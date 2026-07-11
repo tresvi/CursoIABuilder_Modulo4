@@ -1,0 +1,81 @@
+# ==========================
+# .NET (backend - src/back)
+# ==========================
+bin/
+obj/
+out/
+[Dd]ebug/
+[Rr]elease/
+[Bb]uild/
+*.user
+*.suo
+*.userprefs
+project.lock.json
+.vs/
+artifacts/
+
+# Test results / coverage
+[Tt]est[Rr]esult*/
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+*.trx
+
+# ==========================
+# Node / React (frontend - src/front)
+# ==========================
+node_modules/
+dist/
+build/
+.cache/
+coverage/
+*.tsbuildinfo
+
+# Vite / bundler
+.vite/
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/blob-report/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================
+# Entornos y secretos
+# ==========================
+.env
+.env.local
+.env.*.local
+appsettings.*.local.json
+*.pfx
+
+# Base de datos local (SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================
+# Editores / IDE
+# ==========================
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ==========================
+# Claude Code
+# ==========================
+.claude/settings.local.json
+*.db-shm
+*.db-wal
