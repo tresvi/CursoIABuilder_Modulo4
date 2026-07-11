@@ -35,10 +35,10 @@ independientes. Orden de fases por prioridad: P1 → P2 → P3.
 
 - [ ] T001 Crear estructura de carpetas `src/backend/` y `src/frontend/` según plan.md
 - [ ] T002 Inicializar solución .NET 10 en `src/backend/` con proyectos `ECGViewer.Api` (Minimal API) y `ECGViewer.Tests` (xUnit); agregar NuGet: FftSharp, ClosedXML, DocumentFormat.OpenXml, Microsoft.Data.Sqlite en `src/backend/ECGViewer.Api/ECGViewer.Api.csproj`
-- [ ] T003 [P] Inicializar proyecto Vite React 19.2 + TypeScript en `src/frontend/` con Vitest + Testing Library en `src/frontend/package.json` y `src/frontend/vitest.config.ts`
-- [ ] T004 [P] Configurar `VITE_API_BASE` (default `http://localhost:5080`) en `src/frontend/.env` y `src/frontend/src/api/config.ts`
+- [X] T003 [P] Inicializar proyecto Vite React 19.2 + TypeScript en `src/frontend/` con Vitest + Testing Library en `src/frontend/package.json` y `src/frontend/vitest.config.ts`
+- [X] T004 [P] Configurar `VITE_API_BASE` (default `http://localhost:5080`) en `src/frontend/.env` y `src/frontend/src/api/config.ts`
 - [ ] T005 [P] Configurar linting/formato: ESLint + Prettier en `src/frontend/` y `.editorconfig` / analizadores en `src/backend/`
-- [ ] T006 [P] Añadir CSV de referencia de 1 minuto en `src/frontend/tests/fixtures/ecg-1min.csv` para benchmarks de rendimiento
+- [X] T006 [P] Añadir CSV de referencia de 1 minuto en `src/frontend/tests/fixtures/ecg-1min.csv` para benchmarks de rendimiento
 
 ---
 
@@ -50,10 +50,10 @@ independientes. Orden de fases por prioridad: P1 → P2 → P3.
 
 - [ ] T007 Configurar `Program.cs` (Minimal API) en `src/backend/ECGViewer.Api/Program.cs`: CORS para `http://localhost:5173` y `:4173`, puerto 5080, DI base y health endpoint
 - [ ] T008 [P] Crear DTOs comunes y modelo de error uniforme (`SignalDto`, `SampleDto`, `ErrorResponse`) en `src/backend/ECGViewer.Api/Models/`
-- [ ] T009 [P] Definir tipos de dominio de la señal (`Signal`, `Sample`, `originalSignal`/`workingSignal`, derivación de `fs`) en `src/frontend/src/signal/signalModel.ts`
-- [ ] T010 [P] Crear cliente HTTP base que lee `VITE_API_BASE` con manejo de errores en `src/frontend/src/api/client.ts`
-- [ ] T011 [P] Crear shell de la pantalla principal (layout: toolbar, área de gráfico, panel de métricas placeholder) en `src/frontend/src/pages/MainPage.tsx`
-- [ ] T012 [P] Definir store de estado transitorio de UI (`activeTool`, `showGrid`, `dirty`) con hook `useAppState` en `src/frontend/src/hooks/useAppState.ts`
+- [X] T009 [P] Definir tipos de dominio de la señal (`Signal`, `Sample`, `originalSignal`/`workingSignal`, derivación de `fs`) en `src/frontend/src/signal/signalModel.ts`
+- [X] T010 [P] Crear cliente HTTP base que lee `VITE_API_BASE` con manejo de errores en `src/frontend/src/api/client.ts`
+- [X] T011 [P] Crear shell de la pantalla principal (layout: toolbar, área de gráfico, panel de métricas placeholder) en `src/frontend/src/pages/MainPage.tsx`
+- [X] T012 [P] Definir store de estado transitorio de UI (`activeTool`, `showGrid`, `dirty`) con hook `useAppState` en `src/frontend/src/hooks/useAppState.ts`
 
 **Checkpoint**: Base lista — las historias pueden comenzar.
 
@@ -69,18 +69,18 @@ archivo inválido o multicanal se rechaza con mensaje sin dibujar (AC-01..04, AC
 
 ### Tests for User Story 1 (escribir primero, deben FALLAR)
 
-- [ ] T013 [P] [US1] Tests de parseo/validación CSV (válido, columnas faltantes, no numérico, encabezado malo, vacío, multicanal) en `src/frontend/src/signal/csvParse.test.ts`
-- [ ] T014 [P] [US1] Tests de geometría de render (mapeo tiempo→X, amplitud→Y, orden temporal) en `src/frontend/src/render/ecgScale.test.ts`
+- [X] T013 [P] [US1] Tests de parseo/validación CSV (válido, columnas faltantes, no numérico, encabezado malo, vacío, multicanal) en `src/frontend/src/signal/csvParse.test.ts`
+- [X] T014 [P] [US1] Tests de geometría de render (mapeo tiempo→X, amplitud→Y, orden temporal) en `src/frontend/src/render/ecgScale.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T015 [US1] Implementar parser CSV con validaciones (un canal, tiempo/valor numéricos, encabezado) en `src/frontend/src/signal/csvParse.ts` (FR-001/002)
-- [ ] T016 [P] [US1] Implementar escalado/coordenadas de la señal en `src/frontend/src/render/ecgScale.ts`
-- [ ] T017 [US1] Implementar render de la señal y ejes sobre canvas base en `src/frontend/src/render/drawSignal.ts` (FR-003)
-- [ ] T018 [P] [US1] Implementar rejilla ECG (papel milimetrado) conmutable en `src/frontend/src/render/drawGrid.ts` (FR-004, AC-10)
-- [ ] T019 [US1] Componente `ECGChart` con canvas de doble capa (base + overlay) en `src/frontend/src/components/ECGChart.tsx` (research.md D1)
-- [ ] T020 [US1] Componente de carga de archivo + mensajes de error/rechazo (multicanal/ inválido) en `src/frontend/src/components/FileLoader.tsx` (AC-02/03, SC-007)
-- [ ] T021 [US1] Cablear carga → modelo de señal → render en `MainPage.tsx` y toggle de rejilla en la toolbar
+- [X] T015 [US1] Implementar parser CSV con validaciones (un canal, tiempo/valor numéricos, encabezado) en `src/frontend/src/signal/csvParse.ts` (FR-001/002)
+- [X] T016 [P] [US1] Implementar escalado/coordenadas de la señal en `src/frontend/src/render/ecgScale.ts`
+- [X] T017 [US1] Implementar render de la señal y ejes sobre canvas base en `src/frontend/src/render/drawSignal.ts` (FR-003)
+- [X] T018 [P] [US1] Implementar rejilla ECG (papel milimetrado) conmutable en `src/frontend/src/render/drawGrid.ts` (FR-004, AC-10)
+- [X] T019 [US1] Componente `ECGChart` con canvas de doble capa (base + overlay) en `src/frontend/src/components/ECGChart.tsx` (research.md D1)
+- [X] T020 [US1] Componente de carga de archivo + mensajes de error/rechazo (multicanal/ inválido) en `src/frontend/src/components/FileLoader.tsx` (AC-02/03, SC-007)
+- [X] T021 [US1] Cablear carga → modelo de señal → render en `MainPage.tsx` y toggle de rejilla en la toolbar
 
 **Checkpoint**: US1 funcional e independientemente testeable (MVP).
 
@@ -96,17 +96,17 @@ cambiar el rango se recalculan (AC-18/19, FR-006).
 
 ### Tests for User Story 2 (escribir primero, deben FALLAR)
 
-- [ ] T022 [P] [US2] Tests de detección de picos R sobre señales sintéticas de RR conocido en `src/frontend/src/metrics/rPeakDetection.test.ts`
-- [ ] T023 [P] [US2] Tests de HRV (BPM/SDNN/RMSSD/pNN50, casos "—" con <2 RR) en `src/frontend/src/metrics/hrv.test.ts`
-- [ ] T024 [P] [US2] Test de que las métricas usan solo `[fromTime,toTime]` (dos ventanas distintas → valores distintos) en `src/frontend/src/metrics/windowMetrics.test.ts` (SC-004)
+- [X] T022 [P] [US2] Tests de detección de picos R sobre señales sintéticas de RR conocido en `src/frontend/src/metrics/rPeakDetection.test.ts`
+- [X] T023 [P] [US2] Tests de HRV (BPM/SDNN/RMSSD/pNN50, casos "—" con <2 RR) en `src/frontend/src/metrics/hrv.test.ts`
+- [X] T024 [P] [US2] Test de que las métricas usan solo `[fromTime,toTime]` (dos ventanas distintas → valores distintos) en `src/frontend/src/metrics/windowMetrics.test.ts` (SC-004)
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Implementar detección de picos R (Pan-Tompkins simplificado) en `src/frontend/src/metrics/rPeakDetection.ts` (research.md D3)
-- [ ] T026 [US2] Implementar cálculo HRV con manejo de "no disponible" en `src/frontend/src/metrics/hrv.ts` (FR-006)
-- [ ] T027 [P] [US2] Modelo `VisibleWindow` y hook `useVisibleWindow` en `src/frontend/src/hooks/useVisibleWindow.ts`
-- [ ] T028 [US2] Orquestar recorte por ventana → picos → métricas en `src/frontend/src/metrics/windowMetrics.ts`
-- [ ] T029 [US2] Componente `MetricsPanel` que muestra las 4 métricas ("—" cuando null) y se recalcula al cambiar ventana en `src/frontend/src/components/MetricsPanel.tsx`
+- [X] T025 [US2] Implementar detección de picos R (Pan-Tompkins simplificado) en `src/frontend/src/metrics/rPeakDetection.ts` (research.md D3)
+- [X] T026 [US2] Implementar cálculo HRV con manejo de "no disponible" en `src/frontend/src/metrics/hrv.ts` (FR-006)
+- [X] T027 [P] [US2] Modelo `VisibleWindow` y hook `useVisibleWindow` en `src/frontend/src/hooks/useVisibleWindow.ts`
+- [X] T028 [US2] Orquestar recorte por ventana → picos → métricas en `src/frontend/src/metrics/windowMetrics.ts`
+- [X] T029 [US2] Componente `MetricsPanel` que muestra las 4 métricas ("—" cuando null) y se recalcula al cambiar ventana en `src/frontend/src/components/MetricsPanel.tsx`
 
 **Checkpoint**: US1 + US2 funcionan independientemente. MVP completo (P1).
 
