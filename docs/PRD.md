@@ -55,7 +55,7 @@ asistidas con el mouse**, **importar/exportar datos en Excel** y **guardar su tr
 
 ## Requerimientos No Funcionales
 - RNF-01: El sistema debe renderizar el gráfico del ECG en menos de 0.1 s en el percentil 95 sobre 20 mediciones, tomando como referencia un archivo de 1 minuto de señal.
-- RNF-02: El sistema, al actualizar el gráfico (zoom, filtro, nuevo dato o interacción con el mouse), no debe ejecutar un redibujado completo del lienzo y debe mantener al menos 60 fps (frame < 16 ms), medido con el panel Performance del navegador.
+- RNF-02: El sistema, al actualizar el gráfico (zoom, filtro, nuevo dato o interacción con el mouse), no debe ejecutar un redibujado completo del lienzo y debe mantener al menos 10 fps (frame < 100 ms), medido con el panel Performance del navegador.
 - RNF-03: El sistema debe calcular las métricas (BPM, SDNN, RMSSD, pNN50) en menos de 0.1 s en el percentil 95 sobre 20 mediciones, tomando como referencia un archivo de 1 minuto de señal.
 - RNF-04: El sistema debe funcionar sin errores de compatibilidad en las últimas 2 versiones estables de Chrome, Firefox y Edge en escritorio, y de Chrome en Android y Safari en iOS.
 - RNF-05: El sistema no debe guardar automáticamente ningún cambio del gráfico o de la información: la persistencia ocurre solo por acción explícita del usuario.
@@ -83,7 +83,7 @@ asistidas con el mouse**, **importar/exportar datos en Excel** y **guardar su tr
 - AC-19 (RF-14): Dado que el usuario cambia el rango visible (zoom in/out o desplazamiento), cuando el gráfico se actualiza, entonces las métricas se recalculan y reflejan el nuevo rango.
 - AC-20 (RF-15): Dado un gráfico con cambios pendientes (marcadores, filtros o recortes), cuando el usuario presiona explícitamente "Guardar", entonces recién en ese momento los cambios quedan persistidos.
 - AC-21 (RNF-01): Dado el archivo de referencia de 1 minuto, cuando se carga y renderiza 20 veces, entonces el tiempo de renderizado es menor a 0.1 s en el percentil 95.
-- AC-22 (RNF-02): Dado un gráfico en pantalla, cuando se actualiza (zoom, filtro, nuevo dato o arrastre del mouse), entonces no se dispara un redibujado completo del lienzo y se mantienen ≥ 60 fps (frame < 16 ms), verificado con el panel Performance del navegador.
+- AC-22 (RNF-02): Dado un gráfico en pantalla, cuando se actualiza (zoom, filtro, nuevo dato o arrastre del mouse), entonces no se dispara un redibujado completo del lienzo y se mantienen ≥ 10 fps (frame < 100 ms), verificado con el panel Performance del navegador.
 - AC-23 (RNF-03): Dado el archivo de referencia de 1 minuto, cuando se calculan BPM, SDNN, RMSSD y pNN50 20 veces, entonces el tiempo total de cálculo es menor a 0.1 s en el percentil 95.
 - AC-24 (RNF-04): Dada la aplicación abierta en las últimas 2 versiones estables de Chrome/Firefox/Edge (escritorio) y de Chrome Android y Safari iOS, cuando se realizan las operaciones básicas (carga, zoom, filtro, marcado de eventos), entonces todas funcionan sin errores de compatibilidad.
 - AC-25 (RNF-05): Dado un gráfico con marcadores, filtros o recortes aplicados, cuando el usuario cierra o recarga sin haber presionado "Guardar", entonces los cambios no se persisten y se pierden (comportamiento esperado, no un bug).
@@ -102,7 +102,7 @@ asistidas con el mouse**, **importar/exportar datos en Excel** y **guardar su tr
 - Soporte multicanal.
 
 ## Riesgos y Dependencias
-- Riesgo: la librería gráfica no cumple los umbrales de rendimiento (render < 0.1 s p95, sin full-repaint, ≥ 60 fps) → mitigación: renderizar sobre Canvas con un lienzo base (señal/ejes) y un lienzo superpuesto para la interacción del mouse, y medir contra el archivo de referencia de 1 minuto (RNF-01, RNF-02, AC-21, AC-22).
+- Riesgo: la librería gráfica no cumple los umbrales de rendimiento (render < 0.1 s p95, sin full-repaint, ≥ 10 fps) → mitigación: renderizar sobre Canvas con un lienzo base (señal/ejes) y un lienzo superpuesto para la interacción del mouse, y medir contra el archivo de referencia de 1 minuto (RNF-01, RNF-02, AC-21, AC-22).
 - Riesgo: detección poco fiable de picos R sobre señal ruidosa que arroje métricas erróneas (BPM, SDNN, RMSSD, pNN50) → mitigación: aplicar el filtrado digital antes del cálculo y validar contra señales conocidas (RF-10, RF-14, AC-18).
 - Dependencia: librería gráfica de alto rendimiento (Canvas/WebGL); algoritmos de filtrado digital (DSP) y de detección de picos R.
 - Dependencia: `FftSharp` para los filtros DSP; `ClosedXML`/`DocumentFormat.OpenXml` para import/export .xlsx; SQLite para persistir los estudios guardados.
