@@ -54,6 +54,23 @@ public class FilterEndpointTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task Filter_con_longitud_no_potencia_de_2_devuelve_200()
+    {
+        // 1000 muestras no es potencia de 2; antes del fix la FFT radix-2 lanzaba 500.
+        var signal = TwoTone(5, 60, n: 1000);
+        var req = new FilterRequest(signal, new FilterConfigDto(FilterType.LowPass, null, 20));
+
+        var res = await _client.PostAsJsonAsync("/api/filter", req, Json);
+
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        var body = await res.Content.ReadFromJsonAsync<FilterResponse>(Json);
+        Assert.NotNull(body);
+        Assert.Equal(1000, body!.Signal.Samples.Count);
+        Assert.Equal(signal.Samples[0].T, body.Signal.Samples[0].T, 6);
+        Assert.Equal(signal.Samples[^1].T, body.Signal.Samples[^1].T, 6);
+    }
+
+    [Fact]
     public async Task Filter_acepta_tipo_como_string_lowpass()
     {
         // Verifica el mapeo del enum al string del contrato ("lowpass").

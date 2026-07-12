@@ -36,3 +36,18 @@ dotnet test
 
 Errores con formato uniforme `{ "error": { "code", "message" } }`. CORS habilita `5173`/`4173`.
 La ruta de la base SQLite es configurable con la clave `StudyDbPath` (los tests la aíslan).
+
+## Filtros DSP y longitud potencia de 2
+
+`FftSharp.Filter.*` usa una FFT **radix-2** que exige que la señal tenga una longitud potencia de
+2 y lanza `ArgumentException` en caso contrario. Las señales ECG reales no lo cumplen (los CSV de
+ejemplo tienen 10000/10003 muestras), así que `SignalFilter.Apply` (`Dsp/SignalFilter.cs`):
+
+1. extiende la señal hasta la siguiente potencia de 2 rellenando **por reflejo (espejo)**,
+2. aplica el filtro de FftSharp sobre el arreglo extendido, y
+3. recorta el resultado de vuelta a la longitud original.
+
+El reflejo (en lugar de zero-pad) mantiene la señal continua en la costura y evita la pérdida de
+amplitud que el escalón señal→0 produciría en la convolución circular del FFT. La cantidad de
+muestras de salida siempre iguala a la de entrada; el detalle es transparente para el endpoint y
+el frontend. Ver D4 en `specs/001-ecg-viewer/research.md`.

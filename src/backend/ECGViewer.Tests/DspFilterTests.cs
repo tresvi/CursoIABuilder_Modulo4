@@ -88,6 +88,26 @@ public class DspFilterTests
         Assert.Equal(copy, x);
     }
 
+    [Fact]
+    public void Apply_funciona_con_longitud_no_potencia_de_2()
+    {
+        // 10000 muestras = longitud real de los CSV de ejemplo (no es potencia de 2).
+        // Antes del pad/crop esto lanzaba ArgumentException en la FFT radix-2 de FftSharp.
+        const int len = 10000;
+        var x = new double[len];
+        for (var i = 0; i < len; i++)
+        {
+            var t = i / Fs;
+            x[i] = Math.Sin(2 * Math.PI * 5 * t) + Math.Sin(2 * Math.PI * 50 * t);
+        }
+
+        var y = SignalFilter.Apply(x, Fs, FilterType.LowPass, null, 20);
+
+        Assert.Equal(len, y.Length);
+        Assert.True(Magnitude(y, 5) > 0.8, "debe conservar 5 Hz");
+        Assert.True(Magnitude(y, 50) < 0.15, "debe atenuar 50 Hz");
+    }
+
     [Theory]
     [InlineData(FilterType.BandPass, 40.0, 10.0)] // low >= high
     [InlineData(FilterType.LowPass, null, 300.0)] // >= Nyquist (250)

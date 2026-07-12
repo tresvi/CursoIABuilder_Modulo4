@@ -34,8 +34,58 @@ public static class SignalFilter
         return null;
     }
 
-    /// <summary>Aplica el filtro a las amplitudes. Asume parámetros ya validados.</summary>
+    /// <summary>
+    /// Aplica el filtro a las amplitudes. Asume parámetros ya validados.
+    /// FftSharp usa una FFT radix-2 que exige longitud potencia de 2. Se extiende la
+    /// señal hasta la siguiente potencia de 2 rellenando por REFLEJO (espejo) en vez de
+    /// ceros, se filtra y se recorta de vuelta a la longitud original. El reflejo
+    /// mantiene la señal continua en la costura y evita tanto el escalón señal→0 del
+    /// zero-pad como la pérdida de amplitud que ese escalón produce con el filtrado FFT
+    /// (convolución circular). Como la siguiente potencia de 2 nunca supera 2·n, un solo
+    /// reflejo alcanza para rellenar el sobrante.
+    /// </summary>
     public static double[] Apply(double[] values, double fs, FilterType type, double? low, double? high)
+    {
+        var n = values.Length;
+        if (n == 0)
+            return [];
+        if (n == 1)
+            return (double[])values.Clone();
+
+        var padded = ReflectPad(values, NextPowerOfTwo(n));
+        var filtered = CoreFilter(padded, fs, type, low, high);
+
+        var result = new double[n];
+        Array.Copy(filtered, result, n);
+        return result;
+    }
+
+    /// <summary>Menor potencia de 2 mayor o igual a <paramref name="n"/>.</summary>
+    private static int NextPowerOfTwo(int n)
+    {
+        var p = 1;
+        while (p < n)
+            p <<= 1;
+        return p;
+    }
+
+    /// <summary>
+    /// Extiende <paramref name="v"/> (largo n) hasta <paramref name="length"/> reflejando
+    /// la cola como un espejo (…,v[n-2] | v[0..n-1] | v[n-2],v[n-3],…), sin repetir el
+    /// extremo. Requiere length &lt; 2·n, garantizado por NextPowerOfTwo(n).
+    /// </summary>
+    private static double[] ReflectPad(double[] v, int length)
+    {
+        var n = v.Length;
+        var padded = new double[length];
+        Array.Copy(v, padded, n);
+        for (var k = 0; n + k < length; k++)
+            padded[n + k] = v[n - 2 - k];
+        return padded;
+    }
+
+    /// <summary>Despacha al filtro de FftSharp. Requiere longitud potencia de 2.</summary>
+    private static double[] CoreFilter(double[] values, double fs, FilterType type, double? low, double? high)
     {
         return type switch
         {

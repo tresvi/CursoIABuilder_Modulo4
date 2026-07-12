@@ -54,6 +54,13 @@ alternativa razonable.
   operación no destructiva sobre el original.
 - **Alternatives considered**: Filtrado en frontend (TS) — duplicaría lógica DSP y desaprovecharía
   FftSharp/xUnit; descartado. Aplicar filtro en cada zoom — innecesario; el filtro es explícito.
+- **Nota de implementación (potencia de 2)**: `FftSharp.Filter.*` corre una FFT radix-2 que exige
+  longitud potencia de 2 y lanza `ArgumentException` en caso contrario. Las señales reales no lo
+  cumplen (los CSV de ejemplo tienen 10000/10003 muestras). `SignalFilter.Apply` extiende la señal
+  hasta la siguiente potencia de 2 rellenando **por reflejo (espejo)**, filtra y recorta de vuelta
+  a la longitud original. El reflejo (en vez de ceros) mantiene la señal continua en la costura y
+  evita la pérdida de amplitud que el escalón señal→0 del zero-pad produce en la convolución
+  circular del FFT. Como la siguiente potencia de 2 nunca supera 2·n, un solo reflejo alcanza.
 
 ## D5 — Import/Export XLSX
 
