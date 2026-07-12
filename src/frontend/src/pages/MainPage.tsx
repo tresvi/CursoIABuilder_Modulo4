@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FileLoader } from "../components/FileLoader";
 import { ECGChart } from "../components/ECGChart";
 import { MetricsPanel } from "../components/MetricsPanel";
@@ -55,6 +55,7 @@ export function MainPage() {
   const [filterError, setFilterError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterConfig | null>(null);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const working: Signal | null = useMemo(
     () => (derivation ? deriveWorking(derivation) : null),
@@ -260,28 +261,29 @@ export function MainPage() {
           ))}
         </div>
         <button onClick={reset} disabled={!working}>
-          Restablecer zoom
+          🔄 Restablecer zoom
         </button>
         <button onClick={handleExportXlsx} disabled={!working}>
           ⬇️ Exportar XLSX
         </button>
-        <label
-          style={{ cursor: "pointer" }}
+        <button
+          onClick={() => importInputRef.current?.click()}
           title="Importar una señal desde un archivo .xlsx"
         >
           ⬆️ Importar XLSX
-          <input
-            type="file"
-            accept=".xlsx"
-            aria-label="Importar archivo XLSX"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void handleImportXlsx(f);
-              e.target.value = "";
-            }}
-          />
-        </label>
+        </button>
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".xlsx"
+          aria-label="Importar archivo XLSX"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void handleImportXlsx(f);
+            e.target.value = "";
+          }}
+        />
         <button
           onClick={handleSave}
           disabled={!working}
