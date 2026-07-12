@@ -20,7 +20,9 @@ public static class FilterEndpoints
 
                 var fs = SignalMath.ResolveFs(req.Signal!);
                 var f = req.Filter;
-                var validation = SignalFilter.Validate(fs, f.Type, f.CutoffLow, f.CutoffHigh);
+                var validation = SignalFilter.Validate(
+                    fs, f.Type, f.CutoffLow, f.CutoffHigh, f.Window, f.PolyOrder
+                );
                 if (validation is not null)
                     return Results.BadRequest(
                         new ErrorResponse(new ApiError(ErrorCodes.InvalidFilterParams, validation.Message))
@@ -30,7 +32,9 @@ public static class FilterEndpoints
                 for (var i = 0; i < samples.Count; i++)
                     values[i] = samples[i].V;
 
-                var filtered = SignalFilter.Apply(values, fs, f.Type, f.CutoffLow, f.CutoffHigh);
+                var filtered = SignalFilter.Apply(
+                    values, fs, f.Type, f.CutoffLow, f.CutoffHigh, f.Window, f.PolyOrder
+                );
 
                 var outSamples = new SampleDto[samples.Count];
                 for (var i = 0; i < samples.Count; i++)

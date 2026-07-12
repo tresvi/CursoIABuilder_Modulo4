@@ -51,3 +51,19 @@ El reflejo (en lugar de zero-pad) mantiene la señal continua en la costura y ev
 amplitud que el escalón señal→0 produciría en la convolución circular del FFT. La cantidad de
 muestras de salida siempre iguala a la de entrada; el detalle es transparente para el endpoint y
 el frontend. Ver D4 en `specs/001-ecg-viewer/research.md`.
+
+## Filtros de tiempo (ventana deslizante)
+
+Además de los filtros de frecuencia (FftSharp), `SignalFilter.Apply` implementa tres filtros de
+dominio de tiempo pensados para suavizar **conservando mejor los picos** que la media móvil:
+
+| `type` | Filtro | Parámetros |
+|--------|--------|------------|
+| `movingaverage` | Media móvil | `window` ≥ 2 |
+| `median` | Mediana móvil | `window` impar ≥ 3 |
+| `savgol` | Savitzky–Golay | `window` impar ≥ 3, `polyOrder` ∈ [1, window−1] |
+
+Son de ventana centrada y resuelven los bordes por **reflejo (reflect-101)**, sin dependencias
+extra (los coeficientes de Savitzky–Golay se calculan por mínimos cuadrados con eliminación
+gaussiana). El fundamento y el backlog de ideas (filtrado automático, "idealización", detección
+de complejos) están en `docs/Analisis de Filtros.md`.

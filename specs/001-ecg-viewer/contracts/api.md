@@ -19,9 +19,13 @@ en el frontend (ver `research.md` D2/D5).
 
 // FilterConfig
 {
-  "type": "lowpass",   // "lowpass" | "highpass" | "bandpass" | "notch"
-  "cutoffLow": 0.5,     // Hz — requerido en highpass/bandpass/notch
-  "cutoffHigh": 40.0    // Hz — requerido en lowpass/bandpass/notch
+  // Filtros FFT (dominio de frecuencia):     "lowpass" | "highpass" | "bandpass" | "notch"
+  // Filtros de tiempo (ventana deslizante):  "movingaverage" | "median" | "savgol"
+  "type": "bandpass",
+  "cutoffLow": 1.0,     // Hz — requerido en highpass/bandpass/notch
+  "cutoffHigh": 49.5,   // Hz — requerido en lowpass/bandpass/notch
+  "window": null,       // muestras — requerido en movingaverage/median/savgol
+  "polyOrder": null     // grado del polinomio — requerido solo en savgol
 }
 
 // Error (uniforme)
@@ -35,8 +39,11 @@ Códigos de error: `INVALID_SIGNAL`, `MULTICHANNEL_NOT_SUPPORTED`, `INVALID_XLSX
 
 ## POST /api/filter — Aplicar filtro digital (RF-10, AC-14)
 
-Aplica un filtro DSP (FftSharp) de forma **no destructiva**: recibe la señal y devuelve una nueva
-serie filtrada. El original lo conserva el cliente para revertir (RF-11).
+Aplica un filtro DSP de forma **no destructiva**: recibe la señal y devuelve una nueva
+serie filtrada. El original lo conserva el cliente para revertir (RF-11). Hay dos familias:
+los filtros de frecuencia (FftSharp: `lowpass`/`highpass`/`bandpass`/`notch`) y los filtros de
+tiempo por ventana deslizante (`movingaverage`/`median`/`savgol`), estos últimos pensados para
+suavizar conservando mejor los picos (ver `docs/Analisis de Filtros.md`).
 
 **Request**
 ```jsonc
@@ -48,8 +55,14 @@ serie filtrada. El original lo conserva el cliente para revertir (RF-11).
 { "signal": Signal }   // muestras filtradas, mismo eje temporal
 ```
 
-**Errores**: `400 INVALID_FILTER_PARAMS` (cutoffs faltantes/incoherentes, p. ej. bandpass con
-`cutoffLow >= cutoffHigh` o corte ≥ Nyquist = fs/2); `400 INVALID_SIGNAL` (vacía).
+**Errores**: `400 INVALID_FILTER_PARAMS`:
+- Filtros de frecuencia: cutoffs faltantes/incoherentes (p. ej. bandpass con
+  `cutoffLow >= cutoffHigh`) o corte ≥ Nyquist = fs/2.
+- `movingaverage`: `window` ausente o < 2 muestras.
+- `median` / `savgol`: `window` no impar o < 3 muestras; en `savgol`, además,
+  `polyOrder` fuera de `[1, window − 1]`.
+
+También `400 INVALID_SIGNAL` (vacía).
 
 **Reglas**: no modifica el request; determinista para misma entrada; unit-tested en xUnit contra
 señales sintéticas de respuesta conocida (Principio I).

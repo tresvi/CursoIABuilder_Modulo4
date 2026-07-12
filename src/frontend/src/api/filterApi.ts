@@ -2,12 +2,23 @@ import { apiFetch } from "./client";
 import type { Sample, Signal } from "../signal/signalModel";
 
 /** Tipos de filtro digital (coincide con el contrato del backend). */
-export type FilterKind = "lowpass" | "highpass" | "bandpass" | "notch";
+export type FilterKind =
+  | "lowpass"
+  | "highpass"
+  | "bandpass"
+  | "notch"
+  | "movingaverage"
+  | "median"
+  | "savgol";
 
 export interface FilterConfig {
   type: FilterKind;
   cutoffLow?: number | null;
   cutoffHigh?: number | null;
+  /** Tamaño de ventana en muestras (media móvil, mediana, Savitzky–Golay). */
+  window?: number | null;
+  /** Grado del polinomio (solo Savitzky–Golay). */
+  polyOrder?: number | null;
 }
 
 interface FilterResponse {

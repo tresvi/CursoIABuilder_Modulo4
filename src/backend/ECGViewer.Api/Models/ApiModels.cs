@@ -22,10 +22,29 @@ public enum FilterType
 
     [JsonStringEnumMemberName("notch")]
     Notch,
+
+    [JsonStringEnumMemberName("movingaverage")]
+    MovingAverage,
+
+    [JsonStringEnumMemberName("median")]
+    Median,
+
+    [JsonStringEnumMemberName("savgol")]
+    SavitzkyGolay,
 }
 
-/// <summary>Configuración de un filtro digital y sus frecuencias de corte (Hz).</summary>
-public record FilterConfigDto(FilterType Type, double? CutoffLow, double? CutoffHigh);
+/// <summary>
+/// Configuración de un filtro digital. Los filtros FFT usan las frecuencias de corte
+/// (Hz); los filtros de tiempo (media móvil, mediana, Savitzky–Golay) usan
+/// <see cref="Window"/> en muestras y, para Savitzky–Golay, <see cref="PolyOrder"/>.
+/// </summary>
+public record FilterConfigDto(
+    FilterType Type,
+    double? CutoffLow,
+    double? CutoffHigh,
+    int? Window = null,
+    int? PolyOrder = null
+);
 
 public record FilterRequest(SignalDto Signal, FilterConfigDto Filter);
 public record FilterResponse(SignalDto Signal);
