@@ -63,6 +63,18 @@ Todos los botones de acción llevan un emoji al inicio como ayuda visual (💾 G
 ⬇️ Exportar / ⬆️ Importar XLSX, 📈 Cargar ejemplo, 🔄 Restablecer zoom). Al agregar un botón
 nuevo, mantener este criterio.
 
+## Marcadores de evento (US6)
+
+Con la herramienta **📍 Marcar** activa, al hacer click sobre el gráfico se abre un popup
+(`MarkerPromptDialog`) que pide el texto del marcador:
+
+- El input limita a **255 caracteres** (`MARKER_TEXT_MAX`) y muestra un contador `n/255`.
+- **Cancelar** (o `Esc`) descarta: no se crea el marcador. **Aceptar** (o `Enter`) crea la
+  marca anclada al instante clickeado con el texto ingresado.
+- Sobre el gráfico, la etiqueta se acorta con `displayLabel()` (`render/drawMarkers.ts`): si
+  el texto supera **10 caracteres**, se dibujan solo los primeros **8 seguidos de "..."**. El
+  texto completo se conserva y se ve/edita entero en el panel de Marcadores.
+
 ## Colores de la grilla y del trazo (`render/`)
 
 Grilla tipo papel milimetrado de ECG (`render/drawGrid.ts`):

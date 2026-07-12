@@ -4,6 +4,7 @@ import { ECGChart } from "../components/ECGChart";
 import { MetricsPanel } from "../components/MetricsPanel";
 import { MarkerEditor } from "../components/MarkerEditor";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { MarkerPromptDialog } from "../components/MarkerPromptDialog";
 import { FilterPanel } from "../components/FilterPanel";
 import { useAppState } from "../hooks/useAppState";
 import { useVisibleWindow } from "../hooks/useVisibleWindow";
@@ -51,6 +52,9 @@ export function MainPage() {
 
   const [derivation, setDerivation] = useState<Derivation | null>(null);
   const [pendingCrop, setPendingCrop] = useState<CropRange | null>(null);
+  const [pendingMarkerTime, setPendingMarkerTime] = useState<number | null>(
+    null
+  );
   const [filterBusy, setFilterBusy] = useState(false);
   const [filterError, setFilterError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterConfig | null>(null);
@@ -340,7 +344,7 @@ export function MainPage() {
           onZoom={(r) => zoomTo(r.fromTime, r.toTime)}
           onPan={(dt) => panBy(dt)}
           onCropSelect={(r) => setPendingCrop(r)}
-          onAddMarker={(time) => markers.add(time)}
+          onAddMarker={(time) => setPendingMarkerTime(time)}
         />
         {/* Métricas de la ventana visible: fijas al lado derecho del gráfico. */}
         <MetricsPanel metrics={metrics} />
@@ -392,6 +396,15 @@ export function MainPage() {
         confirmLabel="Recortar"
         onConfirm={confirmCrop}
         onCancel={() => setPendingCrop(null)}
+      />
+
+      <MarkerPromptDialog
+        open={pendingMarkerTime !== null}
+        onConfirm={(text) => {
+          if (pendingMarkerTime !== null) markers.add(pendingMarkerTime, text);
+          setPendingMarkerTime(null);
+        }}
+        onCancel={() => setPendingMarkerTime(null)}
       />
     </main>
   );

@@ -177,11 +177,17 @@ luego eliminarlo, verificando cada cambio reflejado en el gráfico durante la se
 **Acceptance Scenarios**:
 
 1. **Given** un gráfico cargado con la herramienta Marcar activa, **When** el usuario hace
-   clic sobre un punto del eje temporal, **Then** se crea un marcador de evento anclado a
-   ese instante, visible y persistente mientras dure la sesión de trabajo.
-2. **Given** un evento ya marcado, **When** el usuario edita su etiqueta o comentario,
+   clic sobre un punto del eje temporal, **Then** se muestra un popup que pide el texto del
+   marcador (máximo 255 caracteres).
+2. **Given** el popup de texto abierto, **When** el usuario cancela, **Then** no se crea el
+   marcador; **When** el usuario acepta, **Then** se crea el marcador de evento anclado a ese
+   instante, visible y persistente mientras dure la sesión de trabajo.
+3. **Given** un marcador cuyo texto supera los 10 caracteres, **When** se dibuja su etiqueta
+   sobre el gráfico, **Then** se muestran solo los primeros 8 caracteres seguidos de "..."
+   (el texto completo se conserva y se ve en el panel de marcadores).
+4. **Given** un evento ya marcado, **When** el usuario edita su etiqueta o comentario,
    **Then** el cambio queda reflejado en el marcador.
-3. **Given** un evento ya marcado, **When** el usuario elige eliminarlo, **Then** el
+5. **Given** un evento ya marcado, **When** el usuario elige eliminarlo, **Then** el
    marcador desaparece del gráfico.
 
 ---

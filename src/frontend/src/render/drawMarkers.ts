@@ -2,6 +2,14 @@ import { createScale, plotRect, type ViewBox } from "./ecgScale";
 import type { EventMarker } from "../signal/markers";
 
 /**
+ * Etiqueta a mostrar sobre el gráfico: si el texto supera los 10 caracteres, se
+ * muestran solo los primeros 8 seguidos de "..." para indicar que sigue (US6).
+ */
+export function displayLabel(label: string): string {
+  return label.length > 10 ? `${label.slice(0, 8)}...` : label;
+}
+
+/**
  * Dibuja los marcadores de evento como líneas verticales con su etiqueta sobre
  * el lienzo overlay (US6). Solo se dibujan los que caen en la ventana visible.
  */
@@ -27,7 +35,7 @@ export function drawMarkers(
     ctx.stroke();
     if (m.label) {
       ctx.fillStyle = "rgba(230,81,0,1)";
-      ctx.fillText(m.label, x + 3, y0 + 12);
+      ctx.fillText(displayLabel(m.label), x + 3, y0 + 12);
     }
   }
   ctx.restore();
