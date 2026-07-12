@@ -74,7 +74,7 @@ verificar que los valores se recalculan.
 
 ---
 
-### User Story 3 - Navegar la señal con zoom y rejilla (Priority: P2)
+### User Story 3 - Navegar la señal con zoom (Priority: P2)
 
 El usuario necesita acercarse a un tramo temporal de interés para inspeccionarlo en detalle
 y luego volver a la vista completa. Con la herramienta Zoom activa, arrastra
