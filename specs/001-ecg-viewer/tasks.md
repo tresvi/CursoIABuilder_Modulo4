@@ -33,8 +33,8 @@ independientes. Orden de fases por prioridad: P1 → P2 → P3.
 
 **Purpose**: Inicialización del monorepo y dependencias.
 
-- [ ] T001 Crear estructura de carpetas `src/backend/` y `src/frontend/` según plan.md
-- [ ] T002 Inicializar solución .NET 10 en `src/backend/` con proyectos `ECGViewer.Api` (Minimal API) y `ECGViewer.Tests` (xUnit); agregar NuGet: FftSharp, ClosedXML, DocumentFormat.OpenXml, Microsoft.Data.Sqlite en `src/backend/ECGViewer.Api/ECGViewer.Api.csproj`
+- [X] T001 Crear estructura de carpetas `src/backend/` y `src/frontend/` según plan.md
+- [X] T002 Inicializar solución .NET 10 en `src/backend/` con proyectos `ECGViewer.Api` (Minimal API) y `ECGViewer.Tests` (xUnit); agregar NuGet: FftSharp, ClosedXML, DocumentFormat.OpenXml, Microsoft.Data.Sqlite en `src/backend/ECGViewer.Api/ECGViewer.Api.csproj`
 - [X] T003 [P] Inicializar proyecto Vite React 19.2 + TypeScript en `src/frontend/` con Vitest + Testing Library en `src/frontend/package.json` y `src/frontend/vitest.config.ts`
 - [X] T004 [P] Configurar `VITE_API_BASE` (default `http://localhost:5080`) en `src/frontend/.env` y `src/frontend/src/api/config.ts`
 - [X] T005 [P] Configurar linting/formato: ESLint + Prettier en `src/frontend/` y `.editorconfig` / analizadores en `src/backend/`
@@ -48,8 +48,8 @@ independientes. Orden de fases por prioridad: P1 → P2 → P3.
 
 **⚠️ CRITICAL**: Ninguna historia puede empezar hasta completar esta fase.
 
-- [ ] T007 Configurar `Program.cs` (Minimal API) en `src/backend/ECGViewer.Api/Program.cs`: CORS para `http://localhost:5173` y `:4173`, puerto 5080, DI base y health endpoint
-- [ ] T008 [P] Crear DTOs comunes y modelo de error uniforme (`SignalDto`, `SampleDto`, `ErrorResponse`) en `src/backend/ECGViewer.Api/Models/`
+- [X] T007 Configurar `Program.cs` (Minimal API) en `src/backend/ECGViewer.Api/Program.cs`: CORS para `http://localhost:5173` y `:4173`, puerto 5080, DI base y health endpoint
+- [X] T008 [P] Crear DTOs comunes y modelo de error uniforme (`SignalDto`, `SampleDto`, `ErrorResponse`) en `src/backend/ECGViewer.Api/Models/`
 - [X] T009 [P] Definir tipos de dominio de la señal (`Signal`, `Sample`, `originalSignal`/`workingSignal`, derivación de `fs`) en `src/frontend/src/signal/signalModel.ts`
 - [X] T010 [P] Crear cliente HTTP base que lee `VITE_API_BASE` con manejo de errores en `src/frontend/src/api/client.ts`
 - [X] T011 [P] Crear shell de la pantalla principal (layout: toolbar, área de gráfico, panel de métricas placeholder) en `src/frontend/src/pages/MainPage.tsx`
@@ -145,17 +145,17 @@ original (AC-14/15, SC-009).
 
 ### Tests for User Story 4 (escribir primero, deben FALLAR)
 
-- [ ] T036 [P] [US4] Tests xUnit de filtros DSP (respuesta conocida por tipo, validación de cortes/Nyquist) en `src/backend/ECGViewer.Tests/DspFilterTests.cs`
-- [ ] T037 [P] [US4] Test de contrato `POST /api/filter` (request/response, 400 params inválidos) en `src/backend/ECGViewer.Tests/FilterEndpointTests.cs`
-- [ ] T038 [P] [US4] Test frontend de reversibilidad (working==original tras revertir) en `src/frontend/src/signal/revertFilter.test.ts`
+- [X] T036 [P] [US4] Tests xUnit de filtros DSP (respuesta conocida por tipo, validación de cortes/Nyquist) en `src/backend/ECGViewer.Tests/DspFilterTests.cs`
+- [X] T037 [P] [US4] Test de contrato `POST /api/filter` (request/response, 400 params inválidos) en `src/backend/ECGViewer.Tests/FilterEndpointTests.cs`
+- [X] T038 [P] [US4] Test frontend de reversibilidad (working==original tras revertir) en `src/frontend/src/signal/revertFilter.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T039 [US4] Implementar filtros DSP con FftSharp (lowpass/highpass/bandpass/notch) en `src/backend/ECGViewer.Api/Dsp/SignalFilter.cs` (FR-007)
-- [ ] T040 [US4] Endpoint `POST /api/filter` con validación de parámetros en `src/backend/ECGViewer.Api/Endpoints/FilterEndpoints.cs` (contracts/api.md)
-- [ ] T041 [P] [US4] Modelo `FilterConfig` (frontend) + cliente `applyFilter` en `src/frontend/src/api/filterApi.ts`
-- [ ] T042 [US4] Lógica no destructiva: guardar `originalSignal` y revertir working al original en `src/frontend/src/signal/signalModel.ts` (FR-008/019, Principio II)
-- [ ] T043 [US4] Panel de filtro (tipo + frecuencias de corte) + botón revertir en `src/frontend/src/components/FilterPanel.tsx` (AC-14/15)
+- [X] T039 [US4] Implementar filtros DSP con FftSharp (lowpass/highpass/bandpass/notch) en `src/backend/ECGViewer.Api/Dsp/SignalFilter.cs` (FR-007)
+- [X] T040 [US4] Endpoint `POST /api/filter` con validación de parámetros en `src/backend/ECGViewer.Api/Endpoints/FilterEndpoints.cs` (contracts/api.md)
+- [X] T041 [P] [US4] Modelo `FilterConfig` (frontend) + cliente `applyFilter` en `src/frontend/src/api/filterApi.ts`
+- [X] T042 [US4] Lógica no destructiva: guardar `originalSignal` y revertir working al original en `src/frontend/src/signal/signalModel.ts` (FR-008/019, Principio II)
+- [X] T043 [US4] Panel de filtro (tipo + frecuencias de corte) + botón revertir en `src/frontend/src/components/FilterPanel.tsx` (AC-14/15)
 
 **Checkpoint**: US4 independiente; filtrado listo para mejorar detección de picos de US2.
 

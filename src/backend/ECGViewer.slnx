@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ECGViewer.Api/ECGViewer.Api.csproj" />
+  <Project Path="ECGViewer.Tests/ECGViewer.Tests.csproj" />
+</Solution>

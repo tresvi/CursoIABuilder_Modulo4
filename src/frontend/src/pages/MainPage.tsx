@@ -4,6 +4,7 @@ import { ECGChart } from "../components/ECGChart";
 import { MetricsPanel } from "../components/MetricsPanel";
 import { MarkerEditor } from "../components/MarkerEditor";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { FilterPanel } from "../components/FilterPanel";
 import { useAppState } from "../hooks/useAppState";
 import { useVisibleWindow } from "../hooks/useVisibleWindow";
 import { useTool, type Tool } from "../hooks/useTool";
@@ -12,12 +13,19 @@ import { useUnsavedGuard } from "../hooks/useUnsavedGuard";
 import { metricsForWindow } from "../metrics/windowMetrics";
 import {
   applyCrop,
+  applyFilter as applyFilterModel,
+  revertFilter,
   deriveWorking,
   initDerivation,
   type CropRange,
   type Derivation,
   type Signal,
 } from "../signal/signalModel";
+import {
+  applyFilter as applyFilterApi,
+  type FilterConfig,
+} from "../api/filterApi";
+import { ApiRequestError } from "../api/client";
 import type { CardiacMetrics } from "../metrics/hrv";
 
 const TOOLS: Array<{ id: Tool; label: string }> = [
@@ -29,8 +37,8 @@ const TOOLS: Array<{ id: Tool; label: string }> = [
 
 /**
  * Pantalla principal de ECGViewer: carga (US1), métricas por ventana (US2),
- * zoom (US3), regla y recorte con confirmación (US5) y marcadores (US6).
- * Filtros (US4) y guardado (US8) requieren el backend.
+ * zoom (US3), filtros vía backend (US4), regla y recorte con confirmación (US5)
+ * y marcadores (US6). El guardado (US8) se incorpora aparte.
  */
 export function MainPage() {
   const { state, toggleGrid, markDirty } = useAppState();
@@ -38,6 +46,8 @@ export function MainPage() {
 
   const [derivation, setDerivation] = useState<Derivation | null>(null);
   const [pendingCrop, setPendingCrop] = useState<CropRange | null>(null);
+  const [filterBusy, setFilterBusy] = useState(false);
+  const [filterError, setFilterError] = useState<string | null>(null);
 
   const working: Signal | null = useMemo(
     () => (derivation ? deriveWorking(derivation) : null),
@@ -56,6 +66,7 @@ export function MainPage() {
   function handleLoad(signal: Signal) {
     setDerivation(initDerivation(signal));
     setPendingCrop(null);
+    setFilterError(null);
     markers.reset([]);
   }
 
@@ -65,6 +76,32 @@ export function MainPage() {
       markDirty();
     }
     setPendingCrop(null);
+  }
+
+  async function handleApplyFilter(config: FilterConfig) {
+    if (!derivation) return;
+    setFilterBusy(true);
+    setFilterError(null);
+    try {
+      // El filtro se aplica sobre la señal ORIGINAL completa (data-model.md).
+      const filtered = await applyFilterApi(derivation.original, config);
+      setDerivation((d) => (d ? applyFilterModel(d, filtered) : d));
+      markDirty();
+    } catch (e) {
+      const msg =
+        e instanceof ApiRequestError
+          ? e.apiError.message
+          : "No se pudo aplicar el filtro (¿backend en http://localhost:5080?).";
+      setFilterError(msg);
+    } finally {
+      setFilterBusy(false);
+    }
+  }
+
+  function handleRevertFilter() {
+    setDerivation((d) => (d ? revertFilter(d) : d));
+    setFilterError(null);
+    markDirty();
   }
 
   return (
@@ -133,6 +170,14 @@ export function MainPage() {
         />
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <MetricsPanel metrics={metrics} />
+          <FilterPanel
+            disabled={!working}
+            hasFilter={derivation?.filteredSamples != null}
+            busy={filterBusy}
+            error={filterError}
+            onApply={handleApplyFilter}
+            onRevert={handleRevertFilter}
+          />
           <section>
             <h3>Marcadores</h3>
             <MarkerEditor
