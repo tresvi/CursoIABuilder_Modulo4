@@ -29,6 +29,7 @@ import {
 } from "../api/filterApi";
 import { getStudy, saveStudy, type SavedStudy } from "../api/studyApi";
 import { exportXlsx, importXlsx } from "../api/excelApi";
+import { downloadCsv } from "../signal/csvExport";
 import { ApiRequestError } from "../api/client";
 import type { CardiacMetrics } from "../metrics/hrv";
 
@@ -118,6 +119,11 @@ export function MainPage() {
     setActiveFilter(null);
     setFilterError(null);
     markDirty();
+  }
+
+  function handleExportCsv() {
+    if (!working) return;
+    downloadCsv(working);
   }
 
   async function handleExportXlsx() {
@@ -264,8 +270,8 @@ export function MainPage() {
           </select>
         </label>
         {/* Barra de herramientas: acciones y modos de mouse agrupados, en el
-            orden pedido (Exportar, Importar, Zoom, Restablecer, Desplazar,
-            Regla, Recorte, Marcar). */}
+            orden pedido (Guardar como CSV, Exportar, Importar, Zoom, Restablecer,
+            Desplazar, Regla, Recorte, Marcar). */}
         <div
           role="toolbar"
           aria-label="Herramientas"
@@ -280,6 +286,13 @@ export function MainPage() {
             background: "#fafafa",
           }}
         >
+          <button
+            onClick={handleExportCsv}
+            disabled={!working}
+            title="Descargar la señal actual del ECGViewer como archivo CSV"
+          >
+            💾 Guardar como CSV
+          </button>
           <button onClick={handleExportXlsx} disabled={!working}>
             ⬇️ Exportar XLSX
           </button>
