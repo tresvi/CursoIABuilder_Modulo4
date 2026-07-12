@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using ECGViewer.Api.Endpoints;
+using ECGViewer.Api.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,10 @@ builder.Services.ConfigureHttpJsonOptions(o =>
     o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+// Persistencia del estudio único en SQLite (ruta configurable para tests).
+var dbPath = builder.Configuration["StudyDbPath"] ?? "ecgviewer.db";
+builder.Services.AddSingleton(new StudyRepository(dbPath));
+
 var app = builder.Build();
 
 app.UseCors(CorsPolicy);
@@ -36,6 +41,7 @@ app.UseCors(CorsPolicy);
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 app.MapFilterEndpoints();
+app.MapStudyEndpoints();
 
 app.Run();
 

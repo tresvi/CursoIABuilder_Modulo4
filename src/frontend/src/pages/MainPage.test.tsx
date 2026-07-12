@@ -1,11 +1,23 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MainPage } from "./MainPage";
+import * as studyApi from "../api/studyApi";
+
+// Evita llamadas de red en los tests y permite espiar el guardado.
+vi.mock("../api/studyApi", () => ({
+  getStudy: vi.fn(() => Promise.resolve(null)),
+  saveStudy: vi.fn(() => Promise.resolve(new Date().toISOString())),
+}));
 
 /** Crea un File CSV para simular la carga del usuario. */
 function csvFile(name: string, content: string): File {
   return new File([content], name, { type: "text/csv" });
 }
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(studyApi.getStudy).mockResolvedValue(null);
+});
 
 describe("MainPage — integración US1 + US2", () => {
   it("renderiza el encabezado y el prompt inicial sin señal", () => {
@@ -55,5 +67,24 @@ describe("MainPage — integración US1 + US2", () => {
     });
     // sigue mostrando el prompt: no se cargó señal
     expect(screen.getByText(/Cargá un archivo CSV/i)).toBeInTheDocument();
+  });
+
+  it("persistencia explícita: solo 'Guardar' invoca saveStudy (US8, FR-016/017, T054a)", async () => {
+    render(<MainPage />);
+    const input = screen.getByLabelText(/Cargar archivo CSV/i);
+    const rows = ["time,value"];
+    for (let i = 0; i < 300; i++) rows.push(`${(i / 250).toFixed(4)},0`);
+    fireEvent.change(input, {
+      target: { files: [csvFile("f.csv", rows.join("\n"))] },
+    });
+
+    // esperar a que la señal cargue (botón "Guardar" habilitado)
+    await waitFor(() => expect(screen.getByTestId("save-btn")).toBeEnabled());
+    // tras cargar (una mutación), NO se persiste nada automáticamente
+    expect(studyApi.saveStudy).not.toHaveBeenCalled();
+
+    // recién al presionar "Guardar" se persiste
+    fireEvent.click(screen.getByTestId("save-btn"));
+    await waitFor(() => expect(studyApi.saveStudy).toHaveBeenCalledTimes(1));
   });
 });

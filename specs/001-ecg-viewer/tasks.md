@@ -198,19 +198,19 @@ cambios pendientes muestra alerta (AC-20/25/26, SC-005).
 
 ### Tests for User Story 8 (escribir primero, deben FALLAR)
 
-- [ ] T052 [P] [US8] Tests xUnit del repositorio SQLite (upsert reemplaza estudio único, restore) en `src/backend/ECGViewer.Tests/StudyRepositoryTests.cs`
-- [ ] T053 [P] [US8] Tests de contrato `GET`/`PUT /api/study` (200, 404 sin estudio) en `src/backend/ECGViewer.Tests/StudyEndpointTests.cs`
+- [X] T052 [P] [US8] Tests xUnit del repositorio SQLite (upsert reemplaza estudio único, restore) en `src/backend/ECGViewer.Tests/StudyRepositoryTests.cs`
+- [X] T053 [P] [US8] Tests de contrato `GET`/`PUT /api/study` (200, 404 sin estudio) en `src/backend/ECGViewer.Tests/StudyEndpointTests.cs`
 - [X] T054 [P] [US8] Test del guardia de cambios sin guardar (`dirty` → confirmación) en `src/frontend/src/hooks/useUnsavedGuard.test.ts`
-- [ ] T054a [P] [US8] Test de persistencia explícita: ninguna mutación (marcador/filtro/recorte) invoca `saveStudy` sin acción "Guardar"; solo "Guardar" dispara `PUT /api/study` en `src/frontend/src/api/studyApi.test.ts` (FR-016/017, Principio III, SC-005)
+- [X] T054a [P] [US8] Test de persistencia explícita: ninguna mutación (marcador/filtro/recorte) invoca `saveStudy` sin acción "Guardar"; solo "Guardar" dispara `PUT /api/study` en `src/frontend/src/api/studyApi.test.ts` (FR-016/017, Principio III, SC-005)
 
 ### Implementation for User Story 8
 
-- [ ] T055 [US8] Esquema SQLite y repositorio de estudio único (upsert/get) en `src/backend/ECGViewer.Api/Persistence/StudyRepository.cs` (FR-021)
-- [ ] T056 [US8] Endpoints `GET /api/study` y `PUT /api/study` en `src/backend/ECGViewer.Api/Endpoints/StudyEndpoints.cs` (contracts/api.md)
-- [ ] T057 [P] [US8] Modelo `SavedStudy` (frontend) + cliente `getStudy`/`saveStudy` en `src/frontend/src/api/studyApi.ts`
-- [ ] T058 [US8] Acción "Guardar" (serializa señal+marcadores+filtro+recorte, marca `dirty=false`) en `MainPage.tsx` (FR-016, AC-20)
+- [X] T055 [US8] Esquema SQLite y repositorio de estudio único (upsert/get) en `src/backend/ECGViewer.Api/Persistence/StudyRepository.cs` (FR-021)
+- [X] T056 [US8] Endpoints `GET /api/study` y `PUT /api/study` en `src/backend/ECGViewer.Api/Endpoints/StudyEndpoints.cs` (contracts/api.md)
+- [X] T057 [P] [US8] Modelo `SavedStudy` (frontend) + cliente `getStudy`/`saveStudy` en `src/frontend/src/api/studyApi.ts`
+- [X] T058 [US8] Acción "Guardar" (serializa señal+marcadores+filtro+recorte, marca `dirty=false`) en `MainPage.tsx` (FR-016, AC-20)
 - [X] T059 [P] [US8] Hook `useUnsavedGuard` con `beforeunload` cuando `dirty=true` en `src/frontend/src/hooks/useUnsavedGuard.ts` (FR-018, AC-26)
-- [ ] T060 [US8] Restaurar estudio al iniciar (reconstruir working aplicando filtro/recorte) en `MainPage.tsx` (FR-021)
+- [X] T060 [US8] Restaurar estudio al iniciar (reconstruir working aplicando filtro/recorte) en `MainPage.tsx` (FR-021)
 
 **Checkpoint**: Todas las P2 completas; garantía de persistencia explícita en vigor. Nota: US8
 persiste señal + filtro (US4) + recorte (US5). La integración de **marcadores** (US6, P3) en el
@@ -237,7 +237,7 @@ el gráfico durante la sesión (AC-05/06/07).
 - [X] T064 [US6] Herramienta "Marcar": clic sobre el eje temporal crea marcador en `src/frontend/src/components/ECGChart.tsx` (AC-05)
 - [X] T065 [P] [US6] Capa de render de marcadores sobre el overlay en `src/frontend/src/render/drawMarkers.ts`
 - [X] T066 [US6] UI de edición de etiqueta y eliminación de marcador en `src/frontend/src/components/MarkerEditor.tsx` (AC-06/07)
-- [ ] T067 [US6] Integrar marcadores en el guardado (US8) y en `dirty`
+- [X] T067 [US6] Integrar marcadores en el guardado (US8) y en `dirty`
 
 **Checkpoint**: US6 independiente.
 

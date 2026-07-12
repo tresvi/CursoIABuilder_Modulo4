@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FileLoader } from "../components/FileLoader";
 import { ECGChart } from "../components/ECGChart";
 import { MetricsPanel } from "../components/MetricsPanel";
@@ -15,6 +15,7 @@ import {
   applyCrop,
   applyFilter as applyFilterModel,
   revertFilter,
+  createSignal,
   deriveWorking,
   initDerivation,
   type CropRange,
@@ -25,6 +26,7 @@ import {
   applyFilter as applyFilterApi,
   type FilterConfig,
 } from "../api/filterApi";
+import { getStudy, saveStudy, type SavedStudy } from "../api/studyApi";
 import { ApiRequestError } from "../api/client";
 import type { CardiacMetrics } from "../metrics/hrv";
 
@@ -41,13 +43,15 @@ const TOOLS: Array<{ id: Tool; label: string }> = [
  * y marcadores (US6). El guardado (US8) se incorpora aparte.
  */
 export function MainPage() {
-  const { state, toggleGrid, markDirty } = useAppState();
+  const { state, toggleGrid, markDirty, clearDirty } = useAppState();
   const { tool, setTool, cursor } = useTool();
 
   const [derivation, setDerivation] = useState<Derivation | null>(null);
   const [pendingCrop, setPendingCrop] = useState<CropRange | null>(null);
   const [filterBusy, setFilterBusy] = useState(false);
   const [filterError, setFilterError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterConfig | null>(null);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   const working: Signal | null = useMemo(
     () => (derivation ? deriveWorking(derivation) : null),
@@ -67,6 +71,8 @@ export function MainPage() {
     setDerivation(initDerivation(signal));
     setPendingCrop(null);
     setFilterError(null);
+    setActiveFilter(null);
+    setSaveStatus(null);
     markers.reset([]);
   }
 
@@ -86,6 +92,7 @@ export function MainPage() {
       // El filtro se aplica sobre la señal ORIGINAL completa (data-model.md).
       const filtered = await applyFilterApi(derivation.original, config);
       setDerivation((d) => (d ? applyFilterModel(d, filtered) : d));
+      setActiveFilter(config);
       markDirty();
     } catch (e) {
       const msg =
@@ -100,9 +107,71 @@ export function MainPage() {
 
   function handleRevertFilter() {
     setDerivation((d) => (d ? revertFilter(d) : d));
+    setActiveFilter(null);
     setFilterError(null);
     markDirty();
   }
+
+  // Persistencia explícita (Principio III, FR-016): SOLO "Guardar" persiste.
+  async function handleSave() {
+    if (!derivation) return;
+    const study: SavedStudy = {
+      signal: {
+        samples: derivation.original.samples as SavedStudy["signal"]["samples"],
+        fs: derivation.original.fs,
+      },
+      markers: markers.markers,
+      filter: activeFilter,
+      crop: derivation.crop,
+    };
+    try {
+      const savedAt = await saveStudy(study);
+      clearDirty();
+      setSaveStatus(`Guardado ${new Date(savedAt).toLocaleTimeString()}`);
+    } catch (e) {
+      setSaveStatus(
+        e instanceof ApiRequestError
+          ? `Error al guardar: ${e.apiError.message}`
+          : "No se pudo guardar (¿backend en http://localhost:5080?)."
+      );
+    }
+  }
+
+  // Restaura el estudio guardado al iniciar (RF-021). Reconstruye original,
+  // re-aplica el filtro (vía backend) y el recorte.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const study = await getStudy();
+        if (!study || cancelled) return;
+        const original = createSignal(study.signal.samples);
+        let d = initDerivation(original);
+        if (study.filter) {
+          try {
+            const filtered = await applyFilterApi(original, study.filter);
+            d = applyFilterModel(d, filtered);
+          } catch {
+            /* si el backend no filtra, se restaura sin filtro */
+          }
+        }
+        if (study.crop) d = applyCrop(d, study.crop);
+        if (cancelled) return;
+        setDerivation(d);
+        setActiveFilter(study.filter);
+        markers.reset(study.markers);
+        clearDirty();
+        setSaveStatus("Estudio restaurado");
+      } catch {
+        /* sin backend o sin estudio: se inicia vacío */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Solo al montar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <main style={{ fontFamily: "system-ui, sans-serif", padding: 16 }}>
@@ -154,6 +223,19 @@ export function MainPage() {
         <button onClick={reset} disabled={!working}>
           Restablecer zoom
         </button>
+        <button
+          onClick={handleSave}
+          disabled={!working}
+          style={{ fontWeight: 600 }}
+          data-testid="save-btn"
+        >
+          💾 Guardar
+        </button>
+        {saveStatus && (
+          <small style={{ color: "#2e7d32" }} data-testid="save-status">
+            {saveStatus}
+          </small>
+        )}
       </section>
 
       <section style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
