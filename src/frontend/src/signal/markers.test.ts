@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { addMarker, editMarker, removeMarker, type EventMarker } from "./markers";
+import {
+  addMarker,
+  editMarker,
+  removeMarker,
+  type EventMarker,
+} from "./markers";
 
 describe("markers (FR-011/012/013, AC-05/06/07)", () => {
   it("crea un marcador anclado a un instante del eje temporal", () => {

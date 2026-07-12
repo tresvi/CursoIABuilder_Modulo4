@@ -37,7 +37,7 @@ independientes. Orden de fases por prioridad: P1 → P2 → P3.
 - [ ] T002 Inicializar solución .NET 10 en `src/backend/` con proyectos `ECGViewer.Api` (Minimal API) y `ECGViewer.Tests` (xUnit); agregar NuGet: FftSharp, ClosedXML, DocumentFormat.OpenXml, Microsoft.Data.Sqlite en `src/backend/ECGViewer.Api/ECGViewer.Api.csproj`
 - [X] T003 [P] Inicializar proyecto Vite React 19.2 + TypeScript en `src/frontend/` con Vitest + Testing Library en `src/frontend/package.json` y `src/frontend/vitest.config.ts`
 - [X] T004 [P] Configurar `VITE_API_BASE` (default `http://localhost:5080`) en `src/frontend/.env` y `src/frontend/src/api/config.ts`
-- [ ] T005 [P] Configurar linting/formato: ESLint + Prettier en `src/frontend/` y `.editorconfig` / analizadores en `src/backend/`
+- [X] T005 [P] Configurar linting/formato: ESLint + Prettier en `src/frontend/` y `.editorconfig` / analizadores en `src/backend/`
 - [X] T006 [P] Añadir CSV de referencia de 1 minuto en `src/frontend/tests/fixtures/ecg-1min.csv` para benchmarks de rendimiento
 
 ---
@@ -271,12 +271,12 @@ el gráfico durante la sesión (AC-05/06/07).
 
 **Purpose**: Rendimiento, compatibilidad y validación final.
 
-- [ ] T075 [P] Benchmark de render < 0.1 s p95 (20 cargas, archivo de 1 min) en `src/frontend/tests/perf/render.perf.test.ts` (SC-001/RNF-01)
-- [ ] T076 [P] Benchmark de cálculo de métricas < 0.1 s p95 (20 mediciones) en `src/frontend/tests/perf/metrics.perf.test.ts` (SC-002/RNF-03)
+- [X] T075 [P] Benchmark de render < 0.1 s p95 (20 cargas, archivo de 1 min) en `src/frontend/tests/perf/render.perf.test.ts` (SC-001/RNF-01)
+- [X] T076 [P] Benchmark de cálculo de métricas < 0.1 s p95 (20 mediciones) en `src/frontend/tests/perf/metrics.perf.test.ts` (SC-002/RNF-03)
 - [ ] T077 Verificar ≥ 10 fps sin redibujo completo durante interacción (documentar medición con panel Performance) (SC-003/RNF-02)
 - [ ] T078 [P] Verificación de compatibilidad de operaciones básicas en Chrome/Firefox/Edge, Chrome Android, Safari iOS (SC-008/RNF-04)
 - [ ] T079 [P] Actualizar documentación de ejecución/uso en `docs/` y `README` del frontend/backend
-- [ ] T080 Refactor y limpieza con la suite en verde (Principio I)
+- [X] T080 Refactor y limpieza con la suite en verde (Principio I)
 - [ ] T081 Ejecutar `quickstart.md` de punta a punta (US1–US8) y registrar resultados
 
 ---

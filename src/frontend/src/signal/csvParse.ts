@@ -1,8 +1,6 @@
 import { createSignal, type Sample, type Signal } from "./signalModel";
 
-export type ParseErrorCode =
-  | "INVALID_SIGNAL"
-  | "MULTICHANNEL_NOT_SUPPORTED";
+export type ParseErrorCode = "INVALID_SIGNAL" | "MULTICHANNEL_NOT_SUPPORTED";
 
 export interface ParseError {
   code: ParseErrorCode;
@@ -10,8 +8,7 @@ export interface ParseError {
 }
 
 export type ParseResult =
-  | { ok: true; signal: Signal }
-  | { ok: false; error: ParseError };
+  { ok: true; signal: Signal } | { ok: false; error: ParseError };
 
 function fail(code: ParseErrorCode, message: string): ParseResult {
   return { ok: false, error: { code, message } };

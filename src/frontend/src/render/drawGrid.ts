@@ -19,7 +19,9 @@ export function drawGrid(
   for (let x = 0, i = 0; x <= width; x += smallPx, i++) {
     ctx.beginPath();
     ctx.strokeStyle =
-      i % largeEvery === 0 ? "rgba(255,120,120,0.55)" : "rgba(255,120,120,0.22)";
+      i % largeEvery === 0
+        ? "rgba(255,120,120,0.55)"
+        : "rgba(255,120,120,0.22)";
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
     ctx.stroke();
@@ -27,7 +29,9 @@ export function drawGrid(
   for (let y = 0, j = 0; y <= height; y += smallPx, j++) {
     ctx.beginPath();
     ctx.strokeStyle =
-      j % largeEvery === 0 ? "rgba(255,120,120,0.55)" : "rgba(255,120,120,0.22)";
+      j % largeEvery === 0
+        ? "rgba(255,120,120,0.55)"
+        : "rgba(255,120,120,0.22)";
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
     ctx.stroke();

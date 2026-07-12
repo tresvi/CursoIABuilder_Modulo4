@@ -80,14 +80,28 @@ export function MainPage() {
 
       <section
         className="toolbar"
-        style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap", marginBottom: 12 }}
+        style={{
+          display: "flex",
+          gap: 16,
+          alignItems: "center",
+          flexWrap: "wrap",
+          marginBottom: 12,
+        }}
       >
         <FileLoader onLoad={handleLoad} />
         <label>
-          <input type="checkbox" checked={state.showGrid} onChange={toggleGrid} />{" "}
+          <input
+            type="checkbox"
+            checked={state.showGrid}
+            onChange={toggleGrid}
+          />{" "}
           Rejilla ECG
         </label>
-        <div style={{ display: "flex", gap: 4 }} role="group" aria-label="Herramientas">
+        <div
+          style={{ display: "flex", gap: 4 }}
+          role="group"
+          aria-label="Herramientas"
+        >
           {TOOLS.map((t) => (
             <button
               key={t.id}

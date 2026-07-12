@@ -10,7 +10,9 @@ function csvFile(name: string, content: string): File {
 describe("MainPage — integración US1 + US2", () => {
   it("renderiza el encabezado y el prompt inicial sin señal", () => {
     render(<MainPage />);
-    expect(screen.getByRole("heading", { name: "ECGViewer" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "ECGViewer" })
+    ).toBeInTheDocument();
     expect(screen.getByText(/Cargá un archivo CSV/i)).toBeInTheDocument();
   });
 
@@ -41,7 +43,10 @@ describe("MainPage — integración US1 + US2", () => {
   it("rechaza un CSV multicanal con un mensaje y no dibuja", async () => {
     render(<MainPage />);
     const input = screen.getByLabelText(/Cargar archivo CSV/i);
-    const file = csvFile("multi.csv", "time,ch1,ch2\n0,0.1,0.2\n0.004,0.15,0.25\n");
+    const file = csvFile(
+      "multi.csv",
+      "time,ch1,ch2\n0,0.1,0.2\n0.004,0.15,0.25\n"
+    );
 
     fireEvent.change(input, { target: { files: [file] } });
 

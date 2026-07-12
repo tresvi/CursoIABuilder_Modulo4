@@ -1,4 +1,9 @@
-import { createSignal, type CropRange, type Sample, type Signal } from "./signalModel";
+import {
+  createSignal,
+  type CropRange,
+  type Sample,
+  type Signal,
+} from "./signalModel";
 
 /**
  * Modelo de un recorte en curso: seleccionado con el mouse pero aún NO aplicado

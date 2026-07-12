@@ -4,7 +4,9 @@ import { useUnsavedGuard } from "./useUnsavedGuard";
 
 /** Dispara un beforeunload cancelable y devuelve si fue prevenido. */
 function fireBeforeUnload(): boolean {
-  const ev = new Event("beforeunload", { cancelable: true }) as BeforeUnloadEvent;
+  const ev = new Event("beforeunload", {
+    cancelable: true,
+  }) as BeforeUnloadEvent;
   window.dispatchEvent(ev);
   return ev.defaultPrevented;
 }

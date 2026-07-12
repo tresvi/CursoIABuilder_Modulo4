@@ -34,7 +34,8 @@ export function detectRPeaks(samples: readonly Sample[], fs: number): number[] {
 
   // 4. Umbral adaptativo relativo al máximo de la señal integrada.
   let peakEnergy = 0;
-  for (let i = 0; i < n; i++) if (integrated[i] > peakEnergy) peakEnergy = integrated[i];
+  for (let i = 0; i < n; i++)
+    if (integrated[i] > peakEnergy) peakEnergy = integrated[i];
   if (peakEnergy <= 0) return [];
   const threshold = 0.3 * peakEnergy;
 

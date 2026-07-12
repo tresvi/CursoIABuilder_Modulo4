@@ -22,7 +22,12 @@ export function MarkerEditor({ markers, onEdit, onRemove }: Props) {
       {sorted.map((m) => (
         <li
           key={m.id}
-          style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}
+          style={{
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+            marginBottom: 4,
+          }}
         >
           <span style={{ fontVariantNumeric: "tabular-nums", minWidth: 64 }}>
             {m.time.toFixed(3)} s

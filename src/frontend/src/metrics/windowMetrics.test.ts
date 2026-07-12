@@ -2,14 +2,19 @@ import { describe, it, expect } from "vitest";
 import { metricsForWindow, samplesInWindow } from "./windowMetrics";
 import { createSignal, type Sample } from "../signal/signalModel";
 
-function syntheticEcg(peakTimes: number[], fs: number, durationSec: number): Sample[] {
+function syntheticEcg(
+  peakTimes: number[],
+  fs: number,
+  durationSec: number
+): Sample[] {
   const n = Math.round(durationSec * fs);
   const sigma = 0.01;
   const samples: Sample[] = [];
   for (let i = 0; i < n; i++) {
     const t = i / fs;
     let v = 0;
-    for (const pt of peakTimes) v += Math.exp(-((t - pt) ** 2) / (2 * sigma * sigma));
+    for (const pt of peakTimes)
+      v += Math.exp(-((t - pt) ** 2) / (2 * sigma * sigma));
     samples.push({ t, v });
   }
   return samples;
@@ -17,7 +22,10 @@ function syntheticEcg(peakTimes: number[], fs: number, durationSec: number): Sam
 
 describe("samplesInWindow", () => {
   it("recorta las muestras al rango [from, to] visible", () => {
-    const samples: Sample[] = Array.from({ length: 11 }, (_, i) => ({ t: i, v: i }));
+    const samples: Sample[] = Array.from({ length: 11 }, (_, i) => ({
+      t: i,
+      v: i,
+    }));
     const sig = createSignal(samples);
     const win = samplesInWindow(sig, 3, 6);
     expect(win.map((s) => s.t)).toEqual([3, 4, 5, 6]);

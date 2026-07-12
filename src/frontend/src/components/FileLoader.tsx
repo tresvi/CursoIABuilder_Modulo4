@@ -50,9 +50,7 @@ export function FileLoader({ onLoad }: Props) {
           if (f) void handleFile(f);
         }}
       />
-      {fileName && !error && (
-        <span className="file-name"> {fileName}</span>
-      )}
+      {fileName && !error && <span className="file-name"> {fileName}</span>}
       {error && (
         <p role="alert" className="error" style={{ color: "#c62828" }}>
           {error}
