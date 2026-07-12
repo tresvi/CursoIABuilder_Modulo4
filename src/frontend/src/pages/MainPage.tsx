@@ -201,6 +201,22 @@ export function MainPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Botón de una herramienta de mouse (modo activo): resalta el seleccionado.
+  const toolBtn = (id: Tool) => {
+    const label = TOOLS.find((t) => t.id === id)!.label;
+    return (
+      <button
+        key={id}
+        onClick={() => setTool(id)}
+        aria-pressed={tool === id}
+        disabled={!working}
+        style={{ fontWeight: tool === id ? 700 : 400 }}
+      >
+        {label}
+      </button>
+    );
+  };
+
   return (
     <main style={{ fontFamily: "system-ui, sans-serif", padding: 16 }}>
       <h1>
@@ -243,47 +259,53 @@ export function MainPage() {
             <option value={50}>50 mm/s</option>
           </select>
         </label>
+        {/* Barra de herramientas: acciones y modos de mouse agrupados, en el
+            orden pedido (Exportar, Importar, Zoom, Restablecer, Desplazar,
+            Regla, Recorte, Marcar). */}
         <div
-          style={{ display: "flex", gap: 4 }}
-          role="group"
+          role="toolbar"
           aria-label="Herramientas"
-        >
-          {TOOLS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTool(t.id)}
-              aria-pressed={tool === t.id}
-              disabled={!working}
-              style={{ fontWeight: tool === t.id ? 700 : 400 }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <button onClick={reset} disabled={!working}>
-          🔄 Restablecer zoom
-        </button>
-        <button onClick={handleExportXlsx} disabled={!working}>
-          ⬇️ Exportar XLSX
-        </button>
-        <button
-          onClick={() => importInputRef.current?.click()}
-          title="Importar una señal desde un archivo .xlsx"
-        >
-          ⬆️ Importar XLSX
-        </button>
-        <input
-          ref={importInputRef}
-          type="file"
-          accept=".xlsx"
-          aria-label="Importar archivo XLSX"
-          style={{ display: "none" }}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void handleImportXlsx(f);
-            e.target.value = "";
+          style={{
+            display: "flex",
+            gap: 4,
+            alignItems: "center",
+            flexWrap: "wrap",
+            padding: "4px 8px",
+            border: "1px solid #ccc",
+            borderRadius: 8,
+            background: "#fafafa",
           }}
-        />
+        >
+          <button onClick={handleExportXlsx} disabled={!working}>
+            ⬇️ Exportar XLSX
+          </button>
+          <button
+            onClick={() => importInputRef.current?.click()}
+            title="Importar una señal desde un archivo .xlsx"
+          >
+            ⬆️ Importar XLSX
+          </button>
+          {toolBtn("zoom")}
+          <button onClick={reset} disabled={!working}>
+            🔄 Restablecer zoom
+          </button>
+          {toolBtn("pan")}
+          {toolBtn("ruler")}
+          {toolBtn("crop")}
+          {toolBtn("marker")}
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".xlsx"
+            aria-label="Importar archivo XLSX"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleImportXlsx(f);
+              e.target.value = "";
+            }}
+          />
+        </div>
         <button
           onClick={handleSave}
           disabled={!working}
