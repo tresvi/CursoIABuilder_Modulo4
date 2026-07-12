@@ -297,7 +297,14 @@ export function MainPage() {
         )}
       </section>
 
-      <section style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+      <section
+        style={{
+          display: "flex",
+          gap: 24,
+          flexWrap: "wrap",
+          alignItems: "flex-start",
+        }}
+      >
         <ECGChart
           signal={working}
           window={window}
@@ -311,25 +318,35 @@ export function MainPage() {
           onCropSelect={(r) => setPendingCrop(r)}
           onAddMarker={(time) => markers.add(time)}
         />
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <MetricsPanel metrics={metrics} />
-          <FilterPanel
-            disabled={!working}
-            hasFilter={derivation?.filteredSamples != null}
-            busy={filterBusy}
-            error={filterError}
-            onApply={handleApplyFilter}
-            onRevert={handleRevertFilter}
+        {/* Métricas de la ventana visible: fijas al lado derecho del gráfico. */}
+        <MetricsPanel metrics={metrics} />
+      </section>
+
+      <section
+        style={{
+          display: "flex",
+          gap: 24,
+          flexWrap: "wrap",
+          alignItems: "flex-start",
+          marginTop: 16,
+        }}
+      >
+        <FilterPanel
+          disabled={!working}
+          hasFilter={derivation?.filteredSamples != null}
+          busy={filterBusy}
+          error={filterError}
+          onApply={handleApplyFilter}
+          onRevert={handleRevertFilter}
+        />
+        <section>
+          <h3>Marcadores</h3>
+          <MarkerEditor
+            markers={markers.markers}
+            onEdit={markers.edit}
+            onRemove={markers.remove}
           />
-          <section>
-            <h3>Marcadores</h3>
-            <MarkerEditor
-              markers={markers.markers}
-              onEdit={markers.edit}
-              onRemove={markers.remove}
-            />
-          </section>
-        </div>
+        </section>
       </section>
 
       {!working && (
