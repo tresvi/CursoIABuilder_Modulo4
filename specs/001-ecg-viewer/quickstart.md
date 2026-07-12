@@ -66,9 +66,11 @@ cd src/frontend && npx playwright test
    (FR-006, edge case).
 - **Rendimiento**: cálculo < 0.1 s p95 sobre 20 mediciones para 1 min (SC-002/RNF-03).
 
-### US3 — Zoom (P2)
+### US3 — Zoom y desplazamiento (P2)
 7. Con Zoom activo, arrastre horizontal ⇒ cursor lupa, selección abarca todo el eje Y, define
    rango X; al soltar, la vista se acerca (AC-08). "Restablecer zoom" ⇒ señal completa (AC-09).
+7b. Con la vista ampliada y Desplazar (pan) activo ⇒ cursor de mano, arrastrar horizontalmente
+   mueve la ventana visible (con clamp a los extremos) y las métricas se recalculan (FR-023).
 
 ### US4 — Filtrar y revertir (P2)
 8. Aplicar filtro (pasa bajo/alto/banda/notch) con sus cortes ⇒ el gráfico se actualiza en la

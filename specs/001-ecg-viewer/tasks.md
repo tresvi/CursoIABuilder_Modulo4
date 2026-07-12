@@ -133,6 +133,7 @@ señal completa (AC-08/09).
 - [X] T033 [P] [US3] Hook `useTool` (herramienta activa + cursor por herramienta) en `src/frontend/src/hooks/useTool.ts`
 - [X] T034 [US3] Overlay de selección de zoom (banda vertical completa en Y) y aplicar rango a `VisibleWindow` en `src/frontend/src/components/ECGChart.tsx` (AC-08)
 - [X] T035 [US3] Acción "Restablecer zoom" en la toolbar que restaura `[inicio,fin]` (AC-09)
+- [X] T035a [US3] Herramienta Desplazar (pan): `panWindow` puro con clamp en `src/frontend/src/hooks/useVisibleWindow.ts`, arrastre incremental en `ECGChart` (cursor mano), botón en la toolbar; recalcula métricas al mover (FR-023) + tests `useVisibleWindow.test.ts`, cursor en `useTool.test.ts`
 
 **Checkpoint**: US3 independiente; al cambiar la ventana, las métricas de US2 se recalculan.
 

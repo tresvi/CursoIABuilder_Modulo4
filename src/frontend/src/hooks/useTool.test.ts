@@ -5,6 +5,7 @@ import { useTool, cursorForTool } from "./useTool";
 describe("cursorForTool (cursor propio por herramienta)", () => {
   it("mapea cada herramienta a su cursor (lupa, regla, tijera, cruz)", () => {
     expect(cursorForTool("zoom")).toContain("zoom-in");
+    expect(cursorForTool("pan")).toBe("grab");
     expect(cursorForTool("ruler")).toBe("crosshair");
     expect(cursorForTool("crop")).toBe("crosshair");
     expect(cursorForTool("marker")).toBe("cell");

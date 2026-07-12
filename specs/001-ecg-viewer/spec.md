@@ -79,19 +79,22 @@ verificar que los valores se recalculan.
 
 ---
 
-### User Story 3 - Navegar la señal con zoom (Priority: P2)
+### User Story 3 - Navegar la señal con zoom y desplazamiento (Priority: P2)
 
 El usuario necesita acercarse a un tramo temporal de interés para inspeccionarlo en detalle
 y luego volver a la vista completa. Con la herramienta Zoom activa, arrastra
 horizontalmente sobre el gráfico para seleccionar un rango de tiempo y, al soltar, la vista
-se acerca a ese rango; una opción de "Restablecer zoom" vuelve a la señal completa.
+se acerca a ese rango; una opción de "Restablecer zoom" vuelve a la señal completa. Cuando la
+vista está ampliada, con la herramienta Desplazar (pan) puede arrastrar horizontalmente para
+mover la ventana visible por la señal.
 
 **Why this priority**: Habilita la inspección detallada y, combinada con US2, define qué
 ventana se analiza. Es muy usada pero la app entrega valor sin ella (se puede ver el total).
 
 **Independent Test**: Arrastrar horizontalmente con Zoom activo y verificar que la vista se
 acerca al rango seleccionado; usar "Restablecer zoom" y verificar que vuelve a la señal
-completa.
+completa; con la vista ampliada y Desplazar activo, arrastrar y verificar que la ventana se
+mueve (con clamp a los extremos) y las métricas se actualizan.
 
 **Acceptance Scenarios**:
 
@@ -101,6 +104,9 @@ completa.
    el botón la vista se acerca a ese rango de tiempo.
 2. **Given** un gráfico con zoom aplicado, **When** el usuario usa "Restablecer zoom",
    **Then** la vista vuelve a mostrar la señal completa.
+3. **Given** un gráfico ampliado con la herramienta Desplazar activa, **When** el usuario
+   arrastra horizontalmente, **Then** la ventana visible se mueve conservando su ancho, sin
+   pasarse de los límites de la señal, y las métricas se recalculan para el nuevo rango.
 
 ---
 
@@ -283,6 +289,11 @@ pendientes y verificar la alerta de confirmación.
 - **FR-005** (RF-06): El sistema MUST permitir, con la herramienta Zoom activa, acercar un
   rango del eje temporal seleccionándolo con arrastre horizontal del mouse (la selección
   abarca todo el eje Y) y restablecer el zoom a la señal completa.
+- **FR-023** (RF-06): El sistema MUST permitir, con la herramienta Desplazar (pan) activa,
+  desplazar horizontalmente la ventana visible arrastrando el mouse cuando el zoom no muestra
+  la señal completa, conservando el ancho de la ventana y sin salir de los límites de la señal.
+  El desplazamiento cambia la ventana visible, por lo que las métricas (FR-006) se recalculan
+  para el nuevo rango.
 - **FR-006** (RF-14): El sistema MUST calcular y mostrar las métricas cardíacas (BPM, SDNN,
   RMSSD, pNN50) exclusivamente sobre la ventana de tiempo visible en el gráfico, y
   recalcularlas cuando cambia el rango visible. Cuando la ventana no tiene latidos suficientes

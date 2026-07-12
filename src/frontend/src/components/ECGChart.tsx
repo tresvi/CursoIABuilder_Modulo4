@@ -21,6 +21,7 @@ interface Props {
   cursor: string;
   markers: EventMarker[];
   onZoom: (range: VisibleWindow) => void;
+  onPan: (deltaTime: number) => void;
   onCropSelect: (range: CropRange) => void;
   onAddMarker: (time: number) => void;
   width?: number;
@@ -48,6 +49,7 @@ export function ECGChart({
   cursor,
   markers,
   onZoom,
+  onPan,
   onCropSelect,
   onAddMarker,
   width = 900,
@@ -153,8 +155,19 @@ export function ECGChart({
   }
 
   function handleMove(e: React.PointerEvent) {
-    if (!dragRef.current) return;
+    if (!dragRef.current || !view) return;
     const { x, y } = localXY(e);
+
+    if (tool === "pan") {
+      // Desplazamiento incremental: convierte el delta en píxeles a segundos y
+      // mueve la ventana en sentido contrario al arrastre (se "agarra" la señal).
+      const scale = createScale(view);
+      const dt = scale.timeOf(x) - scale.timeOf(dragRef.current.x1);
+      if (dt !== 0) onPan(-dt);
+      dragRef.current = { ...dragRef.current, x1: x, y1: y };
+      return; // el pan no dibuja banda en el overlay
+    }
+
     dragRef.current = { ...dragRef.current, x1: x, y1: y };
     paintOverlay(dragRef.current);
   }

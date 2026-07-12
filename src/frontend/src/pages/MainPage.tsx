@@ -33,6 +33,7 @@ import type { CardiacMetrics } from "../metrics/hrv";
 
 const TOOLS: Array<{ id: Tool; label: string }> = [
   { id: "zoom", label: "🔍 Zoom" },
+  { id: "pan", label: "✋ Desplazar" },
   { id: "ruler", label: "📏 Regla" },
   { id: "crop", label: "✂️ Recorte" },
   { id: "marker", label: "📍 Marcar" },
@@ -60,7 +61,7 @@ export function MainPage() {
     [derivation]
   );
 
-  const { window, zoomTo, reset } = useVisibleWindow(working);
+  const { window, zoomTo, panBy, reset } = useVisibleWindow(working);
   const markers = useMarkers(markDirty);
   useUnsavedGuard(state.dirty);
 
@@ -306,6 +307,7 @@ export function MainPage() {
           cursor={cursor}
           markers={markers.markers}
           onZoom={(r) => zoomTo(r.fromTime, r.toTime)}
+          onPan={(dt) => panBy(dt)}
           onCropSelect={(r) => setPendingCrop(r)}
           onAddMarker={(time) => markers.add(time)}
         />

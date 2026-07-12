@@ -16,6 +16,25 @@ export function fullWindow(signal: Signal | null): VisibleWindow {
 }
 
 /**
+ * Desplaza (pan) la ventana `deltaTime` segundos conservando su ancho, sin salir
+ * de los límites de la señal (`full`). Si la ventana ya abarca toda la señal,
+ * devuelve la ventana completa (no hay nada que desplazar).
+ */
+export function panWindow(
+  window: VisibleWindow,
+  deltaTime: number,
+  full: VisibleWindow
+): VisibleWindow {
+  const width = window.toTime - window.fromTime;
+  const fullSpan = full.toTime - full.fromTime;
+  if (width >= fullSpan) return full;
+
+  let from = window.fromTime + deltaTime;
+  from = Math.max(full.fromTime, Math.min(from, full.toTime - width));
+  return { fromTime: from, toTime: from + width };
+}
+
+/**
  * Gestiona la ventana visible. Al cambiar la señal se reinicia a la ventana
  * completa; "restablecer zoom" vuelve a la señal completa (AC-09).
  */
@@ -34,7 +53,12 @@ export function useVisibleWindow(signal: Signal | null) {
     if (toTime > fromTime) setWindow({ fromTime, toTime });
   }, []);
 
+  const panBy = useCallback(
+    (deltaTime: number) => setWindow((w) => panWindow(w, deltaTime, full)),
+    [full]
+  );
+
   const reset = useCallback(() => setWindow(full), [full]);
 
-  return { window, zoomTo, reset };
+  return { window, zoomTo, panBy, reset };
 }

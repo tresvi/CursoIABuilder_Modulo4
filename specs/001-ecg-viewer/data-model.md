@@ -107,7 +107,7 @@ Calculadas **sobre la ventana visible**, nunca sobre todo el archivo (Principio 
 
 | Campo | Tipo | Notas |
 |-------|------|-------|
-| `activeTool` | `'none' \| 'zoom' \| 'ruler' \| 'crop' \| 'marker'` | Cursor propio por herramienta. |
+| `activeTool` | `'none' \| 'zoom' \| 'pan' \| 'ruler' \| 'crop' \| 'marker'` | Cursor propio por herramienta (pan = desplazar). |
 | `showGrid` | `boolean` | Rejilla ECG on/off (FR-004, AC-10). |
 | `paperSpeed` | `25 \| 50` (mm/s) | Velocidad de papel para la escala X de la rejilla (FR-022). Y usa ganancia fija 10 mm/mV. |
 | `dirty` | `boolean` | Hay cambios sin guardar ⇒ guardia `beforeunload` (FR-018, D8). |
