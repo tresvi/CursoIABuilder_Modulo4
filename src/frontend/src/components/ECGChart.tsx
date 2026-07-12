@@ -10,7 +10,7 @@ import { drawGrid, type PaperSpeed } from "../render/drawGrid";
 import { drawAxes } from "../render/drawAxes";
 import { drawMarkers } from "../render/drawMarkers";
 import { selectionToRange } from "../render/selectionToRange";
-import { measureRuler } from "../metrics/ruler";
+import { measureRuler, rulerBox } from "../metrics/ruler";
 
 interface Props {
   signal: Signal | null;
@@ -106,8 +106,17 @@ export function ECGChart({
         ctx.restore();
       } else if (tool === "ruler") {
         const m = measureRuler(drag.x0, drag.y0, drag.x1, drag.y1, view);
+        const box = rulerBox(drag.x0, drag.y0, drag.x1, drag.y1);
         ctx.save();
         ctx.strokeStyle = "#6a1b9a";
+        // Recuadro que circunscribe la recta (ancho = Δt, alto = Δamplitud).
+        ctx.fillStyle = "rgba(106,27,154,0.10)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 3]);
+        ctx.fillRect(box.x, box.y, box.w, box.h);
+        ctx.strokeRect(box.x, box.y, box.w, box.h);
+        // Recta del recorrido del mouse (diagonal del recuadro), sólida.
+        ctx.setLineDash([]);
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.moveTo(drag.x0, drag.y0);

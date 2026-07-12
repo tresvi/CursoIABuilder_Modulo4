@@ -144,9 +144,10 @@ y verificar que se genera una señal acotada, o cancelar y verificar que queda i
 **Acceptance Scenarios**:
 
 1. **Given** la herramienta Regla activa, **When** el usuario arrastra el mouse sobre el
-   gráfico, **Then** el cursor toma forma de regla y se muestra en tiempo real Δt (s) y
-   Δamplitud (mV) entre el punto inicial y la posición del cursor; al soltar el botón la
-   medición desaparece y la señal no se altera.
+   gráfico, **Then** el cursor toma forma de regla, se traza la recta del recorrido y un
+   **recuadro que la circunscribe** (ancho = Δt, alto = Δamplitud), y se muestran en tiempo
+   real Δt (s) y Δamplitud (mV) entre el punto inicial y la posición del cursor; al soltar el
+   botón la medición (recta y recuadro) desaparece y la señal no se altera.
 2. **Given** la herramienta Recorte activa, **When** el usuario arrastra horizontalmente,
    **Then** el cursor toma forma de tijera, la selección abarca todo el eje Y y define el
    rango en el eje X, y se resalta la región a conservar sin alterar todavía la señal.
@@ -294,7 +295,9 @@ pendientes y verificar la alerta de confirmación.
   señal original cargada.
 - **FR-009** (RF-08): El sistema MUST permitir, con la herramienta Regla activa, medir con el
   mouse Δt (s) y Δamplitud (mV) entre el punto donde se presiona y la posición del cursor,
-  en tiempo real y sin modificar la señal.
+  en tiempo real y sin modificar la señal. Además de la recta del recorrido del mouse, el
+  sistema MUST mostrar un **recuadro que la circunscribe** (ancho = Δt, alto = Δamplitud) para
+  que el usuario visualice el área seleccionada. La recta y el recuadro desaparecen al soltar.
 - **FR-010** (RF-09): El sistema MUST permitir, con la herramienta Recorte activa,
   seleccionar con el mouse un rango del eje temporal, resaltar la región a conservar y, solo
   tras confirmación explícita del usuario, recortar la señal a ese rango generando una nueva

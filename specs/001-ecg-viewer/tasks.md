@@ -181,6 +181,7 @@ confirmación y solo recorta si se acepta (AC-11/12/13).
 
 - [X] T046 [US5] Implementar cálculo de la regla en `src/frontend/src/metrics/ruler.ts` (FR-009)
 - [X] T047 [US5] Overlay de regla en vivo (cursor regla) en `src/frontend/src/components/ECGChart.tsx` (AC-11)
+- [X] T047a [US5] Recuadro que circunscribe la recta de la regla (ancho = Δt, alto = Δamplitud) en el overlay: helper puro `rulerBox` en `src/frontend/src/metrics/ruler.ts` + dibujo en `ECGChart.tsx` (FR-009, AC-11) + test `ruler.test.ts`
 - [X] T048 [P] [US5] Modelo `Crop` y función de recorte no destructivo en `src/frontend/src/signal/crop.ts` (FR-010, Principio II)
 - [X] T049 [US5] Overlay de selección de recorte (cursor tijera, región a conservar resaltada, sin aplicar) en `src/frontend/src/components/ECGChart.tsx` (AC-12)
 - [X] T050 [P] [US5] Componente `ConfirmDialog` reutilizable en `src/frontend/src/components/ConfirmDialog.tsx`

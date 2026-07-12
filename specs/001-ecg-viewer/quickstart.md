@@ -76,8 +76,9 @@ cd src/frontend && npx playwright test
 9. Revertir ⇒ la señal coincide **exactamente** con la original (AC-15, SC-009).
 
 ### US5 — Regla y recorte (P2)
-10. Con Regla activa, arrastrar ⇒ cursor regla, Δt (s) y Δamplitud (mV) en vivo; al soltar, la
-    medición desaparece y la señal no cambia (AC-11).
+10. Con Regla activa, arrastrar ⇒ cursor regla, recta del recorrido + recuadro que la
+    circunscribe (ancho = Δt, alto = Δamplitud), Δt (s) y Δamplitud (mV) en vivo; al soltar, la
+    medición (recta y recuadro) desaparece y la señal no cambia (AC-11).
 11. Con Recorte activo, arrastrar ⇒ cursor tijera, selección de rango X, región a conservar
     resaltada, **sin** recortar aún (AC-12). Cartel de confirmación: aceptar ⇒ nueva señal
     acotada; cancelar ⇒ intacta (AC-13).
