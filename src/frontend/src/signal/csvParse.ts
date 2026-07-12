@@ -31,10 +31,12 @@ function parseNumber(raw: string, sep: ";" | ","): number {
  * FR-001/FR-002, AC-01/02/03.
  */
 export function parseCsv(text: string): ParseResult {
+  // Se ignoran líneas vacías y de comentario ('#'): algunos ejemplos traen al final
+  // anotaciones de complejos ("## t#|#v#|#etiqueta") que no son filas de datos.
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
-    .filter((l) => l.length > 0);
+    .filter((l) => l.length > 0 && !l.startsWith("#"));
 
   if (lines.length === 0) {
     return fail("INVALID_SIGNAL", "El archivo está vacío.");

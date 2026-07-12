@@ -55,6 +55,18 @@ describe("parseCsv (FR-001/002, AC-01/02/03)", () => {
     if (!res.ok) expect(res.error.code).toBe("MULTICHANNEL_NOT_SUPPORTED");
   });
 
+  it("ignora líneas de comentario '#' (anotaciones de complejos del ejemplo ESPANTOSO)", () => {
+    const csv =
+      "tiempo, mV\n0,-0.085\n0.002,-0.08\n" +
+      "## 2.268#|#0.83#|#Complejo R\n## 2.479#|#0.233#|#Comp. T ?\n";
+    const res = parseCsv(csv);
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.signal.samples).toHaveLength(2);
+      expect(res.signal.samples[1]).toEqual({ t: 0.002, v: -0.08 });
+    }
+  });
+
   it("acepta separador ';' y decimales con coma", () => {
     const csv = "time;value\n0,000;0,12\n0,004;0,15\n";
     const res = parseCsv(csv);
