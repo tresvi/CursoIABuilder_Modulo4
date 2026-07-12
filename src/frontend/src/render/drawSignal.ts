@@ -14,7 +14,8 @@ export function drawSignal(
   const scale = createScale(view);
   const [t0, t1] = view.tRange;
 
-  ctx.clearRect(0, 0, view.width, view.height);
+  // Nota: el lienzo lo limpia el llamador (ECGChart) antes de dibujar la grilla;
+  // NO se limpia aquí para no borrar la grilla ya pintada.
 
   // Eje base (tiempo).
   ctx.save();
