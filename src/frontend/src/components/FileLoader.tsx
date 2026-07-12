@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { parseCsv } from "../signal/csvParse";
 import type { Signal } from "../signal/signalModel";
 
@@ -20,15 +20,13 @@ function readFileText(file: File): Promise<string> {
 /**
  * Carga de archivo CSV monocanal (US1). Valida el formato y, ante error o
  * multicanal, muestra un mensaje y NO carga la señal (AC-02/03, SC-007).
+ * El nombre del archivo lo muestra el propio control nativo de archivo.
  */
 export function FileLoader({ onLoad }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
 
   async function handleFile(file: File) {
     setError(null);
-    setFileName(file.name);
     const text = await readFileText(file);
     const res = parseCsv(text);
     if (!res.ok) {
@@ -41,7 +39,6 @@ export function FileLoader({ onLoad }: Props) {
   return (
     <div className="file-loader">
       <input
-        ref={inputRef}
         type="file"
         accept=".csv,text/csv"
         aria-label="Cargar archivo CSV de ECG"
@@ -50,7 +47,6 @@ export function FileLoader({ onLoad }: Props) {
           if (f) void handleFile(f);
         }}
       />
-      {fileName && !error && <span className="file-name"> {fileName}</span>}
       {error && (
         <p role="alert" className="error" style={{ color: "#c62828" }}>
           {error}
