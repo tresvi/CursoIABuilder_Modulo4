@@ -62,7 +62,7 @@ cd src/frontend && npx playwright test
    (FR-006, edge case).
 - **Rendimiento**: cálculo < 0.1 s p95 sobre 20 mediciones para 1 min (SC-002/RNF-03).
 
-### US3 — Zoom y rejilla (P2)
+### US3 — Zoom (P2)
 7. Con Zoom activo, arrastre horizontal ⇒ cursor lupa, selección abarca todo el eje Y, define
    rango X; al soltar, la vista se acerca (AC-08). "Restablecer zoom" ⇒ señal completa (AC-09).
 
