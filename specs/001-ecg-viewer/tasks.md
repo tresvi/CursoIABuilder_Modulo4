@@ -121,15 +121,15 @@ señal completa (AC-08/09).
 
 ### Tests for User Story 3 (escribir primero, deben FALLAR)
 
-- [ ] T030 [P] [US3] Tests de conversión selección-pixel → rango temporal `[fromTime,toTime]` en `src/frontend/src/render/selectionToRange.test.ts`
-- [ ] T031 [P] [US3] Tests del hook de herramienta activa (cursor lupa, estado zoom) en `src/frontend/src/hooks/useTool.test.ts`
+- [X] T030 [P] [US3] Tests de conversión selección-pixel → rango temporal `[fromTime,toTime]` en `src/frontend/src/render/selectionToRange.test.ts`
+- [X] T031 [P] [US3] Tests del hook de herramienta activa (cursor lupa, estado zoom) en `src/frontend/src/hooks/useTool.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Implementar `selectionToRange` (pixel→segundos, clamp) en `src/frontend/src/render/selectionToRange.ts`
-- [ ] T033 [P] [US3] Hook `useTool` (herramienta activa + cursor por herramienta) en `src/frontend/src/hooks/useTool.ts`
-- [ ] T034 [US3] Overlay de selección de zoom (banda vertical completa en Y) y aplicar rango a `VisibleWindow` en `src/frontend/src/components/ECGChart.tsx` (AC-08)
-- [ ] T035 [US3] Acción "Restablecer zoom" en la toolbar que restaura `[inicio,fin]` (AC-09)
+- [X] T032 [US3] Implementar `selectionToRange` (pixel→segundos, clamp) en `src/frontend/src/render/selectionToRange.ts`
+- [X] T033 [P] [US3] Hook `useTool` (herramienta activa + cursor por herramienta) en `src/frontend/src/hooks/useTool.ts`
+- [X] T034 [US3] Overlay de selección de zoom (banda vertical completa en Y) y aplicar rango a `VisibleWindow` en `src/frontend/src/components/ECGChart.tsx` (AC-08)
+- [X] T035 [US3] Acción "Restablecer zoom" en la toolbar que restaura `[inicio,fin]` (AC-09)
 
 **Checkpoint**: US3 independiente; al cambiar la ventana, las métricas de US2 se recalculan.
 
@@ -170,19 +170,19 @@ confirmación y solo recorta si se acepta (AC-11/12/13).
 
 ### Tests for User Story 5 (escribir primero, deben FALLAR)
 
-- [ ] T044 [P] [US5] Tests de cálculo de la regla (Δt en s, Δamplitud en mV) en `src/frontend/src/metrics/ruler.test.ts`
-- [ ] T045 [P] [US5] Tests de recorte (genera nueva señal acotada; cancelar = intacta; reversibilidad) en `src/frontend/src/signal/crop.test.ts`
-- [ ] T045a [P] [US5] Test de interacción filtro↔recorte: revertir un filtro sobre una señal recortada devuelve el tramo conservado sin filtro, y recortar sobre señal filtrada no impide revertir el filtro en `src/frontend/src/signal/filterCropInterplay.test.ts` (FR-019, spec.md edge case)
+- [X] T044 [P] [US5] Tests de cálculo de la regla (Δt en s, Δamplitud en mV) en `src/frontend/src/metrics/ruler.test.ts`
+- [X] T045 [P] [US5] Tests de recorte (genera nueva señal acotada; cancelar = intacta; reversibilidad) en `src/frontend/src/signal/crop.test.ts`
+- [X] T045a [P] [US5] Test de interacción filtro↔recorte: revertir un filtro sobre una señal recortada devuelve el tramo conservado sin filtro, y recortar sobre señal filtrada no impide revertir el filtro en `src/frontend/src/signal/filterCropInterplay.test.ts` (FR-019, spec.md edge case)
 
 ### Implementation for User Story 5
 
-- [ ] T046 [US5] Implementar cálculo de la regla en `src/frontend/src/metrics/ruler.ts` (FR-009)
-- [ ] T047 [US5] Overlay de regla en vivo (cursor regla) en `src/frontend/src/components/ECGChart.tsx` (AC-11)
-- [ ] T048 [P] [US5] Modelo `Crop` y función de recorte no destructivo en `src/frontend/src/signal/crop.ts` (FR-010, Principio II)
-- [ ] T049 [US5] Overlay de selección de recorte (cursor tijera, región a conservar resaltada, sin aplicar) en `src/frontend/src/components/ECGChart.tsx` (AC-12)
-- [ ] T050 [P] [US5] Componente `ConfirmDialog` reutilizable en `src/frontend/src/components/ConfirmDialog.tsx`
-- [ ] T051 [US5] Flujo de confirmación de recorte: aceptar → nueva señal acotada; cancelar → intacta (AC-13)
-- [ ] T051a [US5] Componer derivación `original → filtro → recorte` de forma reversible en `src/frontend/src/signal/signalModel.ts`: revertir el filtro reconstruye desde el original conservado aplicando el recorte vigente (satisface T045a, FR-019, data-model.md diagrama de derivación)
+- [X] T046 [US5] Implementar cálculo de la regla en `src/frontend/src/metrics/ruler.ts` (FR-009)
+- [X] T047 [US5] Overlay de regla en vivo (cursor regla) en `src/frontend/src/components/ECGChart.tsx` (AC-11)
+- [X] T048 [P] [US5] Modelo `Crop` y función de recorte no destructivo en `src/frontend/src/signal/crop.ts` (FR-010, Principio II)
+- [X] T049 [US5] Overlay de selección de recorte (cursor tijera, región a conservar resaltada, sin aplicar) en `src/frontend/src/components/ECGChart.tsx` (AC-12)
+- [X] T050 [P] [US5] Componente `ConfirmDialog` reutilizable en `src/frontend/src/components/ConfirmDialog.tsx`
+- [X] T051 [US5] Flujo de confirmación de recorte: aceptar → nueva señal acotada; cancelar → intacta (AC-13)
+- [X] T051a [US5] Componer derivación `original → filtro → recorte` de forma reversible en `src/frontend/src/signal/signalModel.ts`: revertir el filtro reconstruye desde el original conservado aplicando el recorte vigente (satisface T045a, FR-019, data-model.md diagrama de derivación)
 
 **Checkpoint**: US5 independiente; recorte reversible respecto del original.
 
@@ -200,7 +200,7 @@ cambios pendientes muestra alerta (AC-20/25/26, SC-005).
 
 - [ ] T052 [P] [US8] Tests xUnit del repositorio SQLite (upsert reemplaza estudio único, restore) en `src/backend/ECGViewer.Tests/StudyRepositoryTests.cs`
 - [ ] T053 [P] [US8] Tests de contrato `GET`/`PUT /api/study` (200, 404 sin estudio) en `src/backend/ECGViewer.Tests/StudyEndpointTests.cs`
-- [ ] T054 [P] [US8] Test del guardia de cambios sin guardar (`dirty` → confirmación) en `src/frontend/src/hooks/useUnsavedGuard.test.ts`
+- [X] T054 [P] [US8] Test del guardia de cambios sin guardar (`dirty` → confirmación) en `src/frontend/src/hooks/useUnsavedGuard.test.ts`
 - [ ] T054a [P] [US8] Test de persistencia explícita: ninguna mutación (marcador/filtro/recorte) invoca `saveStudy` sin acción "Guardar"; solo "Guardar" dispara `PUT /api/study` en `src/frontend/src/api/studyApi.test.ts` (FR-016/017, Principio III, SC-005)
 
 ### Implementation for User Story 8
@@ -209,7 +209,7 @@ cambios pendientes muestra alerta (AC-20/25/26, SC-005).
 - [ ] T056 [US8] Endpoints `GET /api/study` y `PUT /api/study` en `src/backend/ECGViewer.Api/Endpoints/StudyEndpoints.cs` (contracts/api.md)
 - [ ] T057 [P] [US8] Modelo `SavedStudy` (frontend) + cliente `getStudy`/`saveStudy` en `src/frontend/src/api/studyApi.ts`
 - [ ] T058 [US8] Acción "Guardar" (serializa señal+marcadores+filtro+recorte, marca `dirty=false`) en `MainPage.tsx` (FR-016, AC-20)
-- [ ] T059 [P] [US8] Hook `useUnsavedGuard` con `beforeunload` cuando `dirty=true` en `src/frontend/src/hooks/useUnsavedGuard.ts` (FR-018, AC-26)
+- [X] T059 [P] [US8] Hook `useUnsavedGuard` con `beforeunload` cuando `dirty=true` en `src/frontend/src/hooks/useUnsavedGuard.ts` (FR-018, AC-26)
 - [ ] T060 [US8] Restaurar estudio al iniciar (reconstruir working aplicando filtro/recorte) en `MainPage.tsx` (FR-021)
 
 **Checkpoint**: Todas las P2 completas; garantía de persistencia explícita en vigor. Nota: US8
@@ -228,15 +228,15 @@ el gráfico durante la sesión (AC-05/06/07).
 
 ### Tests for User Story 6 (escribir primero, deben FALLAR)
 
-- [ ] T061 [P] [US6] Tests del modelo de marcadores (crear anclado a tiempo, editar label, eliminar) en `src/frontend/src/signal/markers.test.ts`
+- [X] T061 [P] [US6] Tests del modelo de marcadores (crear anclado a tiempo, editar label, eliminar) en `src/frontend/src/signal/markers.test.ts`
 
 ### Implementation for User Story 6
 
-- [ ] T062 [US6] Modelo `EventMarker` y operaciones (add/edit/remove) en `src/frontend/src/signal/markers.ts` (FR-011/012/013)
-- [ ] T063 [P] [US6] Hook `useMarkers` (estado de sesión, marca `dirty`) en `src/frontend/src/hooks/useMarkers.ts`
-- [ ] T064 [US6] Herramienta "Marcar": clic sobre el eje temporal crea marcador en `src/frontend/src/components/ECGChart.tsx` (AC-05)
-- [ ] T065 [P] [US6] Capa de render de marcadores sobre el overlay en `src/frontend/src/render/drawMarkers.ts`
-- [ ] T066 [US6] UI de edición de etiqueta y eliminación de marcador en `src/frontend/src/components/MarkerEditor.tsx` (AC-06/07)
+- [X] T062 [US6] Modelo `EventMarker` y operaciones (add/edit/remove) en `src/frontend/src/signal/markers.ts` (FR-011/012/013)
+- [X] T063 [P] [US6] Hook `useMarkers` (estado de sesión, marca `dirty`) en `src/frontend/src/hooks/useMarkers.ts`
+- [X] T064 [US6] Herramienta "Marcar": clic sobre el eje temporal crea marcador en `src/frontend/src/components/ECGChart.tsx` (AC-05)
+- [X] T065 [P] [US6] Capa de render de marcadores sobre el overlay en `src/frontend/src/render/drawMarkers.ts`
+- [X] T066 [US6] UI de edición de etiqueta y eliminación de marcador en `src/frontend/src/components/MarkerEditor.tsx` (AC-06/07)
 - [ ] T067 [US6] Integrar marcadores en el guardado (US8) y en `dirty`
 
 **Checkpoint**: US6 independiente.

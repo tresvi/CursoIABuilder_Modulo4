@@ -50,17 +50,56 @@ export function createSignal(samples: Sample[]): Signal {
   };
 }
 
-/**
- * Estado de derivación de la señal de trabajo respecto de la original.
- * Mantiene la original inmutable para poder revertir el filtro (T042/T051a).
- */
-export interface SignalState {
-  /** señal original cargada — nunca se sobrescribe */
-  readonly original: Signal;
-  /** señal de trabajo mostrada (puede estar filtrada y/o recortada) */
-  readonly working: Signal;
+export interface CropRange {
+  fromTime: number;
+  toTime: number;
 }
 
-export function initState(original: Signal): SignalState {
-  return { original, working: original };
+/**
+ * Derivación de la señal de trabajo respecto de la original (Principio II,
+ * FR-019, data-model.md). La original es inmutable; el filtro y el recorte son
+ * capas reversibles que se componen en el orden `original → filtro → recorte`.
+ *
+ * `filteredSamples` son las muestras que devuelve el backend al filtrar la señal
+ * original completa (mismo eje temporal); `null` = sin filtro.
+ */
+export interface Derivation {
+  readonly original: Signal;
+  readonly filteredSamples: readonly Sample[] | null;
+  readonly crop: CropRange | null;
+}
+
+export function initDerivation(original: Signal): Derivation {
+  return { original, filteredSamples: null, crop: null };
+}
+
+/** Reconstruye la señal de trabajo aplicando filtro (si hay) y luego recorte. */
+export function deriveWorking(d: Derivation): Signal {
+  const base = d.filteredSamples ?? d.original.samples;
+  const samples = d.crop
+    ? base.filter((s) => s.t >= d.crop!.fromTime && s.t <= d.crop!.toTime)
+    : base.slice();
+  return createSignal(samples as Sample[]);
+}
+
+/** Aplica un filtro: guarda las muestras filtradas de la señal original completa. */
+export function applyFilter(
+  d: Derivation,
+  filteredFullSamples: readonly Sample[]
+): Derivation {
+  return { ...d, filteredSamples: filteredFullSamples };
+}
+
+/** Revierte el filtro exactamente al original (conservando el recorte vigente). */
+export function revertFilter(d: Derivation): Derivation {
+  return { ...d, filteredSamples: null };
+}
+
+/** Aplica (o reemplaza) el recorte al rango temporal indicado. */
+export function applyCrop(d: Derivation, range: CropRange): Derivation {
+  return { ...d, crop: range };
+}
+
+export function clearCrop(d: Derivation): Derivation {
+  return { ...d, crop: null };
 }
