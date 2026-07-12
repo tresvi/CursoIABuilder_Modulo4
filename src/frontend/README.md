@@ -47,12 +47,21 @@ Los cálculos (parseo, HRV, DSP-model, geometría) son funciones puras con tests
   archivo cargado a mano. Los otros CSV de muestra viven en `Ejemplos_Archivos_CSV/` en la
   raíz del repo; solo el filtrado se publica en `public/` para el botón.
 
-## Convención de UI: iconos en botones de acción
+## Convención de UI: barra de herramientas e iconos
 
-Los botones de acción de la barra llevan un emoji al inicio como ayuda visual, coherente
-con las herramientas de mouse (🔍 Zoom, ✋ Desplazar, 📏 Regla, ✂️ Recorte, 📍 Marcar) y
-con acciones como 💾 Guardar, ⬇️ Exportar / ⬆️ Importar XLSX, 📈 Cargar ejemplo y
-🔄 Restablecer zoom. Al agregar un botón nuevo, mantener este criterio.
+Las acciones y modos de mouse viven agrupados en un contenedor `role="toolbar"` (recuadrado)
+dentro de `MainPage`, en este orden fijo: **⬇️ Exportar XLSX · ⬆️ Importar XLSX · 🔍 Zoom ·
+🔄 Restablecer zoom · ✋ Desplazar · 📏 Regla · ✂️ Recorte · 📍 Marcar**. Los cinco modos de
+mouse (Zoom/Desplazar/Regla/Recorte/Marcar) se renderizan con el helper `toolBtn(id)`, que
+resalta el modo activo (`aria-pressed` + negrita). Al agregar una herramienta nueva, meterla
+en esta barra en vez de dejarla como botón suelto.
+
+Quedan **fuera** de la barra por ser otra categoría: la carga de datos (Seleccionar archivo /
+📈 Cargar ejemplo), las opciones de visualización (Rejilla ECG / Velocidad) y 💾 Guardar.
+
+Todos los botones de acción llevan un emoji al inicio como ayuda visual (💾 Guardar,
+⬇️ Exportar / ⬆️ Importar XLSX, 📈 Cargar ejemplo, 🔄 Restablecer zoom). Al agregar un botón
+nuevo, mantener este criterio.
 
 ## Colores de la grilla y del trazo (`render/`)
 
