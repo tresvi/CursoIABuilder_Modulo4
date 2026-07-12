@@ -27,6 +27,7 @@ import {
   type FilterConfig,
 } from "../api/filterApi";
 import { getStudy, saveStudy, type SavedStudy } from "../api/studyApi";
+import { exportXlsx, importXlsx } from "../api/excelApi";
 import { ApiRequestError } from "../api/client";
 import type { CardiacMetrics } from "../metrics/hrv";
 
@@ -39,8 +40,8 @@ const TOOLS: Array<{ id: Tool; label: string }> = [
 
 /**
  * Pantalla principal de ECGViewer: carga (US1), métricas por ventana (US2),
- * zoom (US3), filtros vía backend (US4), regla y recorte con confirmación (US5)
- * y marcadores (US6). El guardado (US8) se incorpora aparte.
+ * zoom (US3), filtros vía backend (US4), regla y recorte con confirmación (US5),
+ * marcadores (US6), import/export XLSX (US7) y guardado/restauración (US8).
  */
 export function MainPage() {
   const { state, toggleGrid, markDirty, clearDirty } = useAppState();
@@ -110,6 +111,30 @@ export function MainPage() {
     setActiveFilter(null);
     setFilterError(null);
     markDirty();
+  }
+
+  async function handleExportXlsx() {
+    if (!working) return;
+    try {
+      await exportXlsx(working);
+    } catch {
+      setSaveStatus(
+        "No se pudo exportar (¿backend en http://localhost:5080?)."
+      );
+    }
+  }
+
+  async function handleImportXlsx(file: File) {
+    try {
+      const signal = await importXlsx(file);
+      handleLoad(signal);
+    } catch (e) {
+      setSaveStatus(
+        e instanceof ApiRequestError
+          ? `Error al importar: ${e.apiError.message}`
+          : "No se pudo importar el .xlsx."
+      );
+    }
   }
 
   // Persistencia explícita (Principio III, FR-016): SOLO "Guardar" persiste.
@@ -223,6 +248,26 @@ export function MainPage() {
         <button onClick={reset} disabled={!working}>
           Restablecer zoom
         </button>
+        <button onClick={handleExportXlsx} disabled={!working}>
+          ⬇️ Exportar XLSX
+        </button>
+        <label
+          style={{ cursor: "pointer" }}
+          title="Importar una señal desde un archivo .xlsx"
+        >
+          ⬆️ Importar XLSX
+          <input
+            type="file"
+            accept=".xlsx"
+            aria-label="Importar archivo XLSX"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void handleImportXlsx(f);
+              e.target.value = "";
+            }}
+          />
+        </label>
         <button
           onClick={handleSave}
           disabled={!working}

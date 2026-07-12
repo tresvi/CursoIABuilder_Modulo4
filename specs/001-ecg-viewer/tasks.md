@@ -252,16 +252,16 @@ el gráfico durante la sesión (AC-05/06/07).
 
 ### Tests for User Story 7 (escribir primero, deben FALLAR)
 
-- [ ] T068 [P] [US7] Tests xUnit de export/import XLSX (round-trip sin pérdida, estructura inválida, multicanal) en `src/backend/ECGViewer.Tests/ExcelTests.cs`
-- [ ] T069 [P] [US7] Tests de contrato `POST /api/import/xlsx` y `POST /api/export/xlsx` en `src/backend/ECGViewer.Tests/ExcelEndpointTests.cs`
+- [X] T068 [P] [US7] Tests xUnit de export/import XLSX (round-trip sin pérdida, estructura inválida, multicanal) en `src/backend/ECGViewer.Tests/ExcelTests.cs`
+- [X] T069 [P] [US7] Tests de contrato `POST /api/import/xlsx` y `POST /api/export/xlsx` en `src/backend/ECGViewer.Tests/ExcelEndpointTests.cs`
 
 ### Implementation for User Story 7
 
-- [ ] T070 [US7] Servicio de export XLSX (ClosedXML) en `src/backend/ECGViewer.Api/Excel/ExcelExporter.cs` (FR-014)
-- [ ] T071 [US7] Servicio de import XLSX con validaciones (un canal, tiempo/valor) en `src/backend/ECGViewer.Api/Excel/ExcelImporter.cs` (FR-015, AC-17)
-- [ ] T072 [US7] Endpoints `POST /api/export/xlsx` y `POST /api/import/xlsx` (multipart) en `src/backend/ECGViewer.Api/Endpoints/ExcelEndpoints.cs` (contracts/api.md)
-- [ ] T073 [P] [US7] Cliente `exportXlsx`/`importXlsx` (multipart, descarga binaria) en `src/frontend/src/api/excelApi.ts`
-- [ ] T074 [US7] Botones Importar/Exportar XLSX en la toolbar, reusando el pipeline de US1 tras importar (AC-17)
+- [X] T070 [US7] Servicio de export XLSX (ClosedXML) en `src/backend/ECGViewer.Api/Excel/ExcelExporter.cs` (FR-014)
+- [X] T071 [US7] Servicio de import XLSX con validaciones (un canal, tiempo/valor) en `src/backend/ECGViewer.Api/Excel/ExcelImporter.cs` (FR-015, AC-17)
+- [X] T072 [US7] Endpoints `POST /api/export/xlsx` y `POST /api/import/xlsx` (multipart) en `src/backend/ECGViewer.Api/Endpoints/ExcelEndpoints.cs` (contracts/api.md)
+- [X] T073 [P] [US7] Cliente `exportXlsx`/`importXlsx` (multipart, descarga binaria) en `src/frontend/src/api/excelApi.ts`
+- [X] T074 [US7] Botones Importar/Exportar XLSX en la toolbar, reusando el pipeline de US1 tras importar (AC-17)
 
 **Checkpoint**: Todas las historias funcionales.
 
