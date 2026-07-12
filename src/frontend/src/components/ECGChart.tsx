@@ -4,9 +4,10 @@ import type { CropRange } from "../signal/signalModel";
 import type { EventMarker } from "../signal/markers";
 import type { VisibleWindow } from "../hooks/useVisibleWindow";
 import type { Tool } from "../hooks/useTool";
-import { createScale, type ViewBox } from "../render/ecgScale";
+import { createScale, plotRect, type ViewBox } from "../render/ecgScale";
 import { drawSignal, amplitudeRange } from "../render/drawSignal";
 import { drawGrid, type PaperSpeed } from "../render/drawGrid";
+import { drawAxes } from "../render/drawAxes";
 import { drawMarkers } from "../render/drawMarkers";
 import { selectionToRange } from "../render/selectionToRange";
 import { measureRuler } from "../metrics/ruler";
@@ -61,13 +62,16 @@ export function ECGChart({
     return {
       width,
       height,
-      padding: 12,
+      // márgenes asimétricos: lugar a la izquierda (rótulos mV) y abajo (rótulos s)
+      padding: 10,
+      padLeft: 46,
+      padBottom: 30,
       tRange: [window.fromTime, window.toTime],
       vRange: amplitudeRange(signal.samples),
     };
   }, [signal, window, width, height]);
 
-  // Capa base: rejilla + señal.
+  // Capa base: rejilla + señal + ejes con su escala.
   useEffect(() => {
     const ctx = getCtx(baseRef.current);
     if (!ctx) return;
@@ -75,6 +79,7 @@ export function ECGChart({
     if (!signal || !view) return;
     if (showGrid) drawGrid(ctx, view, paperSpeed);
     drawSignal(ctx, signal.samples, view);
+    drawAxes(ctx, view);
   }, [signal, view, showGrid, paperSpeed, width, height]);
 
   // Capa overlay: marcadores persistentes (+ feedback de arrastre si lo hay).
@@ -87,7 +92,8 @@ export function ECGChart({
       if (!drag) return;
 
       if (tool === "zoom" || tool === "crop") {
-        // banda vertical que abarca todo el eje Y (AC-08/AC-12).
+        // banda vertical que abarca todo el eje Y del área de trazado (AC-08/AC-12).
+        const { y0, y1 } = plotRect(view);
         ctx.save();
         ctx.fillStyle =
           tool === "crop" ? "rgba(76,175,80,0.18)" : "rgba(21,101,192,0.18)";
@@ -95,8 +101,8 @@ export function ECGChart({
           tool === "crop" ? "rgba(76,175,80,0.9)" : "rgba(21,101,192,0.9)";
         const x = Math.min(drag.x0, drag.x1);
         const w = Math.abs(drag.x1 - drag.x0);
-        ctx.fillRect(x, 0, w, height);
-        ctx.strokeRect(x, 0, w, height);
+        ctx.fillRect(x, y0, w, y1 - y0);
+        ctx.strokeRect(x, y0, w, y1 - y0);
         ctx.restore();
       } else if (tool === "ruler") {
         const m = measureRuler(drag.x0, drag.y0, drag.x1, drag.y1, view);

@@ -77,6 +77,7 @@ archivo inválido o multicanal se rechaza con mensaje sin dibujar (AC-01..04, AC
 - [X] T015 [US1] Implementar parser CSV con validaciones (un canal, tiempo/valor numéricos, encabezado) en `src/frontend/src/signal/csvParse.ts` (FR-001/002)
 - [X] T016 [P] [US1] Implementar escalado/coordenadas de la señal en `src/frontend/src/render/ecgScale.ts`
 - [X] T017 [US1] Implementar render de la señal y ejes sobre canvas base en `src/frontend/src/render/drawSignal.ts` (FR-003)
+- [X] T017a [US1] Escala numérica de los ejes (X en s, Y en mV): ticks "redondos" (`niceTicks`), valores y unidad en `src/frontend/src/render/drawAxes.ts`; `ecgScale` con márgenes por lado (`plotRect`) para el canal de rótulos; señal recortada al área de trazado (FR-003, AC-04) + tests `drawAxes.test.ts`
 - [X] T018 [P] [US1] Implementar rejilla ECG (papel milimetrado) conmutable en `src/frontend/src/render/drawGrid.ts` (FR-004, AC-10)
 - [X] T019 [US1] Componente `ECGChart` con canvas de doble capa (base + overlay) en `src/frontend/src/components/ECGChart.tsx` (research.md D1)
 - [X] T020 [US1] Componente de carga de archivo + mensajes de error/rechazo (multicanal/ inválido) en `src/frontend/src/components/FileLoader.tsx` (AC-02/03, SC-007)

@@ -1,4 +1,4 @@
-import { createScale, type ViewBox } from "./ecgScale";
+import { createScale, plotRect, type ViewBox } from "./ecgScale";
 
 /** Ganancia clínica: 10 mm/mV → cada mm en el eje Y equivale a 0.1 mV. */
 export const MV_PER_MM = 0.1;
@@ -45,6 +45,7 @@ export function drawGrid(
   const [t0, t1] = view.tRange;
   const [v0, v1] = view.vRange;
   const secPerMm = 1 / paperSpeed;
+  const { x0, y0, x1, y1 } = plotRect(view);
 
   const pxPerMmX = Math.abs(scale.xOf(t0 + secPerMm) - scale.xOf(t0));
   const pxPerMmY = Math.abs(scale.yOf(v0 + MV_PER_MM) - scale.yOf(v0));
@@ -57,8 +58,8 @@ export function drawGrid(
     for (const t of gridValues(t0, t1, step)) {
       const x = scale.xOf(t);
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, view.height);
+      ctx.moveTo(x, y0);
+      ctx.lineTo(x, y1);
       ctx.stroke();
     }
   };
@@ -68,8 +69,8 @@ export function drawGrid(
     for (const v of gridValues(v0, v1, step)) {
       const y = scale.yOf(v);
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(view.width, y);
+      ctx.moveTo(x0, y);
+      ctx.lineTo(x1, y);
       ctx.stroke();
     }
   };

@@ -1,4 +1,4 @@
-import { createScale, type ViewBox } from "./ecgScale";
+import { createScale, plotRect, type ViewBox } from "./ecgScale";
 import type { Sample } from "../signal/signalModel";
 
 /**
@@ -13,23 +13,29 @@ export function drawSignal(
 ): void {
   const scale = createScale(view);
   const [t0, t1] = view.tRange;
+  const { x0, y0, x1, y1 } = plotRect(view);
 
   // Nota: el lienzo lo limpia el llamador (ECGChart) antes de dibujar la grilla;
   // NO se limpia aquí para no borrar la grilla ya pintada.
 
-  // Eje base (tiempo).
-  ctx.save();
-  ctx.strokeStyle = "rgba(90,90,90,0.9)";
-  ctx.lineWidth = 1;
+  // Eje base (línea de 0 mV), dentro del área de trazado.
   const yZero = scale.yOf(0);
-  ctx.beginPath();
-  ctx.moveTo(view.padding, yZero);
-  ctx.lineTo(view.width - view.padding, yZero);
-  ctx.stroke();
-  ctx.restore();
+  if (yZero >= y0 && yZero <= y1) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(90,90,90,0.9)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x0, yZero);
+    ctx.lineTo(x1, yZero);
+    ctx.stroke();
+    ctx.restore();
+  }
 
-  // Trazo de la señal.
+  // Trazo de la señal, recortado al área de trazado para no invadir los rótulos.
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(x0, y0, x1 - x0, y1 - y0);
+  ctx.clip();
   ctx.strokeStyle = "#1565c0";
   ctx.lineWidth = 1.4;
   ctx.beginPath();

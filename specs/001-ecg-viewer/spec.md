@@ -37,8 +37,9 @@ mensaje claro sin dibujar nada.
 
 1. **Given** un archivo CSV válido de un canal con encabezado y columnas tiempo/valor,
    **When** el usuario lo carga, **Then** el sistema acepta la señal y la dibuja sin
-   errores, con el tiempo en el eje X (s) y la amplitud en el eje Y (mV), respetando el
-   orden temporal del archivo.
+   errores, con el tiempo en el eje X (s) y la amplitud en el eje Y (mV) —cada eje con su
+   **escala numérica visible** (ticks con valores y unidad)—, respetando el orden temporal
+   del archivo.
 2. **Given** un archivo CSV con formato inválido (columnas faltantes, valores no numéricos
    o encabezado incorrecto), **When** el usuario intenta cargarlo, **Then** el sistema
    muestra un mensaje de error y no carga la señal.
@@ -262,7 +263,9 @@ pendientes y verificar la alerta de confirmación.
   incorrecto) y archivos con más de un canal (informando que solo soporta un canal).
 - **FR-003** (RF-02): El sistema MUST visualizar la señal cargada en un gráfico principal con
   el tiempo en el eje X (en segundos) y la amplitud en el eje Y (en mV), respetando el orden
-  temporal del archivo.
+  temporal del archivo. Cada eje MUST mostrar una **escala numérica visible**: marcas de tick
+  con sus valores (en s en el eje X, en mV en el eje Y) y el rótulo de la unidad. Los valores de
+  tick se recalculan al cambiar la ventana visible (zoom/desplazamiento).
 - **FR-004** (RF-07): El sistema MUST permitir mostrar u ocultar una rejilla ECG sobre el
   gráfico, reproduciendo el papel milimetrado clásico con dos niveles de líneas: subdivisiones
   finas cada 1 mm y divisiones gruesas cada 5 mm pintadas encima. Las escalas son clínicas:

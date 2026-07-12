@@ -1,4 +1,4 @@
-import { createScale, type ViewBox } from "./ecgScale";
+import { createScale, plotRect, type ViewBox } from "./ecgScale";
 import type { EventMarker } from "../signal/markers";
 
 /**
@@ -12,6 +12,7 @@ export function drawMarkers(
 ): void {
   const scale = createScale(view);
   const [t0, t1] = view.tRange;
+  const { y0, y1 } = plotRect(view);
 
   ctx.save();
   ctx.lineWidth = 1.2;
@@ -21,12 +22,12 @@ export function drawMarkers(
     const x = scale.xOf(m.time);
     ctx.strokeStyle = "rgba(230,81,0,0.9)";
     ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, view.height);
+    ctx.moveTo(x, y0);
+    ctx.lineTo(x, y1);
     ctx.stroke();
     if (m.label) {
       ctx.fillStyle = "rgba(230,81,0,1)";
-      ctx.fillText(m.label, x + 3, 12);
+      ctx.fillText(m.label, x + 3, y0 + 12);
     }
   }
   ctx.restore();

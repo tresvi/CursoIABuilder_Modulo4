@@ -47,8 +47,8 @@ cd src/frontend && npx playwright test
 ## Escenarios de validación (mapeados al spec)
 
 ### US1 — Cargar y visualizar (P1)
-1. Cargar un CSV válido de 1 canal ⇒ la señal se dibuja: eje X en s, eje Y en mV, orden temporal
-   respetado (AC-01, AC-04).
+1. Cargar un CSV válido de 1 canal ⇒ la señal se dibuja: eje X en s, eje Y en mV, cada eje con su
+   escala numérica visible (ticks con valores y unidad); orden temporal respetado (AC-01, AC-04).
 2. Cargar CSV inválido (columnas faltantes / no numérico / encabezado malo) ⇒ mensaje de error,
    no dibuja (AC-02).
 3. Cargar CSV multicanal ⇒ "solo soporta un canal", no procesa (AC-03).
