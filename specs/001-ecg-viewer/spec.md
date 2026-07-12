@@ -45,7 +45,11 @@ mensaje claro sin dibujar nada.
 3. **Given** un archivo CSV con más de un canal, **When** el usuario intenta cargarlo,
    **Then** el sistema informa que solo soporta un canal y no procesa el archivo.
 4. **Given** una señal ya dibujada, **When** el usuario activa o desactiva la rejilla ECG,
-   **Then** la cuadrícula se muestra u oculta sobre el gráfico.
+   **Then** la cuadrícula tipo papel milimetrado (finas cada 1 mm, gruesas cada 5 mm, con
+   ganancia 10 mm/mV en Y) se muestra u oculta sobre el gráfico, anclada a la señal.
+5. **Given** la rejilla activa, **When** el usuario cambia la velocidad de papel entre 25 y
+   50 mm/s, **Then** el paso temporal de la cuadrícula en el eje X se ajusta (a 25 mm/s un
+   cuadro grande = 0.2 s; a 50 mm/s = 0.1 s).
 
 ---
 
@@ -243,6 +247,9 @@ pendientes y verificar la alerta de confirmación.
 - **Cierre/recarga sin cambios pendientes**: no se muestra ninguna alerta.
 - **Señal de referencia de 1 minuto**: sirve de referencia para los umbrales de rendimiento
   de render y de cálculo de métricas.
+- **Rejilla a bajo nivel de zoom**: cuando la separación entre líneas de un nivel cae por debajo
+  del mínimo legible (≥ 4 px), ese nivel deja de dibujarse (primero las subdivisiones finas de
+  1 mm, luego las gruesas de 5 mm) para evitar el "borrón" y preservar el rendimiento.
 
 ## Requirements *(mandatory)*
 
@@ -257,7 +264,18 @@ pendientes y verificar la alerta de confirmación.
   el tiempo en el eje X (en segundos) y la amplitud en el eje Y (en mV), respetando el orden
   temporal del archivo.
 - **FR-004** (RF-07): El sistema MUST permitir mostrar u ocultar una rejilla ECG sobre el
-  gráfico.
+  gráfico, reproduciendo el papel milimetrado clásico con dos niveles de líneas: subdivisiones
+  finas cada 1 mm y divisiones gruesas cada 5 mm pintadas encima. Las escalas son clínicas:
+  eje Y con ganancia fija de 10 mm/mV (1 mm = 0.1 mV; cuadro grande de 5 mm = 0.5 mV) y eje X
+  según la velocidad de papel seleccionada (ver FR-022). La rejilla se ancla a valores absolutos
+  de tiempo/amplitud (no al borde del gráfico), de modo que las líneas permanecen fijas respecto
+  a la señal al hacer zoom o desplazamiento. Por rendimiento (RNF-01/02), cada nivel de líneas
+  solo se dibuja si su separación en pantalla es ≥ 4 px: al alejar el zoom, las subdivisiones
+  finas dejan de pintarse antes de amontonarse.
+- **FR-022** (RF-07): El sistema MUST permitir seleccionar la velocidad de papel que fija la
+  escala temporal del eje X de la rejilla: 25 mm/s (por defecto; 1 mm = 0.04 s, cuadro grande =
+  0.2 s) o 50 mm/s (1 mm = 0.02 s, cuadro grande = 0.1 s). El paso de la rejilla en X se ajusta
+  a la velocidad elegida.
 - **FR-005** (RF-06): El sistema MUST permitir, con la herramienta Zoom activa, acercar un
   rango del eje temporal seleccionándolo con arrastre horizontal del mouse (la selección
   abarca todo el eje Y) y restablecer el zoom a la señal completa.
@@ -356,6 +374,8 @@ pendientes y verificar la alerta de confirmación.
   usuario. Los estudios guardados se persisten localmente, no en la nube.
 - Las herramientas de **zoom, regla y recorte** se operan con el **mouse** sobre el gráfico,
   con un cursor propio por herramienta (lupa, regla, tijera).
+- La **rejilla ECG** usa escalas clínicas estándar: ganancia fija de **10 mm/mV** en el eje Y y
+  **velocidad de papel** seleccionable (**25 mm/s** por defecto o **50 mm/s**) para el eje X.
 - Solo se soporta **un canal** por archivo; los archivos multicanal se informan y no se
   procesan.
 - El **archivo de referencia** para los umbrales de rendimiento es una señal de 1 minuto.

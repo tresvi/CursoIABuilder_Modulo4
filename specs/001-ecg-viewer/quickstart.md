@@ -52,7 +52,11 @@ cd src/frontend && npx playwright test
 2. Cargar CSV inválido (columnas faltantes / no numérico / encabezado malo) ⇒ mensaje de error,
    no dibuja (AC-02).
 3. Cargar CSV multicanal ⇒ "solo soporta un canal", no procesa (AC-03).
-4. Alternar rejilla ECG ⇒ se muestra/oculta (AC-10).
+4. Alternar rejilla ECG ⇒ papel milimetrado (finas 1 mm, gruesas 5 mm, 10 mm/mV en Y) se
+   muestra/oculta, anclado a la señal al hacer pan/zoom (AC-10, FR-004).
+5. Cambiar la velocidad de papel (25 ↔ 50 mm/s) ⇒ el paso temporal de la rejilla en X se ajusta
+   (cuadro grande 0.2 s a 25 mm/s; 0.1 s a 50 mm/s) (FR-022). Alejar el zoom ⇒ las finas dejan
+   de dibujarse antes de amontonarse (guarda de 4 px).
 - **Rendimiento**: render de la señal de 1 min < 0.1 s p95 sobre 20 cargas (SC-001/RNF-01).
 
 ### US2 — Métricas sobre la ventana visible (P1)

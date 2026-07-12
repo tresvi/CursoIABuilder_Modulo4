@@ -58,7 +58,8 @@ cd src/frontend && npm run typecheck && npm run lint && npm run format:check
 
 ## Funcionalidades (historias de usuario)
 
-- **US1** Cargar y visualizar CSV monocanal (rechaza inválido/multicanal).
+- **US1** Cargar y visualizar CSV monocanal (rechaza inválido/multicanal), con rejilla tipo
+  papel milimetrado clínico (10 mm/mV; velocidad de papel 25/50 mm/s) conmutable.
 - **US2** Métricas HRV (BPM, SDNN, RMSSD, pNN50) **sobre la ventana visible**; "—" si faltan latidos.
 - **US3** Zoom por arrastre + "Restablecer zoom".
 - **US4** Filtros digitales (pasa bajo/alto/banda/notch) reversibles.

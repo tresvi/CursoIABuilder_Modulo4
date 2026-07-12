@@ -6,7 +6,7 @@ import type { VisibleWindow } from "../hooks/useVisibleWindow";
 import type { Tool } from "../hooks/useTool";
 import { createScale, type ViewBox } from "../render/ecgScale";
 import { drawSignal, amplitudeRange } from "../render/drawSignal";
-import { drawGrid } from "../render/drawGrid";
+import { drawGrid, type PaperSpeed } from "../render/drawGrid";
 import { drawMarkers } from "../render/drawMarkers";
 import { selectionToRange } from "../render/selectionToRange";
 import { measureRuler } from "../metrics/ruler";
@@ -15,6 +15,7 @@ interface Props {
   signal: Signal | null;
   window: VisibleWindow;
   showGrid: boolean;
+  paperSpeed: PaperSpeed;
   tool: Tool;
   cursor: string;
   markers: EventMarker[];
@@ -41,6 +42,7 @@ export function ECGChart({
   signal,
   window,
   showGrid,
+  paperSpeed,
   tool,
   cursor,
   markers,
@@ -71,9 +73,9 @@ export function ECGChart({
     if (!ctx) return;
     ctx.clearRect(0, 0, width, height);
     if (!signal || !view) return;
-    if (showGrid) drawGrid(ctx, view);
+    if (showGrid) drawGrid(ctx, view, paperSpeed);
     drawSignal(ctx, signal.samples, view);
-  }, [signal, view, showGrid, width, height]);
+  }, [signal, view, showGrid, paperSpeed, width, height]);
 
   // Capa overlay: marcadores persistentes (+ feedback de arrastre si lo hay).
   const paintOverlay = useCallback(

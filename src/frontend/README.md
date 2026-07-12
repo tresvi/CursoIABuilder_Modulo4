@@ -25,7 +25,7 @@ Configurable con `VITE_API_BASE` (ver `.env`).
 src/
 ├── signal/     # modelo de señal (original/working), parseo CSV, recorte, marcadores
 ├── metrics/    # detección de picos R, HRV, regla, métricas por ventana
-├── render/     # escala, dibujo de señal/rejilla/marcadores, selección→rango
+├── render/     # escala, dibujo de señal, rejilla milimetrada clínica, marcadores, selección→rango
 ├── hooks/      # ventana visible, herramienta activa, marcadores, guardia de cambios
 ├── api/        # cliente HTTP y clientes de filtro/estudio/xlsx
 ├── components/ # ECGChart (canvas doble capa), paneles y diálogos

@@ -44,7 +44,8 @@ const TOOLS: Array<{ id: Tool; label: string }> = [
  * marcadores (US6), import/export XLSX (US7) y guardado/restauración (US8).
  */
 export function MainPage() {
-  const { state, toggleGrid, markDirty, clearDirty } = useAppState();
+  const { state, toggleGrid, setPaperSpeed, markDirty, clearDirty } =
+    useAppState();
   const { tool, setTool, cursor } = useTool();
 
   const [derivation, setDerivation] = useState<Derivation | null>(null);
@@ -228,6 +229,18 @@ export function MainPage() {
           />{" "}
           Rejilla ECG
         </label>
+        <label>
+          Velocidad{" "}
+          <select
+            aria-label="Velocidad de papel"
+            value={state.paperSpeed}
+            onChange={(e) => setPaperSpeed(Number(e.target.value) as 25 | 50)}
+            disabled={!state.showGrid}
+          >
+            <option value={25}>25 mm/s</option>
+            <option value={50}>50 mm/s</option>
+          </select>
+        </label>
         <div
           style={{ display: "flex", gap: 4 }}
           role="group"
@@ -288,6 +301,7 @@ export function MainPage() {
           signal={working}
           window={window}
           showGrid={state.showGrid}
+          paperSpeed={state.paperSpeed}
           tool={tool}
           cursor={cursor}
           markers={markers.markers}

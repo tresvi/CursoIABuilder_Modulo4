@@ -1,7 +1,10 @@
 import { useCallback, useState } from "react";
+import type { PaperSpeed } from "../render/drawGrid";
 
 export interface AppUiState {
   showGrid: boolean;
+  /** velocidad de papel (mm/s) para la escala temporal de la grilla */
+  paperSpeed: PaperSpeed;
   /** hay cambios sin guardar (marcadores/filtros/recortes) — guardia FR-018 */
   dirty: boolean;
 }
@@ -13,11 +16,16 @@ export interface AppUiState {
 export function useAppState() {
   const [state, setState] = useState<AppUiState>({
     showGrid: true,
+    paperSpeed: 25,
     dirty: false,
   });
 
   const toggleGrid = useCallback(
     () => setState((s) => ({ ...s, showGrid: !s.showGrid })),
+    []
+  );
+  const setPaperSpeed = useCallback(
+    (paperSpeed: PaperSpeed) => setState((s) => ({ ...s, paperSpeed })),
     []
   );
   const markDirty = useCallback(
@@ -29,5 +37,5 @@ export function useAppState() {
     []
   );
 
-  return { state, toggleGrid, markDirty, clearDirty };
+  return { state, toggleGrid, setPaperSpeed, markDirty, clearDirty };
 }

@@ -97,6 +97,22 @@ alternativa razonable.
 - **Alternatives considered**: Autosave con opción de deshacer — contradice el Principio III;
   descartado.
 
+## D9 — Rejilla tipo papel milimetrado clínico
+
+- **Decision**: La rejilla se dibuja en el lienzo base con dos niveles (finas cada 1 mm,
+  `#fbe7e7`, `lineWidth` 1; gruesas cada 5 mm, `#f0c4c4`, `lineWidth` 1.3, encima). Escalas
+  clínicas: eje Y con ganancia fija **10 mm/mV** (`MV_PER_MM = 0.1`) y eje X según la **velocidad
+  de papel** (`secPerMm = 1 / paperSpeed`, con 25 o 50 mm/s). Las líneas se ubican en múltiplos
+  **absolutos** del paso dentro de la ventana visible (`gridValues`), no en el borde del gráfico,
+  y cada nivel se pinta solo si su separación en pantalla es ≥ `GRID_MIN_PX` (4 px).
+- **Rationale**: Reproduce el papel de ECG real, con el que el usuario clínico/educativo está
+  familiarizado, y hace medibles amplitud (mV) y tiempo (s) por conteo de cuadros. El anclaje a
+  valores absolutos mantiene la rejilla solidaria a la señal al hacer pan/zoom. La guarda de
+  4 px evita el "borrón" al alejar el zoom y preserva el rendimiento (RNF-01/02).
+- **Alternatives considered**: Rejilla de paso fijo en píxeles (más simple, pero no representa
+  escalas clínicas ni se ancla a la señal) — descartada. Ganancia/velocidad configurables
+  libremente — innecesario para el MVP; se exponen los presets estándar (10 mm/mV; 25/50 mm/s).
+
 ## Resumen de resolución
 
 Todas las decisiones necesarias para diseñar contratos y modelo de datos quedan resueltas; no

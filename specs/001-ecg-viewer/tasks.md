@@ -81,6 +81,8 @@ archivo inválido o multicanal se rechaza con mensaje sin dibujar (AC-01..04, AC
 - [X] T019 [US1] Componente `ECGChart` con canvas de doble capa (base + overlay) en `src/frontend/src/components/ECGChart.tsx` (research.md D1)
 - [X] T020 [US1] Componente de carga de archivo + mensajes de error/rechazo (multicanal/ inválido) en `src/frontend/src/components/FileLoader.tsx` (AC-02/03, SC-007)
 - [X] T021 [US1] Cablear carga → modelo de señal → render en `MainPage.tsx` y toggle de rejilla en la toolbar
+- [X] T018a [US1] Rejilla tipo papel milimetrado clínico en `src/frontend/src/render/drawGrid.ts`: finas 1 mm (`#fbe7e7`) + gruesas 5 mm (`#f0c4c4`), ganancia 10 mm/mV en Y, anclada a valores absolutos (`gridValues`), guarda de legibilidad `GRID_MIN_PX=4` (FR-004, RNF-01/02) + test `drawGrid.test.ts`
+- [X] T018b [US1] Selector de velocidad de papel (25/50 mm/s) que fija la escala X de la rejilla: estado en `useAppState`, `select` en `MainPage`, propagado a `ECGChart`→`drawGrid` (FR-022)
 
 **Checkpoint**: US1 funcional e independientemente testeable (MVP).
 
