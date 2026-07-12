@@ -273,11 +273,11 @@ el gráfico durante la sesión (AC-05/06/07).
 
 - [X] T075 [P] Benchmark de render < 0.1 s p95 (20 cargas, archivo de 1 min) en `src/frontend/tests/perf/render.perf.test.ts` (SC-001/RNF-01)
 - [X] T076 [P] Benchmark de cálculo de métricas < 0.1 s p95 (20 mediciones) en `src/frontend/tests/perf/metrics.perf.test.ts` (SC-002/RNF-03)
-- [ ] T077 Verificar ≥ 10 fps sin redibujo completo durante interacción (documentar medición con panel Performance) (SC-003/RNF-02)
-- [ ] T078 [P] Verificación de compatibilidad de operaciones básicas en Chrome/Firefox/Edge, Chrome Android, Safari iOS (SC-008/RNF-04)
-- [ ] T079 [P] Actualizar documentación de ejecución/uso en `docs/` y `README` del frontend/backend
+- [ ] T077 Verificar ≥ 10 fps sin redibujo completo durante interacción (documentar medición con panel Performance) (SC-003/RNF-02) — ⏳ requiere navegador (ver quickstart-results.md)
+- [ ] T078 [P] Verificación de compatibilidad de operaciones básicas en Chrome/Firefox/Edge, Chrome Android, Safari iOS (SC-008/RNF-04) — ⏳ requiere navegador (ver quickstart-results.md)
+- [X] T079 [P] Actualizar documentación de ejecución/uso en `docs/` y `README` del frontend/backend
 - [X] T080 Refactor y limpieza con la suite en verde (Principio I)
-- [ ] T081 Ejecutar `quickstart.md` de punta a punta (US1–US8) y registrar resultados
+- [X] T081 Ejecutar `quickstart.md` de punta a punta (US1–US8) y registrar resultados
 
 ---
 
