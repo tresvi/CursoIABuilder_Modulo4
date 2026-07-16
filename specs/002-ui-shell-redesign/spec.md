@@ -29,7 +29,7 @@ librería de componentes React." (continuación de la feature 001; solo presenta
 ### User Story 1 - Navegar la app como un dashboard con sidebar (Priority: P1)
 
 Un estudiante o docente abre ECGViewer y ve una interfaz tipo tablero: una **barra lateral**
-a la izquierda con las acciones agrupadas en **Archivo**, **Filtros** y **Herramientas**; el
+a la izquierda con las acciones agrupadas en **Archivo**, **Herramientas** y **Filtros**; el
 gráfico ECG al centro; las métricas a la derecha; y una barra de estado abajo (Fs, duración,
 muestras). Todas las acciones que antes vivían en una barra de herramientas superior están ahora
 accesibles desde la sidebar.
@@ -44,7 +44,7 @@ importar/exportar, guardar, filtros, zoom/pan/regla/recorte/marcar, rejilla) se 
 **Acceptance Scenarios**:
 
 1. **Given** la app abierta sin señal, **When** el usuario observa la pantalla, **Then** ve la
-   sidebar con los grupos Archivo/Filtros/Herramientas, un encabezado, el área de gráfico vacía
+   sidebar con los grupos Archivo/Herramientas/Filtros, un encabezado, el área de gráfico vacía
    con su prompt, el panel de métricas y la barra de estado.
 2. **Given** una señal cargada, **When** el usuario usa un ítem de "Herramientas" (p. ej. Regla),
    **Then** la herramienta se activa igual que con la toolbar anterior (comportamiento intacto).
@@ -80,7 +80,7 @@ quedan como íconos con tooltip.
 ### User Story 3 - Colapsar secciones de la sidebar (Priority: P2)
 
 Con la sidebar expandida, el usuario puede colapsar individualmente cada sección (Archivo,
-Filtros, Herramientas) haciendo clic en su encabezado, para reducir el ruido visual y encontrar
+Herramientas, Filtros) haciendo clic en su encabezado, para reducir el ruido visual y encontrar
 más rápido lo que busca.
 
 **Why this priority**: Mejora de organización; no bloquea el uso básico (P2).
@@ -153,14 +153,15 @@ la misma altura, que el panel es una tarjeta blanca y que su ancho es compacto (
 
 - **FR-001**: La UI DEBE presentar un cascarón tipo dashboard: sidebar (izquierda), encabezado
   (breadcrumb + estado), área de gráfico, panel de métricas (derecha) y barra de estado (abajo).
-- **FR-002**: La sidebar DEBE agrupar acciones en **Archivo** (abrir CSV, cargar ejemplo, importar
-  XLSX, guardar, guardar como CSV, exportar XLSX), **Filtros** (pasa bajo/alto/banda/notch,
-  restaurar) y **Herramientas** (rejilla ECG, zoom, desplazar, regla, recortar, marcar, restablecer
-  zoom). Cada ítem DEBE disparar el handler ya existente; NO se crea lógica de dominio nueva.
+- **FR-002**: La sidebar DEBE agrupar acciones, **en este orden**: **Archivo** (abrir CSV, cargar
+  ejemplo, importar XLSX, guardar, guardar como CSV, exportar XLSX), **Herramientas** (rejilla ECG,
+  zoom, desplazar, regla, recortar, marcar, restablecer zoom) y **Filtros** (pasa bajo/alto/banda/
+  notch, restaurar). Cada ítem DEBE disparar el handler ya existente; NO se crea lógica de dominio
+  nueva.
 - **FR-003**: La sidebar DEBE poder colapsarse/expandirse mediante un **botón hamburguesa** ubicado
   en su parte superior, exponiendo `aria-label`/`aria-expanded` acordes al estado.
 - **FR-004**: En modo colapsado, los ítems DEBEN mostrarse como íconos con **tooltip** (etiqueta).
-- **FR-005**: Cada sección (Archivo/Filtros/Herramientas) DEBE ser colapsable individualmente
+- **FR-005**: Cada sección (Archivo/Herramientas/Filtros) DEBE ser colapsable individualmente
   cuando la sidebar está expandida.
 - **FR-006**: Elegir un filtro en la sidebar DEBE preseleccionar ese tipo en el panel de Filtro
   digital (el ajuste de cortes y "Aplicar" siguen en el panel).

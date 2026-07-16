@@ -36,7 +36,7 @@ alturas, ausencia de overflow) se verifica por preview — límite legítimo de 
 ## Phase 2: Cascarón (US1)
 
 - [X] T205 [US1] `NavItem` (ícono + etiqueta + tooltip en colapsado) en `src/frontend/src/components/layout/NavItem.tsx`
-- [X] T206 [US1] `Sidebar` con grupos Archivo/Filtros/Herramientas cableados a los handlers existentes en `src/frontend/src/components/layout/Sidebar.tsx`
+- [X] T206 [US1] `Sidebar` con grupos Archivo/Herramientas/Filtros (en ese orden) cableados a los handlers existentes en `src/frontend/src/components/layout/Sidebar.tsx`
 - [X] T207 [US1] `TopBar` (breadcrumb + estado + velocidad de papel) y `StatusBar` (Fs/duración/muestras) en `src/frontend/src/components/layout/`
 - [X] T208 [US1] `AppLayout` (sidebar · contenido · footer) en `src/frontend/src/components/layout/AppLayout.tsx`
 - [X] T209 [US1] Reescribir el árbol JSX de `src/frontend/src/pages/MainPage.tsx` para montar el cascarón, conservando hooks/handlers/efectos y todos los `data-testid`/`aria-label`
@@ -44,7 +44,7 @@ alturas, ausencia de overflow) se verifica por preview — límite legítimo de 
 ## Phase 3: Interacción de la sidebar (US2, US3) — con tests
 
 - [X] T210 [US2] Menú **hamburguesa** arriba de la sidebar que colapsa/expande (`aria-label`/`aria-expanded`); modo colapsado = solo íconos con tooltip
-- [X] T211 [US3] Secciones colapsables (Archivo/Filtros/Herramientas) con encabezado clickeable + chevron
+- [X] T211 [US3] Secciones colapsables (Archivo/Herramientas/Filtros) con encabezado clickeable + chevron
 - [X] T212 [US2/US3/US5] **Tests de interacción** (Vitest/RTL) en `src/frontend/src/components/layout/Sidebar.test.tsx`: (a) el hamburguesa invoca `onToggleCollapse` y en colapsado el toggle expone "Expandir menú" ocultando etiquetas; (b) colapsar la sección "Filtros" oculta sus ítems (`aria-expanded=false`); (c) [SC-005] los controles de colapso son `<button>` nativos (operables por teclado por semántica)
 
 ## Phase 4: Responsividad y paneles (US4, US5)

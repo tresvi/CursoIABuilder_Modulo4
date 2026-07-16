@@ -198,27 +198,6 @@ export function Sidebar({
           />
         </SidebarGroup>
 
-        <SidebarGroup title="Filtros" collapsed={collapsed}>
-          {FILTERS.map((f) => (
-            <NavItem
-              key={f.id}
-              icon={f.icon}
-              label={f.label}
-              collapsed={collapsed}
-              active={activeFilterType === f.id}
-              onClick={() => onSelectFilter(f.id)}
-              disabled={!hasSignal}
-            />
-          ))}
-          <NavItem
-            icon={Undo2}
-            label="Restaurar"
-            collapsed={collapsed}
-            onClick={onRevertFilter}
-            disabled={!hasFilter}
-          />
-        </SidebarGroup>
-
         <SidebarGroup title="Herramientas" collapsed={collapsed}>
           <NavItem
             icon={Grid3x3}
@@ -244,6 +223,27 @@ export function Sidebar({
             collapsed={collapsed}
             onClick={onResetZoom}
             disabled={!hasSignal}
+          />
+        </SidebarGroup>
+
+        <SidebarGroup title="Filtros" collapsed={collapsed}>
+          {FILTERS.map((f) => (
+            <NavItem
+              key={f.id}
+              icon={f.icon}
+              label={f.label}
+              collapsed={collapsed}
+              active={activeFilterType === f.id}
+              onClick={() => onSelectFilter(f.id)}
+              disabled={!hasSignal}
+            />
+          ))}
+          <NavItem
+            icon={Undo2}
+            label="Restaurar"
+            collapsed={collapsed}
+            onClick={onRevertFilter}
+            disabled={!hasFilter}
           />
         </SidebarGroup>
       </nav>
