@@ -38,6 +38,10 @@ en tests (mocks/fakes) — no hay uso de Claude en el alcance funcional actual.
 móviles (Chrome Android, Safari iOS). Backend local en `http://localhost:5080`; front dev en
 `http://localhost:5173`.
 
+> **Nota (feature 002)**: el rediseño del cascarón de UI (`specs/002-ui-shell-redesign/`) acota
+> el alcance de **presentación** a **tablet + PC** (viewports ≥ 768px); mobile queda diferido como
+> trabajo futuro. Esta narrowing aplica al layout/cascarón, no a la lógica de dominio de 001.
+
 **Project Type**: Web application (frontend + backend) — `src/frontend` y `src/backend`.
 
 **Performance Goals**:

@@ -63,4 +63,14 @@ describe("Sidebar — colapso (US2/US3)", () => {
     expect(header).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText("Pasa Banda")).toBeNull();
   });
+
+  // SC-005: los controles de colapso son <button> nativos → operables por
+  // teclado (Enter/Espacio) y foco por semántica, sin manejadores ad-hoc.
+  it("los controles de colapso son botones nativos (operables por teclado)", () => {
+    renderSidebar({ collapsed: false });
+    const toggle = screen.getByRole("button", { name: "Colapsar menú" });
+    const section = screen.getByRole("button", { name: /herramientas/i });
+    expect(toggle.tagName).toBe("BUTTON");
+    expect(section.tagName).toBe("BUTTON");
+  });
 });

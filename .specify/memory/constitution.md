@@ -1,7 +1,17 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 1.1.0
+Version change: 1.1.0 → 1.2.0
+Bump rationale (1.2.0): Enmienda MINOR (aclaración de alcance del Principio I,
+derivada del análisis /speckit.analyze de la feature 002). Se agrega la subsección
+"Alcance" al Principio I: TDD rige el comportamiento/lógica de dominio; para trabajo
+exclusivamente de presentación/UI la puerta equivalente es preservar el contrato de
+tests + escribir tests de interacción para el comportamiento nuevo de UI. Amplía
+materialmente la guía sin redefinir el principio ni habilitar saltear TDD en lógica.
+Templates: sin cambios.
+
+--- Historial ---
+Version change (1.1.0): 1.0.0 → 1.1.0
 Bump rationale (1.1.0): Enmienda MINOR asociada a la feature 002 (rediseño del
 cascarón de UI). Se amplía la guía de stack en "Flujo de Desarrollo": se fija
 shadcn/ui + Tailwind como sistema de UI y se explicita que el motor de
@@ -9,7 +19,6 @@ visualización del ECG es Canvas 2D propio y NO se reemplaza por una librería d
 charting (refuerza el Principio V). No se agregan ni redefinen principios.
 Templates: sin cambios (los placeholders de stack son genéricos).
 
---- Historial ---
 Version change (1.0.0): (plantilla sin ratificar) → 1.0.0
 Bump rationale: Ratificación inicial. Se reemplazan todos los placeholders de la
 plantilla por principios concretos del proyecto ECGViewer.
@@ -55,6 +64,17 @@ admite excepciones:
 Rationale: TDD fija el contrato antes de la implementación, evita código no ejercitado y
 mantiene la señal de regresión confiable en una aplicación cuyos cálculos (filtros DSP,
 métricas de variabilidad) deben ser correctos y reproducibles.
+
+**Alcance (aclaración v1.2.0)**: Este principio gobierna todo **cambio de comportamiento o
+lógica de dominio** (parseo, DSP, métricas, persistencia, e interacción con lógica). Para
+trabajo **exclusivamente de presentación/UI** (estilos, layout, tematización) que NO altera
+comportamiento, la puerta de calidad equivalente es: (a) **preservar el contrato de tests**
+existente —los `data-testid`/`aria-label` que asertan los tests— manteniéndolos en verde; y
+(b) escribir **tests de interacción** para todo **comportamiento nuevo de UI** (p. ej.
+colapsar/expandir un panel). La fidelidad puramente visual (colores, spacing, ausencia de
+overflow) se verifica por inspección/preview. Esta aclaración NO habilita saltear TDD en
+lógica bajo la excusa de "es UI": si el cambio toca comportamiento, aplica el ciclo
+rojo → verde → refactor sin excepción.
 
 ### II. Integridad de la Señal Original
 
@@ -141,4 +161,4 @@ particular, la ausencia de tests previos a la implementación (Principio I) es m
 rechazo. La complejidad adicional debe justificarse. Para la guía operativa de desarrollo,
 consultar `AGENTS.md` / `CLAUDE.md`.
 
-**Version**: 1.1.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-07-16
+**Version**: 1.2.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-07-16

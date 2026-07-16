@@ -50,25 +50,28 @@ componentes de cascarón + primitivos UI; refactor de presentación de los panel
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Evaluado contra `.specify/memory/constitution.md` (v1.1.0, enmendada por esta feature):
+Evaluado contra `.specify/memory/constitution.md` (v1.2.0, enmendada por esta feature):
 
 | Principio | Cómo lo cumple el plan | Estado |
 |-----------|------------------------|--------|
-| **I. Test-First (NO-NEGOCIABLE)** | El cambio es presentación/CSS (sin lógica de dominio nueva). El contrato de test existente se preserva (86 tests verdes sin editar) y se agregan tests de interacción para el comportamiento nuevo (colapso). La desviación del rojo→verde estricto se documenta en `research.md`. | ⚠️ PASS con nota |
+| **I. Test-First (NO-NEGOCIABLE)** | El cambio es presentación/UI (sin lógica de dominio nueva). Conforme a la subsección *Alcance* del Principio I (v1.2.0): (a) el contrato de tests existente se preserva —86 tests heredados de 001 verdes sin editar—; y (b) se agregan tests de interacción para el comportamiento nuevo de UI (colapso de sidebar/secciones, `Sidebar.test.tsx`). | ✅ PASS |
 | **II. Integridad de la Señal Original** | No se toca `signalModel`, filtros ni recortes; el rediseño es puramente de UI. | ✅ PASS |
 | **III. Persistencia Explícita** | Se conserva "Guardar" como única vía de persistencia y el guard de cambios sin guardar; la sidebar solo re-cablea los mismos handlers. | ✅ PASS |
 | **IV. Métricas sobre la Ventana Visible** | El panel de métricas cambia de estilo, no de cálculo: sigue recibiendo las métricas de la ventana visible. | ✅ PASS |
 | **V. Rendimiento de Visualización** | El motor Canvas 2D de doble capa queda intacto; NO se introduce librería de charting. El ancho responsivo redibuja solo ante resize real. | ✅ PASS |
 
-**Enmienda constitucional asociada**: se agrega a la sección *Flujo de Desarrollo / Stack* que la UI
-usa **shadcn/ui + Tailwind** y que el motor de visualización es **Canvas 2D propio y no se reemplaza
-por una librería de charting** (refuerza Principio V). Bump **1.0.0 → 1.1.0** (MINOR: amplía guía de
-stack, sin redefinir principios).
+**Enmiendas constitucionales asociadas** (dos MINOR):
+- **1.0.0 → 1.1.0**: en *Flujo de Desarrollo / Stack*, se fija que la UI usa **shadcn/ui + Tailwind**
+  y que el motor de visualización es **Canvas 2D propio y no se reemplaza por una librería de
+  charting** (refuerza Principio V).
+- **1.1.0 → 1.2.0**: subsección *Alcance* del **Principio I**, que distingue TDD de comportamiento/
+  lógica vs. la puerta de calidad para trabajo exclusivamente de presentación/UI (preservar contrato
+  de tests + tests de interacción). Derivada del análisis `/speckit.analyze` de esta feature.
 
 **Restricciones de alcance/seguridad**: monocanal ✅; libre acceso ✅; sin secretos ✅; no es
 diagnóstico ✅; **sin features fuera de alcance** ✅ (no se inventa HRV/Espectro; mobile diferido).
 
-**Resultado del gate**: PASS (con la nota de TDD para presentación). `Complexity Tracking` vacío.
+**Resultado del gate**: PASS — sin violaciones. `Complexity Tracking` vacío.
 
 ## Project Structure
 

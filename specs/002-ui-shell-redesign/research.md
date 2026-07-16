@@ -77,19 +77,21 @@ dibujo ni backend. La restricción rectora es el **Principio V** (rendimiento de
 
 ## Nota sobre TDD (Principio I) en esta feature
 
-El trabajo fue **presentación/CSS**, donde el ciclo rojo→verde→refactor no aplica de la misma forma
-que a la lógica. La estrategia de verificación fue:
+El trabajo fue **presentación/UI**, cubierto explícitamente por la subsección *Alcance* del
+**Principio I** (constitución **v1.2.0**): el ciclo rojo→verde→refactor rige el comportamiento/
+lógica de dominio; para presentación pura, la puerta de calidad equivalente es preservar el contrato
+de tests + tests de interacción para el comportamiento nuevo de UI. La estrategia aplicada fue:
 
 1. **Preservar el contrato de test existente**: los `data-testid`/`aria-label` que asertan los tests
-   de 001 se mantuvieron; la suite (86 tests) quedó verde sin editarla (FR-009, SC-003).
-2. **Agregar tests de interacción reales** para el comportamiento nuevo con verdadera lógica de UI
-   (colapso de sidebar y de secciones) — ver `tasks.md` T210–T212 y
-   `src/frontend/src/components/layout/Sidebar.test.tsx`.
+   de 001 se mantuvieron; la suite heredada (86 tests) quedó verde sin editarla (FR-009, SC-003).
+2. **Agregar tests de interacción reales** para el comportamiento nuevo de UI (colapso de sidebar y
+   de secciones) — ver `tasks.md` T210–T212 y `src/frontend/src/components/layout/Sidebar.test.tsx`.
 3. **Verificación visual/estructural por preview** para fidelidad (colores, spacing, ausencia de
    overflow, igualdad de alturas), que es el límite legítimo de TDD para presentación.
 
-Esta desviación del rojo→verde estricto se documenta abiertamente: el incremento no cambió lógica
-de dominio, y el riesgo de regresión se cubre con (1) + (2).
+Con esta puerta, el incremento **cumple** el Principio I (v1.2.0): no cambió lógica de dominio, y el
+riesgo de regresión queda cubierto por (1) + (2). Nota histórica: la aclaración de alcance del
+Principio I nació justamente del `/speckit.analyze` de esta feature (hallazgo D1).
 
 ## Resumen de resolución
 

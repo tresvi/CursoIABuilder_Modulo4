@@ -45,7 +45,7 @@ alturas, ausencia de overflow) se verifica por preview — límite legítimo de 
 
 - [X] T210 [US2] Menú **hamburguesa** arriba de la sidebar que colapsa/expande (`aria-label`/`aria-expanded`); modo colapsado = solo íconos con tooltip
 - [X] T211 [US3] Secciones colapsables (Archivo/Filtros/Herramientas) con encabezado clickeable + chevron
-- [X] T212 [US2/US3] **Tests de interacción** (Vitest/RTL) en `src/frontend/src/components/layout/Sidebar.test.tsx`: (a) el hamburguesa invoca `onToggleCollapse` y en colapsado el toggle expone "Expandir menú" ocultando etiquetas; (b) colapsar la sección "Filtros" oculta sus ítems (`aria-expanded=false`)
+- [X] T212 [US2/US3/US5] **Tests de interacción** (Vitest/RTL) en `src/frontend/src/components/layout/Sidebar.test.tsx`: (a) el hamburguesa invoca `onToggleCollapse` y en colapsado el toggle expone "Expandir menú" ocultando etiquetas; (b) colapsar la sección "Filtros" oculta sus ítems (`aria-expanded=false`); (c) [SC-005] los controles de colapso son `<button>` nativos (operables por teclado por semántica)
 
 ## Phase 4: Responsividad y paneles (US4, US5)
 
@@ -59,6 +59,7 @@ alturas, ausencia de overflow) se verifica por preview — límite legítimo de 
 - [X] T217 `npm run typecheck` limpio y `npm run build` (Tailwind compila) OK
 - [X] T218 `npm test` — 86 tests verdes (contrato de 001 preservado)
 - [X] T219 Verificación visual por preview: estado vacío, dashboard cargado, colapso sidebar/secciones, tablet (768px) y PC (1280px) sin overflow, alturas gráfico=métricas
+- [X] T219b [FR-010] Verificar que el diff NO toca lógica de dominio ni el motor de dibujo: sin cambios en `src/frontend/src/render/*`, `src/frontend/src/signal/*`, `src/frontend/src/metrics/*` ni `src/backend/` (confirmado por `git diff --stat` de los commits `3d715ab`/`1451e6d`)
 - [X] T220 Actualizar `AGENTS.md` con el stack de UI y la convención de carpetas del cascarón
 
 ## Dependencies

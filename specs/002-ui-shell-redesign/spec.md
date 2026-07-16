@@ -187,8 +187,9 @@ persistidas: `collapsed` (sidebar), `filterType` (tipo de filtro seleccionado), 
   presenta scroll horizontal.
 - **SC-002**: El bitmap del canvas del gráfico coincide con su ancho CSS renderizado (sin
   distorsión) tras el ajuste responsivo.
-- **SC-003**: La suite existente (86 tests, Vitest) permanece **100% verde** y `npm run typecheck`
-  queda limpio tras el rediseño, sin editar los tests de 001.
+- **SC-003**: La suite **heredada de 001** (86 tests, Vitest) permanece **100% verde** sin editarse
+  y `npm run typecheck` queda limpio tras el rediseño. Con los tests de interacción nuevos de esta
+  feature (Sidebar), el total pasa a **89** verdes.
 - **SC-004**: La columna de métricas iguala el alto del gráfico (diferencia < 2px) y su ancho es
   ≤ 130px.
 - **SC-005**: El colapso/expansión de la sidebar y de cada sección es operable por teclado y
