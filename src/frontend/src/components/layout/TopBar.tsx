@@ -31,7 +31,7 @@ export function TopBar({
     <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-card px-6 py-3">
       <div className="flex items-center gap-2 font-semibold">
         <Activity className="size-5 text-primary" aria-hidden />
-        <span>Tracado ECG</span>
+        <span>Trazado ECG</span>
       </div>
 
       <span className="text-border" aria-hidden>
