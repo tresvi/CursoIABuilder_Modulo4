@@ -6,9 +6,14 @@ import { MarkerEditor } from "../components/MarkerEditor";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { MarkerPromptDialog } from "../components/MarkerPromptDialog";
 import { FilterPanel } from "../components/FilterPanel";
+import { AppLayout } from "../components/layout/AppLayout";
+import { Sidebar } from "../components/layout/Sidebar";
+import { TopBar } from "../components/layout/TopBar";
+import { StatusBar } from "../components/layout/StatusBar";
+import { Card } from "../components/ui/card";
 import { useAppState } from "../hooks/useAppState";
 import { useVisibleWindow } from "../hooks/useVisibleWindow";
-import { useTool, type Tool } from "../hooks/useTool";
+import { useTool } from "../hooks/useTool";
 import { useMarkers } from "../hooks/useMarkers";
 import { useUnsavedGuard } from "../hooks/useUnsavedGuard";
 import { metricsForWindow } from "../metrics/windowMetrics";
@@ -26,20 +31,13 @@ import {
 import {
   applyFilter as applyFilterApi,
   type FilterConfig,
+  type FilterKind,
 } from "../api/filterApi";
 import { getStudy, saveStudy, type SavedStudy } from "../api/studyApi";
 import { exportXlsx, importXlsx } from "../api/excelApi";
 import { downloadCsv } from "../signal/csvExport";
 import { ApiRequestError } from "../api/client";
 import type { CardiacMetrics } from "../metrics/hrv";
-
-const TOOLS: Array<{ id: Tool; label: string }> = [
-  { id: "zoom", label: "🔍 Zoom" },
-  { id: "pan", label: "✋ Desplazar" },
-  { id: "ruler", label: "📏 Regla" },
-  { id: "crop", label: "✂️ Recorte" },
-  { id: "marker", label: "📍 Marcar" },
-];
 
 /**
  * Pantalla principal de ECGViewer: carga (US1), métricas por ventana (US2),
@@ -59,7 +57,10 @@ export function MainPage() {
   const [filterBusy, setFilterBusy] = useState(false);
   const [filterError, setFilterError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterConfig | null>(null);
+  const [filterType, setFilterType] = useState<FilterKind>("bandpass");
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const working: Signal | null = useMemo(
@@ -141,6 +142,7 @@ export function MainPage() {
     try {
       const signal = await importXlsx(file);
       handleLoad(signal);
+      setFileName(file.name);
     } catch (e) {
       setSaveStatus(
         e instanceof ApiRequestError
@@ -211,191 +213,114 @@ export function MainPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Botón de una herramienta de mouse (modo activo): resalta el seleccionado.
-  const toolBtn = (id: Tool) => {
-    const label = TOOLS.find((t) => t.id === id)!.label;
-    return (
-      <button
-        key={id}
-        onClick={() => setTool(id)}
-        aria-pressed={tool === id}
-        disabled={!working}
-        style={{ fontWeight: tool === id ? 700 : 400 }}
-      >
-        {label}
-      </button>
-    );
-  };
-
   return (
-    <main style={{ fontFamily: "system-ui, sans-serif", padding: 16 }}>
-      <h1>
-        ECGViewer{" "}
-        {state.dirty && (
-          <small style={{ color: "#c62828" }} data-testid="dirty-flag">
-            • cambios sin guardar
-          </small>
-        )}
-      </h1>
-
-      <section
-        className="toolbar"
-        style={{
-          display: "flex",
-          gap: 16,
-          alignItems: "center",
-          flexWrap: "wrap",
-          marginBottom: 12,
-        }}
-      >
-        <FileLoader onLoad={handleLoad} />
-        <label>
-          <input
-            type="checkbox"
-            checked={state.showGrid}
-            onChange={toggleGrid}
-          />{" "}
-          Rejilla ECG
-        </label>
-        <label>
-          Velocidad{" "}
-          <select
-            aria-label="Velocidad de papel"
-            value={state.paperSpeed}
-            onChange={(e) => setPaperSpeed(Number(e.target.value) as 25 | 50)}
-            disabled={!state.showGrid}
-          >
-            <option value={25}>25 mm/s</option>
-            <option value={50}>50 mm/s</option>
-          </select>
-        </label>
-        {/* Barra de herramientas: acciones y modos de mouse agrupados, en el
-            orden pedido (Guardar como CSV, Exportar, Importar, Zoom, Restablecer,
-            Desplazar, Regla, Recorte, Marcar). */}
-        <div
-          role="toolbar"
-          aria-label="Herramientas"
-          style={{
-            display: "flex",
-            gap: 4,
-            alignItems: "center",
-            flexWrap: "wrap",
-            padding: "4px 8px",
-            border: "1px solid #ccc",
-            borderRadius: 8,
-            background: "#fafafa",
-          }}
-        >
-          <button
-            onClick={handleExportCsv}
-            disabled={!working}
-            title="Descargar la señal actual del ECGViewer como archivo CSV"
-          >
-            💾 Guardar como CSV
-          </button>
-          <button onClick={handleExportXlsx} disabled={!working}>
-            ⬇️ Exportar XLSX
-          </button>
-          <button
-            onClick={() => importInputRef.current?.click()}
-            title="Importar una señal desde un archivo .xlsx"
-          >
-            ⬆️ Importar XLSX
-          </button>
-          {toolBtn("zoom")}
-          <button onClick={reset} disabled={!working}>
-            🔄 Restablecer zoom
-          </button>
-          {toolBtn("pan")}
-          {toolBtn("ruler")}
-          {toolBtn("crop")}
-          {toolBtn("marker")}
-          <input
-            ref={importInputRef}
-            type="file"
-            accept=".xlsx"
-            aria-label="Importar archivo XLSX"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void handleImportXlsx(f);
-              e.target.value = "";
-            }}
-          />
-        </div>
-        <button
-          onClick={handleSave}
-          disabled={!working}
-          style={{ fontWeight: 600 }}
-          data-testid="save-btn"
-        >
-          💾 Guardar
-        </button>
-        {saveStatus && (
-          <small style={{ color: "#2e7d32" }} data-testid="save-status">
-            {saveStatus}
-          </small>
-        )}
-      </section>
-
-      <section
-        style={{
-          display: "flex",
-          gap: 24,
-          flexWrap: "wrap",
-          alignItems: "flex-start",
-        }}
-      >
-        <ECGChart
-          signal={working}
-          window={window}
+    <AppLayout
+      sidebar={
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((c) => !c)}
+          hasSignal={!!working}
+          fileLoader={
+            <FileLoader
+              onLoad={handleLoad}
+              onSourceName={setFileName}
+              collapsed={collapsed}
+            />
+          }
+          onImportXlsx={() => importInputRef.current?.click()}
+          onSave={handleSave}
+          onExportCsv={handleExportCsv}
+          onExportXlsx={handleExportXlsx}
+          activeFilterType={filterType}
+          onSelectFilter={setFilterType}
+          onRevertFilter={handleRevertFilter}
+          hasFilter={derivation?.filteredSamples != null}
+          tool={tool}
+          onSelectTool={setTool}
+          showGrid={state.showGrid}
+          onToggleGrid={toggleGrid}
+          onResetZoom={reset}
+        />
+      }
+      topBar={
+        <TopBar
+          fileName={fileName}
+          hasSignal={!!working}
+          dirty={state.dirty}
+          saveStatus={saveStatus}
           showGrid={state.showGrid}
           paperSpeed={state.paperSpeed}
-          tool={tool}
-          cursor={cursor}
-          markers={markers.markers}
-          onZoom={(r) => zoomTo(r.fromTime, r.toTime)}
-          onPan={(dt) => panBy(dt)}
-          onCropSelect={(r) => setPendingCrop(r)}
-          onAddMarker={(time) => setPendingMarkerTime(time)}
+          onPaperSpeed={setPaperSpeed}
         />
-        {/* Métricas de la ventana visible: fijas al lado derecho del gráfico. */}
-        <MetricsPanel metrics={metrics} />
-      </section>
+      }
+      statusBar={<StatusBar signal={working} />}
+    >
+      {/* Encabezado accesible requerido por los tests/lectores de pantalla. */}
+      <h1 className="sr-only">ECGViewer</h1>
 
-      <section
-        style={{
-          display: "flex",
-          gap: 24,
-          flexWrap: "wrap",
-          alignItems: "flex-start",
-          marginTop: 16,
-        }}
-      >
-        <FilterPanel
-          disabled={!working}
-          hasFilter={derivation?.filteredSamples != null}
-          busy={filterBusy}
-          error={filterError}
-          onApply={handleApplyFilter}
-          onRevert={handleRevertFilter}
-        />
-        <section>
-          <h3>Marcadores</h3>
-          <MarkerEditor
-            markers={markers.markers}
-            onEdit={markers.edit}
-            onRemove={markers.remove}
-          />
-        </section>
-      </section>
+      {working ? (
+        <div className="flex flex-col gap-6">
+          <div className="flex items-stretch gap-4">
+            <Card className="min-w-0 flex-1 p-3">
+              <ECGChart
+                signal={working}
+                window={window}
+                showGrid={state.showGrid}
+                paperSpeed={state.paperSpeed}
+                tool={tool}
+                cursor={cursor}
+                markers={markers.markers}
+                onZoom={(r) => zoomTo(r.fromTime, r.toTime)}
+                onPan={(dt) => panBy(dt)}
+                onCropSelect={(r) => setPendingCrop(r)}
+                onAddMarker={(time) => setPendingMarkerTime(time)}
+              />
+            </Card>
+            <MetricsPanel metrics={metrics} />
+          </div>
 
-      {!working && (
-        <p style={{ color: "#666" }}>
-          Cargá un archivo CSV de ECG monocanal (columnas tiempo, valor) para
-          comenzar.
-        </p>
+          <div className="flex flex-wrap items-start gap-6">
+            <FilterPanel
+              disabled={!working}
+              hasFilter={derivation?.filteredSamples != null}
+              busy={filterBusy}
+              error={filterError}
+              type={filterType}
+              onTypeChange={setFilterType}
+              onApply={handleApplyFilter}
+              onRevert={handleRevertFilter}
+            />
+            <Card className="min-w-64 p-4">
+              <h3 className="mb-3 text-base font-semibold">Marcadores</h3>
+              <MarkerEditor
+                markers={markers.markers}
+                onEdit={markers.edit}
+                onRemove={markers.remove}
+              />
+            </Card>
+          </div>
+        </div>
+      ) : (
+        <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
+          <p className="max-w-md">
+            Cargá un archivo CSV de ECG monocanal (columnas tiempo, valor) para
+            comenzar.
+          </p>
+        </div>
       )}
+
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".xlsx"
+        aria-label="Importar archivo XLSX"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void handleImportXlsx(f);
+          e.target.value = "";
+        }}
+      />
 
       <ConfirmDialog
         open={pendingCrop !== null}
@@ -419,6 +344,6 @@ export function MainPage() {
         }}
         onCancel={() => setPendingMarkerTime(null)}
       />
-    </main>
+    </AppLayout>
   );
 }

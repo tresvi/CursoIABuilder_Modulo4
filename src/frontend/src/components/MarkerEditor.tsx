@@ -1,4 +1,7 @@
+import { X } from "lucide-react";
 import type { EventMarker } from "../signal/markers";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 interface Props {
   markers: EventMarker[];
@@ -10,7 +13,7 @@ interface Props {
 export function MarkerEditor({ markers, onEdit, onRemove }: Props) {
   if (markers.length === 0) {
     return (
-      <p style={{ color: "#666" }} data-testid="markers-empty">
+      <p className="text-sm text-muted-foreground" data-testid="markers-empty">
         Sin marcadores. Activá la herramienta “Marcar” y hacé clic sobre el
         gráfico.
       </p>
@@ -18,32 +21,28 @@ export function MarkerEditor({ markers, onEdit, onRemove }: Props) {
   }
   const sorted = [...markers].sort((a, b) => a.time - b.time);
   return (
-    <ul style={{ listStyle: "none", padding: 0 }} data-testid="marker-list">
+    <ul className="m-0 list-none space-y-2 p-0" data-testid="marker-list">
       {sorted.map((m) => (
-        <li
-          key={m.id}
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            marginBottom: 4,
-          }}
-        >
-          <span style={{ fontVariantNumeric: "tabular-nums", minWidth: 64 }}>
+        <li key={m.id} className="flex items-center gap-2">
+          <span className="min-w-16 text-sm tabular-nums text-muted-foreground">
             {m.time.toFixed(3)} s
           </span>
-          <input
+          <Input
             aria-label={`Etiqueta del marcador en ${m.time.toFixed(3)} s`}
             value={m.label}
             placeholder="etiqueta…"
             onChange={(e) => onEdit(m.id, e.target.value)}
+            className="h-8"
           />
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
             aria-label={`Eliminar marcador en ${m.time.toFixed(3)} s`}
             onClick={() => onRemove(m.id)}
           >
-            ✕
-          </button>
+            <X className="size-4" aria-hidden />
+          </Button>
         </li>
       ))}
     </ul>

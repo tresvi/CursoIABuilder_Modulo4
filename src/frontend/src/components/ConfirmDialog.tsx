@@ -1,3 +1,5 @@
+import { Button } from "./ui/button";
+
 interface Props {
   open: boolean;
   message: string;
@@ -21,31 +23,15 @@ export function ConfirmDialog({
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.35)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
     >
-      <div
-        style={{
-          background: "#fff",
-          padding: 20,
-          borderRadius: 8,
-          maxWidth: 380,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
-        }}
-      >
-        <p style={{ marginTop: 0 }}>{message}</p>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <button onClick={onCancel}>{cancelLabel}</button>
-          <button onClick={onConfirm} style={{ fontWeight: 600 }}>
-            {confirmLabel}
-          </button>
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-xl">
+        <p className="mt-0 text-sm">{message}</p>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={onCancel}>
+            {cancelLabel}
+          </Button>
+          <Button onClick={onConfirm}>{confirmLabel}</Button>
         </div>
       </div>
     </div>

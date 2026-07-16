@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Signal } from "../signal/signalModel";
 import type { CropRange } from "../signal/signalModel";
 import type { EventMarker } from "../signal/markers";
@@ -52,12 +52,28 @@ export function ECGChart({
   onPan,
   onCropSelect,
   onAddMarker,
-  width = 900,
+  width: widthProp = 900,
   height = 360,
 }: Props) {
   const baseRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const dragRef = useRef<DragState | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Ancho responsivo: el canvas ocupa el ancho del contenedor (tablet/PC).
+  // `widthProp` (900) es el fallback en entornos sin ResizeObserver (jsdom/tests).
+  const [measured, setMeasured] = useState<number | null>(null);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver((entries) => {
+      const w = Math.floor(entries[0].contentRect.width);
+      if (w > 0) setMeasured(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const width = Math.max(320, measured ?? widthProp);
 
   const view: ViewBox | null = useMemo(() => {
     if (!signal || signal.samples.length === 0) return null;
@@ -199,8 +215,9 @@ export function ECGChart({
 
   return (
     <div
+      ref={containerRef}
       className="ecg-chart"
-      style={{ position: "relative", width, height }}
+      style={{ position: "relative", width: "100%", height }}
       data-testid="ecg-chart"
     >
       <canvas

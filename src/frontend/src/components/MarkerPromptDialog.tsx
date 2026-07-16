@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface Props {
   open: boolean;
@@ -33,28 +35,11 @@ export function MarkerPromptDialog({ open, onConfirm, onCancel }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label="Nuevo marcador"
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.35)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
     >
-      <div
-        style={{
-          background: "#fff",
-          padding: 20,
-          borderRadius: 8,
-          maxWidth: 380,
-          width: "90%",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
-        }}
-      >
-        <p style={{ marginTop: 0 }}>Texto del marcador</p>
-        <input
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-5 shadow-xl">
+        <p className="mt-0 mb-2 text-sm font-medium">Texto del marcador</p>
+        <Input
           ref={inputRef}
           type="text"
           value={text}
@@ -65,28 +50,15 @@ export function MarkerPromptDialog({ open, onConfirm, onCancel }: Props) {
             if (e.key === "Enter") onConfirm(text);
             if (e.key === "Escape") onCancel();
           }}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            padding: 6,
-            fontSize: 14,
-          }}
         />
-        <small style={{ color: "#666", display: "block", marginTop: 4 }}>
+        <small className="mt-1 block text-xs text-muted-foreground">
           {text.length}/{MARKER_TEXT_MAX}
         </small>
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            justifyContent: "flex-end",
-            marginTop: 16,
-          }}
-        >
-          <button onClick={onCancel}>Cancelar</button>
-          <button onClick={() => onConfirm(text)} style={{ fontWeight: 600 }}>
-            Aceptar
-          </button>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button onClick={() => onConfirm(text)}>Aceptar</Button>
         </div>
       </div>
     </div>

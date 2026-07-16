@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FilterConfig, FilterKind } from "../api/filterApi";
+import { Card } from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Select } from "./ui/select";
 
 interface Props {
   disabled: boolean;
   hasFilter: boolean;
   busy: boolean;
   error: string | null;
+  /** Tipo de filtro seleccionado (controlado por MainPage / sidebar). */
+  type: FilterKind;
+  onTypeChange: (type: FilterKind) => void;
   onApply: (config: FilterConfig) => void;
   onRevert: () => void;
 }
@@ -36,10 +43,11 @@ export function FilterPanel({
   hasFilter,
   busy,
   error,
+  type,
+  onTypeChange,
   onApply,
   onRevert,
 }: Props) {
-  const [type, setType] = useState<FilterKind>("bandpass");
   const [low, setLow] = useState("1");
   const [high, setHigh] = useState("49.5");
   const [winSize, setWinSize] = useState("7");
@@ -47,11 +55,11 @@ export function FilterPanel({
 
   const kind = KINDS.find((k) => k.id === type)!;
 
-  function changeType(next: FilterKind) {
-    setType(next);
-    const def = KINDS.find((k) => k.id === next)?.defWindow;
+  // Al cambiar el tipo (desde el select o la sidebar), sugiere la ventana por defecto.
+  useEffect(() => {
+    const def = KINDS.find((k) => k.id === type)?.defWindow;
     if (def != null) setWinSize(String(def));
-  }
+  }, [type]);
 
   function submit() {
     onApply({
@@ -63,33 +71,32 @@ export function FilterPanel({
     });
   }
 
+  const field = "flex flex-col gap-1 text-sm";
+
   return (
-    <section className="filter-panel" data-testid="filter-panel">
-      <h3>Filtro digital</h3>
-      <div
-        style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "end" }}
-      >
-        <label>
+    <Card className="p-4" data-testid="filter-panel">
+      <h3 className="mb-3 text-base font-semibold">Filtro digital</h3>
+      <div className="flex flex-wrap items-end gap-3">
+        <label className={field}>
           Tipo
-          <br />
-          <select
+          <Select
             aria-label="Tipo de filtro"
             value={type}
-            onChange={(e) => changeType(e.target.value as FilterKind)}
+            onChange={(e) => onTypeChange(e.target.value as FilterKind)}
             disabled={disabled}
+            className="w-40"
           >
             {KINDS.map((k) => (
               <option key={k.id} value={k.id}>
                 {k.label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         {kind.low && (
-          <label>
+          <label className={field}>
             Corte inf. (Hz)
-            <br />
-            <input
+            <Input
               aria-label="Corte inferior"
               type="number"
               value={low}
@@ -97,15 +104,14 @@ export function FilterPanel({
               step="0.1"
               onChange={(e) => setLow(e.target.value)}
               disabled={disabled}
-              style={{ width: 90 }}
+              className="w-28"
             />
           </label>
         )}
         {kind.high && (
-          <label>
+          <label className={field}>
             Corte sup. (Hz)
-            <br />
-            <input
+            <Input
               aria-label="Corte superior"
               type="number"
               value={high}
@@ -113,15 +119,14 @@ export function FilterPanel({
               step="0.1"
               onChange={(e) => setHigh(e.target.value)}
               disabled={disabled}
-              style={{ width: 90 }}
+              className="w-28"
             />
           </label>
         )}
         {kind.window && (
-          <label>
+          <label className={field}>
             Ventana (muestras)
-            <br />
-            <input
+            <Input
               aria-label="Ventana"
               type="number"
               value={winSize}
@@ -129,15 +134,14 @@ export function FilterPanel({
               step={kind.poly ? 2 : 1}
               onChange={(e) => setWinSize(e.target.value)}
               disabled={disabled}
-              style={{ width: 110 }}
+              className="w-32"
             />
           </label>
         )}
         {kind.poly && (
-          <label>
+          <label className={field}>
             Grado polinomio
-            <br />
-            <input
+            <Input
               aria-label="Grado del polinomio"
               type="number"
               value={poly}
@@ -145,22 +149,26 @@ export function FilterPanel({
               step={1}
               onChange={(e) => setPoly(e.target.value)}
               disabled={disabled}
-              style={{ width: 90 }}
+              className="w-28"
             />
           </label>
         )}
-        <button onClick={submit} disabled={disabled || busy}>
+        <Button onClick={submit} disabled={disabled || busy}>
           {busy ? "Aplicando…" : "Aplicar filtro"}
-        </button>
-        <button onClick={onRevert} disabled={disabled || !hasFilter}>
+        </Button>
+        <Button
+          variant="outline"
+          onClick={onRevert}
+          disabled={disabled || !hasFilter}
+        >
           Revertir
-        </button>
+        </Button>
       </div>
       {error && (
-        <p role="alert" style={{ color: "#c62828" }}>
+        <p role="alert" className="mt-2 text-sm text-destructive">
           {error}
         </p>
       )}
-    </section>
+    </Card>
   );
 }
