@@ -57,7 +57,7 @@ alturas, ausencia de overflow) se verifica por preview — límite legítimo de 
 ## Phase 5: Verificación
 
 - [X] T217 `npm run typecheck` limpio y `npm run build` (Tailwind compila) OK
-- [X] T218 `npm test` — 86 tests verdes (contrato de 001 preservado)
+- [X] T218 `npm test` — 86 tests heredados de 001 verdes (contrato preservado); 90 en total con los tests de interacción nuevos (T212)
 - [X] T219 Verificación visual por preview: estado vacío, dashboard cargado, colapso sidebar/secciones, tablet (768px) y PC (1280px) sin overflow, alturas gráfico=métricas
 - [X] T219b [FR-010] Verificar que el diff NO toca lógica de dominio ni el motor de dibujo: sin cambios en `src/frontend/src/render/*`, `src/frontend/src/signal/*`, `src/frontend/src/metrics/*` ni `src/backend/` (confirmado por `git diff --stat` de los commits `3d715ab`/`1451e6d`)
 - [X] T220 Actualizar `AGENTS.md` con el stack de UI y la convención de carpetas del cascarón
