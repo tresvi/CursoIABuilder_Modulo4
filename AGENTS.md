@@ -7,6 +7,17 @@ Orientada a entornos educativos y de investigación en ingeniería biomédica.
 - Back: .NET 10 (Minimal API). Ubicado en `src/backend`.
 - Base de datos: SQLite (para persistir los estudios guardados). App de libre acceso: sin usuarios ni sesiones.
 
+### UI (front) — feature 002
+- **shadcn/ui + Tailwind CSS v4**. Primitivos propios en `src/frontend/src/components/ui/` (`button`,
+  `card`, `badge`, `input`, `select`); tokens de tema (sidebar navy, acento teal) en
+  `src/frontend/src/index.css`; helper `cn` en `src/frontend/src/lib/utils.ts`. Alias `@/*` → `src/*`.
+- **Cascarón** en `src/frontend/src/components/layout/`: `AppLayout` (sidebar · contenido · footer),
+  `Sidebar` (colapsable con hamburguesa + secciones colapsables), `NavItem`, `TopBar`, `StatusBar`.
+- El **gráfico ECG sigue siendo Canvas 2D propio** (`components/ECGChart.tsx` + `render/*`); es
+  responsivo al contenedor vía `ResizeObserver`. NO reemplazar por librería de charting (Principio V).
+- `select`/`input` son **nativos estilados** (no Radix) para preservar `aria-label` y los tests.
+- Alcance de responsividad: **tablet + PC**; mobile fuera de alcance. Ver `specs/002-ui-shell-redesign/`.
+
 ### Dependencias NuGet (back)
 Versiones exactas viven en el `.csproj`; acá solo el "qué y por qué".
 - `FftSharp` (Scott Harden): cálculos de filtros DSP (pasa bajo/alto/banda/notch) — RF-10.

@@ -1,7 +1,16 @@
 <!--
 Sync Impact Report
 ==================
-Version change: (plantilla sin ratificar) → 1.0.0
+Version change: 1.0.0 → 1.1.0
+Bump rationale (1.1.0): Enmienda MINOR asociada a la feature 002 (rediseño del
+cascarón de UI). Se amplía la guía de stack en "Flujo de Desarrollo": se fija
+shadcn/ui + Tailwind como sistema de UI y se explicita que el motor de
+visualización del ECG es Canvas 2D propio y NO se reemplaza por una librería de
+charting (refuerza el Principio V). No se agregan ni redefinen principios.
+Templates: sin cambios (los placeholders de stack son genéricos).
+
+--- Historial ---
+Version change (1.0.0): (plantilla sin ratificar) → 1.0.0
 Bump rationale: Ratificación inicial. Se reemplazan todos los placeholders de la
 plantilla por principios concretos del proyecto ECGViewer.
 
@@ -103,6 +112,11 @@ inestable.
 
 - **Stack**: Front React 19.2 + TypeScript (Vite) en `src/frontend`; Back .NET 10 (Minimal
   API) en `src/backend`; persistencia en SQLite.
+- **UI**: la capa de presentación usa **shadcn/ui + Tailwind CSS** (componentes propios en
+  `src/frontend/src/components/ui/`, tokens de tema en `src/frontend/src/index.css`). El motor de
+  visualización del ECG es **Canvas 2D propio** y **NO se reemplaza por una librería de charting**
+  (Chart.js, Recharts, Plotly, etc.): hacerlo violaría el Principio V. Las decisiones de UI/UX se
+  registran en el `research.md` de su feature, no en esta constitución.
 - **Puertas de calidad**: `dotnet test` (xUnit) y `npm test` (Vitest) DEBEN pasar antes de
   integrar un cambio. Todo cambio de comportamiento llega acompañado de sus tests
   (Principio I).
@@ -127,4 +141,4 @@ particular, la ausencia de tests previos a la implementación (Principio I) es m
 rechazo. La complejidad adicional debe justificarse. Para la guía operativa de desarrollo,
 consultar `AGENTS.md` / `CLAUDE.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-07-11
+**Version**: 1.1.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-07-16
