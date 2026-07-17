@@ -37,15 +37,39 @@ Los cálculos (parseo, HRV, DSP-model, geometría) son funciones puras con tests
 
 ## Carga de datos (US1)
 
-`FileLoader` ofrece dos vías, juntas en la barra de herramientas:
+`FileLoader` (grupo "Archivo" de la sidebar) ofrece dos vías:
 
-- **Selector de archivo** nativo (`<input type="file">`) para un CSV propio.
-- **📈 Cargar ejemplo**: botón destacado (fondo azul `#1565c0`) que trae un ECG de
-  muestra sin que el usuario tenga que copiar archivos a su PC. Hace `fetch` de
-  `public/ejemplos/ECG_20_Seg_FILTRADO.csv` (servido como asset estático por Vite en
-  `${import.meta.env.BASE_URL}ejemplos/…`) y lo procesa por el mismo `parseCsv` que un
-  archivo cargado a mano. Los otros CSV de muestra viven en `Ejemplos_Archivos_CSV/` en la
-  raíz del repo; solo el filtrado se publica en `public/` para el botón.
+- **Abrir CSV**: selector de archivo nativo (`<input type="file">` oculto) para un CSV propio.
+- **📈 Cargar ejemplo**: botón **desplegable** que lista los ECG de muestra y carga el elegido.
+  Al abrirlo muestra los tres ejemplos —filtrado, sin filtrar y con mucho ruido— y hace `fetch`
+  de `public/ejemplos/<archivo>.csv` (asset estático de Vite en
+  `${import.meta.env.BASE_URL}ejemplos/…`), procesándolo por el mismo `parseCsv` que un archivo
+  cargado a mano. Los tres CSV se publican en `public/ejemplos/`; los originales también viven
+  en `Ejemplos_Archivos_CSV/` en la raíz del repo.
+
+El desplegable está en `ExampleMenu`, un componente reutilizable cuyo botón disparador se pasa
+por render-prop: la sidebar lo usa con un `NavItem` y el **estado vacío** del área de trabajo con
+un `Button`, de modo que se puede cargar un ejemplo tanto desde la barra como desde la pantalla
+de bienvenida. Esa pantalla muestra el texto "Cargá un archivo CSV … o bien elige cargar un
+ejemplo" junto al botón.
+
+`parseCsv` ignora líneas de comentario que empiezan con `#`: el ejemplo "con mucho ruido"
+(`ECG_20_Seg_ESPANTOSO.csv`) trae al final anotaciones de complejos (`## t#|#v#|#etiqueta`) que
+no son filas de datos.
+
+## Guardar como CSV
+
+La primera acción de la barra de herramientas es **💾 Guardar como CSV** (`signal/csvExport.ts`):
+genera el CSV de la señal **actual** del viewer (con filtro/recorte aplicados) y dispara la
+descarga en el cliente, sin backend. El formato (`tiempo,mV`) es compatible con `parseCsv`, así
+que el archivo descargado se puede volver a cargar (round-trip).
+
+## Inicio y restauración del estudio (US8)
+
+Al arrancar, la app **no** restaura automáticamente el último estudio: siempre abre en el estado
+vacío. Si `GET /api/study` detecta un estudio guardado, el estado vacío ofrece un botón
+**"Restaurar último estudio"** que lo reconstruye a pedido (señal original + filtro re-aplicado
+vía backend + recorte + marcadores). El guardado sigue siendo explícito (solo "Guardar").
 
 ## Convención de UI: barra de herramientas e iconos
 

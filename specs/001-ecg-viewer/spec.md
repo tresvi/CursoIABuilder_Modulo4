@@ -343,6 +343,9 @@ pendientes y verificar la alerta de confirmación.
 - **FR-021**: El sistema MUST mantener un único estudio guardado: "Guardar" reemplaza el
   estudio anterior y el usuario puede restaurar ese estudio (señal + marcadores + filtros +
   recortes). El sistema MUST NOT ofrecer una lista de estudios ni comparación entre estudios.
+  La restauración es **a pedido del usuario**: la app inicia siempre en el estado vacío y,
+  si hay un estudio guardado, ofrece un botón "Restaurar último estudio"; no se restaura
+  automáticamente al cargar la app.
 
 ### Key Entities *(include if feature involves data)*
 
