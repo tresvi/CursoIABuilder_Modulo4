@@ -64,6 +64,26 @@ genera el CSV de la señal **actual** del viewer (con filtro/recorte aplicados) 
 descarga en el cliente, sin backend. El formato (`tiempo,mV`) es compatible con `parseCsv`, así
 que el archivo descargado se puede volver a cargar (round-trip).
 
+## Ventana visible, zoom y duración
+
+La **ventana visible** (`hooks/useVisibleWindow.ts`) es el rango temporal sobre el que se
+dibuja y se calculan las métricas (Principio IV). Reglas de reinicio:
+
+- **Al cargar** un archivo, la vista inicial se acota a los primeros
+  **`MAX_INITIAL_SECONDS` = 20 s** (o menos si el ensayo es más corto). Un ensayo largo tiene
+  demasiadas muestras para dibujar de una: `drawSignal` solo recorre las muestras dentro del
+  rango visible, así que acotar la vista aligera el render y mejora la legibilidad. El usuario
+  puede desplazarse (pan) o usar "Restablecer zoom".
+- **Al aplicar un filtro**, el zoom **se conserva**: el filtro cambia amplitudes pero no el eje
+  de tiempo. El hook distingue "cargar" de "filtrar/recortar" con una `loadKey` (la identidad de
+  la señal original, que solo cambia al cargar otra señal).
+- **Al recortar**, se muestra el rango recortado.
+- **"Restablecer zoom"** vuelve a la señal **completa** aunque supere 20 s (AC-09).
+
+La `TopBar` muestra, a la derecha del control de velocidad, la **duración total del ensayo
+abierto** en formato `HH:MM:SS` (`formatDuration`), tomada de la señal original (estable ante
+filtro/recorte).
+
 ## Inicio y restauración del estudio (US8)
 
 Al arrancar, la app **no** restaura automáticamente el último estudio: siempre abre en el estado

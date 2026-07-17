@@ -7,11 +7,27 @@ export interface VisibleWindow {
   toTime: number;
 }
 
+/**
+ * Duración (segundos) que se muestra por defecto al cargar un archivo. Si el
+ * ensayo es más largo, la vista inicial se acota a los primeros N segundos para
+ * no dibujar demasiadas muestras (rendimiento y legibilidad); el usuario puede
+ * desplazarse o "Restablecer zoom" para ver todo.
+ */
+export const MAX_INITIAL_SECONDS = 20;
+
 export function fullWindow(signal: Signal | null): VisibleWindow {
   if (!signal || signal.samples.length === 0) return { fromTime: 0, toTime: 0 };
   return {
     fromTime: signal.samples[0].t,
     toTime: signal.samples[signal.samples.length - 1].t,
+  };
+}
+
+/** Ventana inicial: los primeros `MAX_INITIAL_SECONDS` de la señal (o menos). */
+export function initialWindow(full: VisibleWindow): VisibleWindow {
+  return {
+    fromTime: full.fromTime,
+    toTime: Math.min(full.toTime, full.fromTime + MAX_INITIAL_SECONDS),
   };
 }
 
@@ -35,16 +51,34 @@ export function panWindow(
 }
 
 /**
- * Gestiona la ventana visible. Al cambiar la señal se reinicia a la ventana
- * completa; "restablecer zoom" vuelve a la señal completa (AC-09).
+ * Gestiona la ventana visible. Reglas de reinicio:
+ * - Al **cargar** otro archivo (cambia `loadKey`): la vista inicial se acota a
+ *   los primeros `MAX_INITIAL_SECONDS`.
+ * - Al **recortar** (cambia el rango sin recargar): muestra el rango recortado.
+ * - Al **filtrar** (mismo `loadKey` y mismo rango, solo cambian amplitudes): la
+ *   ventana se conserva (no se pierde el zoom).
+ * "Restablecer zoom" vuelve a la señal completa (AC-09), sin el tope de 20 s.
+ *
+ * `loadKey` debe cambiar solo al cargar una señal nueva (p. ej. la identidad de
+ * la señal original), y mantenerse estable al filtrar o recortar.
  */
-export function useVisibleWindow(signal: Signal | null) {
+export function useVisibleWindow(signal: Signal | null, loadKey?: unknown) {
   const full = useMemo(() => fullWindow(signal), [signal]);
-  const [window, setWindow] = useState<VisibleWindow>(full);
+  const [window, setWindow] = useState<VisibleWindow>(() => initialWindow(full));
 
-  // Reinicia cuando cambia la señal (por identidad de `full`).
+  const [lastLoadKey, setLastLoadKey] = useState(loadKey);
   const [lastFull, setLastFull] = useState(full);
-  if (lastFull !== full) {
+
+  if (lastLoadKey !== loadKey) {
+    // Nuevo archivo cargado: vista inicial acotada a los primeros 20 s.
+    setLastLoadKey(loadKey);
+    setLastFull(full);
+    setWindow(initialWindow(full));
+  } else if (
+    lastFull.fromTime !== full.fromTime ||
+    lastFull.toTime !== full.toTime
+  ) {
+    // Cambió el rango sin recargar (recorte): mostrar el rango completo.
     setLastFull(full);
     setWindow(full);
   }

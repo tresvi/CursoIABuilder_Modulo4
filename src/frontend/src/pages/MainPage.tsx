@@ -72,7 +72,12 @@ export function MainPage() {
     [derivation]
   );
 
-  const { window, zoomTo, panBy, reset } = useVisibleWindow(working);
+  // `derivation.original` cambia solo al cargar otra señal (initDerivation); al
+  // filtrar/recortar se conserva, por eso sirve de clave de "carga nueva".
+  const { window, zoomTo, panBy, reset } = useVisibleWindow(
+    working,
+    derivation?.original
+  );
   const markers = useMarkers(markDirty);
   useUnsavedGuard(state.dirty);
 
@@ -263,6 +268,7 @@ export function MainPage() {
           showGrid={state.showGrid}
           paperSpeed={state.paperSpeed}
           onPaperSpeed={setPaperSpeed}
+          durationSec={derivation?.original.durationSec ?? null}
         />
       }
       statusBar={<StatusBar signal={working} />}
