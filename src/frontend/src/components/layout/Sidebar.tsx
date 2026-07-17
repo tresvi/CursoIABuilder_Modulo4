@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import {
   Activity,
   ChevronDown,
@@ -207,23 +207,27 @@ export function Sidebar({
             onClick={onToggleGrid}
           />
           {TOOLS.map((t) => (
-            <NavItem
-              key={t.id}
-              icon={t.icon}
-              label={t.label}
-              collapsed={collapsed}
-              active={tool === t.id}
-              onClick={() => onSelectTool(t.id)}
-              disabled={!hasSignal}
-            />
+            <Fragment key={t.id}>
+              <NavItem
+                icon={t.icon}
+                label={t.label}
+                collapsed={collapsed}
+                active={tool === t.id}
+                onClick={() => onSelectTool(t.id)}
+                disabled={!hasSignal}
+              />
+              {/* "Restablecer zoom" va inmediatamente debajo de "Zoom". */}
+              {t.id === "zoom" && (
+                <NavItem
+                  icon={RotateCcw}
+                  label="Restablecer zoom"
+                  collapsed={collapsed}
+                  onClick={onResetZoom}
+                  disabled={!hasSignal}
+                />
+              )}
+            </Fragment>
           ))}
-          <NavItem
-            icon={RotateCcw}
-            label="Restablecer zoom"
-            collapsed={collapsed}
-            onClick={onResetZoom}
-            disabled={!hasSignal}
-          />
         </SidebarGroup>
 
         <SidebarGroup title="Filtros" collapsed={collapsed}>

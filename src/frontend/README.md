@@ -71,21 +71,22 @@ vacío. Si `GET /api/study` detecta un estudio guardado, el estado vacío ofrece
 **"Restaurar último estudio"** que lo reconstruye a pedido (señal original + filtro re-aplicado
 vía backend + recorte + marcadores). El guardado sigue siendo explícito (solo "Guardar").
 
-## Convención de UI: barra de herramientas e iconos
+## Convención de UI: sidebar y grupos
 
-Las acciones y modos de mouse viven agrupados en un contenedor `role="toolbar"` (recuadrado)
-dentro de `MainPage`, en este orden fijo: **⬇️ Exportar XLSX · ⬆️ Importar XLSX · 🔍 Zoom ·
-🔄 Restablecer zoom · ✋ Desplazar · 📏 Regla · ✂️ Recorte · 📍 Marcar**. Los cinco modos de
-mouse (Zoom/Desplazar/Regla/Recorte/Marcar) se renderizan con el helper `toolBtn(id)`, que
-resalta el modo activo (`aria-pressed` + negrita). Al agregar una herramienta nueva, meterla
-en esta barra en vez de dejarla como botón suelto.
+Las acciones y modos de mouse viven en la **sidebar** (`components/layout/Sidebar.tsx`), en
+grupos colapsables de `NavItem` (ícono + etiqueta; solo ícono cuando la sidebar está
+colapsada). Los handlers viven en `MainPage`; la sidebar no tiene lógica de dominio. Los grupos,
+en orden:
 
-Quedan **fuera** de la barra por ser otra categoría: la carga de datos (Seleccionar archivo /
-📈 Cargar ejemplo), las opciones de visualización (Rejilla ECG / Velocidad) y 💾 Guardar.
+- **Archivo**: Abrir CSV, Cargar ejemplo (ambos en `FileLoader`), Importar XLSX, Guardar,
+  Guardar como CSV, Exportar XLSX.
+- **Herramientas**: Rejilla ECG, **Zoom**, **Restablecer zoom**, Desplazar, Regla, Recortar,
+  Marcar. "Restablecer zoom" va **inmediatamente debajo de "Zoom"** (se inserta tras el ítem
+  `zoom` dentro del `map` de `TOOLS`); el resto de los modos de mouse resaltan el activo con
+  `active` (`aria`/estilo). Al agregar una herramienta nueva, sumarla a este grupo.
+- **Filtros**: Pasa Bajo, Pasa Alto, Pasa Banda, Notch y Restaurar (revierte el filtro).
 
-Todos los botones de acción llevan un emoji al inicio como ayuda visual (💾 Guardar,
-⬇️ Exportar / ⬆️ Importar XLSX, 📈 Cargar ejemplo, 🔄 Restablecer zoom). Al agregar un botón
-nuevo, mantener este criterio.
+La velocidad de papel y el estado de guardado viven en la `TopBar`, no en la sidebar.
 
 ## Marcadores de evento (US6)
 
