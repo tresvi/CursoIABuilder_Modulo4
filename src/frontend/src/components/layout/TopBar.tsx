@@ -55,6 +55,17 @@ export function TopBar({
         <span>{fileName ?? "sin archivo"}</span>
       </div>
 
+      {durationSec != null && (
+        <span
+          className="flex items-center gap-1.5 text-sm text-muted-foreground"
+          title="Duración total del ensayo abierto"
+          data-testid="duration"
+        >
+          <Clock className="size-4" aria-hidden />
+          {formatDuration(durationSec)}
+        </span>
+      )}
+
       {hasSignal && (
         <Badge variant="success">
           <CheckCircle2 className="size-3.5" aria-hidden />
@@ -93,16 +104,6 @@ export function TopBar({
             <option value={50}>50 mm/s</option>
           </Select>
         </label>
-        {durationSec != null && (
-          <span
-            className="flex items-center gap-1.5 text-sm text-muted-foreground"
-            title="Duración total del ensayo abierto"
-            data-testid="duration"
-          >
-            <Clock className="size-4" aria-hidden />
-            {formatDuration(durationSec)}
-          </span>
-        )}
       </div>
     </header>
   );

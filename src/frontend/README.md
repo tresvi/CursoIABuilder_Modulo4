@@ -80,9 +80,9 @@ dibuja y se calculan las métricas (Principio IV). Reglas de reinicio:
 - **Al recortar**, se muestra el rango recortado.
 - **"Restablecer zoom"** vuelve a la señal **completa** aunque supere 20 s (AC-09).
 
-La `TopBar` muestra, a la derecha del control de velocidad, la **duración total del ensayo
-abierto** en formato `HH:MM:SS` (`formatDuration`), tomada de la señal original (estable ante
-filtro/recorte).
+La `TopBar` muestra, **junto al nombre del archivo** (primero el nombre y luego la duración), la
+**duración total del ensayo abierto** en formato `HH:MM:SS` (`formatDuration`), tomada de la
+señal original (estable ante filtro/recorte).
 
 ## Inicio y restauración del estudio (US8)
 
