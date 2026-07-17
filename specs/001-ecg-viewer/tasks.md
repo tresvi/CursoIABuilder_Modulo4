@@ -196,7 +196,7 @@ confirmación y solo recorta si se acepta (AC-11/12/13).
 ## Phase 8: User Story 8 - Guardar explícitamente y proteger cambios (Priority: P2)
 
 **Goal**: Persistir el estudio único solo con "Guardar"; alertar ante cierre/recarga con cambios
-pendientes; restaurar el estudio.
+pendientes; restaurar el estudio a pedido (la app inicia vacía, no restaura automáticamente).
 
 **Independent Test**: Cambios no persisten sin "Guardar"; con "Guardar" persisten; cerrar con
 cambios pendientes muestra alerta (AC-20/25/26, SC-005).
@@ -215,7 +215,7 @@ cambios pendientes muestra alerta (AC-20/25/26, SC-005).
 - [X] T057 [P] [US8] Modelo `SavedStudy` (frontend) + cliente `getStudy`/`saveStudy` en `src/frontend/src/api/studyApi.ts`
 - [X] T058 [US8] Acción "Guardar" (serializa señal+marcadores+filtro+recorte, marca `dirty=false`) en `MainPage.tsx` (FR-016, AC-20)
 - [X] T059 [P] [US8] Hook `useUnsavedGuard` con `beforeunload` cuando `dirty=true` en `src/frontend/src/hooks/useUnsavedGuard.ts` (FR-018, AC-26)
-- [X] T060 [US8] Restaurar estudio al iniciar (reconstruir working aplicando filtro/recorte) en `MainPage.tsx` (FR-021)
+- [X] T060 [US8] Restaurar estudio a pedido (la app inicia vacía; el botón "Restaurar último estudio" reconstruye working aplicando filtro/recorte) en `MainPage.tsx` (FR-021)
 
 **Checkpoint**: Todas las P2 completas; garantía de persistencia explícita en vigor. Nota: US8
 persiste señal + filtro (US4) + recorte (US5). La integración de **marcadores** (US6, P3) en el
@@ -283,6 +283,24 @@ el gráfico durante la sesión (AC-05/06/07).
 - [X] T079 [P] Actualizar documentación de ejecución/uso en `docs/` y `README` del frontend/backend
 - [X] T080 Refactor y limpieza con la suite en verde (Principio I)
 - [X] T081 Ejecutar `quickstart.md` de punta a punta (US1–US8) y registrar resultados
+
+---
+
+## Phase 12: Mejoras post-MVP (fuera del alcance 001 original)
+
+**Purpose**: Registrar el trabajo construido después del MVP, ya integrado y con tests, para que
+`tasks.md` refleje la realidad. Se documentó a posteriori (ver `/speckit-analyze`); a futuro las
+features grandes deberían nacer como specs propios (`/speckit-specify`).
+
+- [X] T082 [US4] Filtros de dominio de tiempo (media móvil, mediana, Savitzky–Golay) en `src/backend/ECGViewer.Api/Dsp/SignalFilter.cs` + tests xUnit (FR-007)
+- [X] T083 [US4] UI de filtros de tiempo (ventana y grado del polinomio) en `src/frontend/src/components/FilterPanel.tsx` (FR-007)
+- [X] T084 [US7] "Guardar como CSV": descarga client-side de la señal visible en `src/frontend/src/signal/csvExport.ts` + tests (FR-024)
+- [X] T085 [US1] "Cargar ejemplo" desplegable con ejemplos embebidos y botón en estado vacío en `src/frontend/src/components/ExampleMenu.tsx` + `MainPage.tsx` (FR-025)
+- [X] T086 [US1] `parseCsv` ignora líneas de comentario `#` (anotaciones de complejos) en `src/frontend/src/signal/csvParse.ts`
+- [X] T087 [US3] Vista inicial acotada a 20 s y zoom conservado al filtrar en `src/frontend/src/hooks/useVisibleWindow.ts` + tests (FR-026)
+- [X] T088 [US8] Indicador de duración HH:MM:SS junto al nombre en la TopBar (`formatDuration`) + tests (FR-026)
+- [X] T089 [US8] Restauración a pedido (sin auto-restaurar al iniciar; botón "Restaurar último estudio") en `MainPage.tsx` (FR-021)
+- [X] T090 Refactor de UI a cascarón con sidebar/topbar/statusbar (Tailwind + componentes `ui` + lucide-react) en `src/frontend/src/components/layout/`
 
 ---
 

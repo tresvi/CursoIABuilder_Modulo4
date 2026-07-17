@@ -21,9 +21,12 @@ Nada se persiste sin acción explícita "Guardar".
 **Language/Version**: TypeScript 5.x (frontend), C# / .NET 10 (backend)
 
 **Primary Dependencies**:
-- Frontend: React 19.2, Vite, Vitest (+ Testing Library), Canvas 2D API nativa (sin librería
-  gráfica pesada), Playwright (E2E, opcional).
-- Backend: ASP.NET Core Minimal API (.NET 10), FftSharp (filtros DSP — RF-10), ClosedXML +
+- Frontend: React 19.2, Vite, Vitest (+ Testing Library), Canvas 2D API nativa para el gráfico
+  (sin librería gráfica pesada), Tailwind CSS + componentes UI estilo shadcn (`components/ui`) +
+  lucide-react para el cascarón (sidebar/topbar/statusbar), Playwright (E2E, opcional).
+- Backend: ASP.NET Core Minimal API (.NET 10), FftSharp (filtros de frecuencia — RF-10) más
+  filtros de dominio de tiempo propios (media móvil / mediana / Savitzky–Golay, sin dependencia
+  extra), ClosedXML +
   DocumentFormat.OpenXml (XLSX — RF-12/RF-13), Microsoft.Data.Sqlite / EF Core-lite para SQLite,
   xUnit (tests).
 
@@ -112,8 +115,9 @@ src/
 │
 └── frontend/                        # React 19.2 + TS (Vite)
     ├── src/
-    │   ├── components/               # ECGChart (canvas base+overlay), Toolbar,
-    │   │                             # MetricsPanel, MarkersLayer, ConfirmDialog
+    │   ├── components/               # ECGChart (canvas base+overlay), FilterPanel, MetricsPanel,
+    │   │                             # MarkerEditor, ConfirmDialog, ExampleMenu, FileLoader,
+    │   │                             # layout/ (AppLayout, Sidebar, TopBar, StatusBar), ui/
     │   ├── hooks/                    # useVisibleWindow, useTool, useUnsavedGuard
     │   ├── signal/                   # csvParse, signalModel (original/working)
     │   ├── metrics/                  # rPeakDetection, hrv (BPM/SDNN/RMSSD/pNN50)

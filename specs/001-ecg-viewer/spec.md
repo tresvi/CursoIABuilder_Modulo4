@@ -250,6 +250,8 @@ pendientes y verificar la alerta de confirmación.
 - **Archivo multicanal (CSV o XLSX)**: se informa que solo se soporta un canal y no se
   procesa.
 - **Valores no numéricos o encabezado incorrecto**: se rechaza con un mensaje de error.
+- **Líneas de comentario en el CSV**: las filas que empiezan con `#` se ignoran (p. ej.
+  anotaciones de complejos al final del archivo), sin tratarse como datos ni provocar error.
 - **Ventana visible sin suficientes latidos para calcular HRV** (p. ej. menos de dos picos R
   detectables): las métricas no calculables (SDNN, RMSSD, pNN50, y BPM si no hay al menos un
   intervalo RR) se muestran como "no disponible" ("—"), nunca como 0, y el panel permanece
@@ -305,9 +307,12 @@ pendientes y verificar la alerta de confirmación.
   recalcularlas cuando cambia el rango visible. Cuando la ventana no tiene latidos suficientes
   para una métrica, el sistema MUST mostrarla como "no disponible" ("—") y no como 0,
   manteniendo el panel visible.
-- **FR-007** (RF-10): El sistema MUST permitir aplicar un filtro digital (pasa bajo, pasa
-  alto, pasa banda o notch), con sus frecuencias de corte, a la señal desde la pantalla
-  principal, actualizando el gráfico sin cambiar de pantalla.
+- **FR-007** (RF-10): El sistema MUST permitir aplicar un filtro digital a la señal desde la
+  pantalla principal, actualizando el gráfico sin cambiar de pantalla. Los filtros de
+  frecuencia (pasa bajo, pasa alto, pasa banda, notch) usan sus frecuencias de corte; además
+  el sistema ofrece filtros de dominio de tiempo por ventana deslizante (media móvil, mediana
+  móvil y Savitzky–Golay), configurables por tamaño de ventana (y grado del polinomio en
+  Savitzky–Golay). Todos MUST ser reversibles a la señal original (FR-008/FR-019).
 - **FR-008** (RF-11): El sistema MUST permitir revertir la señal filtrada exactamente a la
   señal original cargada.
 - **FR-009** (RF-08): El sistema MUST permitir, con la herramienta Regla activa, medir con el
@@ -346,6 +351,16 @@ pendientes y verificar la alerta de confirmación.
   La restauración es **a pedido del usuario**: la app inicia siempre en el estado vacío y,
   si hay un estudio guardado, ofrece un botón "Restaurar último estudio"; no se restaura
   automáticamente al cargar la app.
+- **FR-024**: El sistema MUST permitir descargar ("Guardar como CSV") la señal actualmente
+  visible en el viewer (con filtro/recorte aplicados) como archivo CSV en la máquina del
+  usuario, con un formato reimportable por el propio parser de carga.
+- **FR-025** (RF-01): El sistema MUST ofrecer, además de la carga de un CSV propio, un botón
+  desplegable "Cargar ejemplo" que liste ECGs de muestra embebidos y cargue el elegido, para
+  probar la app sin archivos propios.
+- **FR-026** (RF-06): Al cargar un ensayo, el sistema MUST acotar la vista inicial a los
+  primeros 20 segundos (o menos si el ensayo es más corto) para no dibujar demasiadas
+  muestras; "Restablecer zoom" MUST volver a la señal completa. El sistema MUST mostrar la
+  duración total del ensayo abierto en formato HH:MM:SS.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -357,8 +372,10 @@ pendientes y verificar la alerta de confirmación.
   las métricas.
 - **Marcador de evento**: anotación anclada a un instante del eje temporal, con una etiqueta
   o comentario editable.
-- **Filtro digital**: configuración de un filtro (tipo pasa bajo / pasa alto / pasa banda /
-  notch y sus frecuencias de corte) aplicado a la señal de trabajo.
+- **Filtro digital**: configuración de un filtro aplicado a la señal de trabajo. De frecuencia
+  (pasa bajo / pasa alto / pasa banda / notch, con frecuencias de corte) o de dominio de tiempo
+  por ventana deslizante (media móvil / mediana / Savitzky–Golay, con tamaño de ventana y, en
+  Savitzky–Golay, grado del polinomio).
 - **Recorte**: rango temporal seleccionado que, tras confirmación, produce una nueva señal
   acotada a partir de la señal de trabajo.
 - **Métricas cardíacas**: conjunto de valores calculados sobre la ventana visible: BPM,
