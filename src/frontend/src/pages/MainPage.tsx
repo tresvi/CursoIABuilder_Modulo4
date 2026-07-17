@@ -6,6 +6,9 @@ import { MarkerEditor } from "../components/MarkerEditor";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { MarkerPromptDialog } from "../components/MarkerPromptDialog";
 import { FilterPanel } from "../components/FilterPanel";
+import { ExampleMenu } from "../components/ExampleMenu";
+import { Button } from "../components/ui/button";
+import { LineChart, ChevronDown, History } from "lucide-react";
 import { AppLayout } from "../components/layout/AppLayout";
 import { Sidebar } from "../components/layout/Sidebar";
 import { TopBar } from "../components/layout/TopBar";
@@ -61,6 +64,7 @@ export function MainPage() {
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [savedStudy, setSavedStudy] = useState<SavedStudy | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const working: Signal | null = useMemo(
@@ -177,31 +181,14 @@ export function MainPage() {
     }
   }
 
-  // Restaura el estudio guardado al iniciar (RF-021). Reconstruye original,
-  // re-aplica el filtro (vía backend) y el recorte.
+  // Detecta si hay un estudio guardado (RF-021) SIN aplicarlo: la app arranca
+  // siempre en el estado vacío y ofrece restaurarlo con un botón explícito.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const study = await getStudy();
-        if (!study || cancelled) return;
-        const original = createSignal(study.signal.samples);
-        let d = initDerivation(original);
-        if (study.filter) {
-          try {
-            const filtered = await applyFilterApi(original, study.filter);
-            d = applyFilterModel(d, filtered);
-          } catch {
-            /* si el backend no filtra, se restaura sin filtro */
-          }
-        }
-        if (study.crop) d = applyCrop(d, study.crop);
-        if (cancelled) return;
-        setDerivation(d);
-        setActiveFilter(study.filter);
-        markers.reset(study.markers);
-        clearDirty();
-        setSaveStatus("Estudio restaurado");
+        if (!cancelled && study) setSavedStudy(study);
       } catch {
         /* sin backend o sin estudio: se inicia vacío */
       }
@@ -212,6 +199,31 @@ export function MainPage() {
     // Solo al montar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Restaura el estudio guardado a pedido: reconstruye original, re-aplica el
+  // filtro (vía backend) y el recorte.
+  async function handleRestoreStudy() {
+    if (!savedStudy) return;
+    const study = savedStudy;
+    const original = createSignal(study.signal.samples);
+    let d = initDerivation(original);
+    if (study.filter) {
+      try {
+        const filtered = await applyFilterApi(original, study.filter);
+        d = applyFilterModel(d, filtered);
+      } catch {
+        /* si el backend no filtra, se restaura sin filtro */
+      }
+    }
+    if (study.crop) d = applyCrop(d, study.crop);
+    setDerivation(d);
+    setActiveFilter(study.filter);
+    if (study.filter) setFilterType(study.filter.type);
+    markers.reset(study.markers);
+    clearDirty();
+    setFileName("Estudio guardado");
+    setSaveStatus("Estudio restaurado");
+  }
 
   return (
     <AppLayout
@@ -301,11 +313,37 @@ export function MainPage() {
           </div>
         </div>
       ) : (
-        <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
+        <div className="flex h-full flex-col items-center justify-center gap-4 text-center text-muted-foreground">
           <p className="max-w-md">
             Cargá un archivo CSV de ECG monocanal (columnas tiempo, valor) para
-            comenzar.
+            comenzar, o bien elige cargar un ejemplo.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <ExampleMenu
+              onLoad={handleLoad}
+              onSourceName={setFileName}
+              align="center"
+              renderTrigger={({ open, toggle, loading }) => (
+                <Button
+                  variant="outline"
+                  onClick={toggle}
+                  disabled={loading}
+                  aria-haspopup="menu"
+                  aria-expanded={open}
+                >
+                  <LineChart aria-hidden />
+                  {loading ? "Cargando…" : "Cargar ejemplo"}
+                  <ChevronDown aria-hidden />
+                </Button>
+              )}
+            />
+            {savedStudy && (
+              <Button variant="ghost" onClick={() => void handleRestoreStudy()}>
+                <History aria-hidden />
+                Restaurar último estudio
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

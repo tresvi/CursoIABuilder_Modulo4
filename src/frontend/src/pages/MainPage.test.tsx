@@ -25,7 +25,42 @@ describe("MainPage — integración US1 + US2", () => {
     expect(
       screen.getByRole("heading", { name: "ECGViewer" })
     ).toBeInTheDocument();
-    expect(screen.getByText(/Cargá un archivo CSV/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Cargá un archivo CSV.*o bien elige cargar un ejemplo/i)
+    ).toBeInTheDocument();
+  });
+
+  it("el estado vacío ofrece cargar un ejemplo con menú desplegable", () => {
+    render(<MainPage />);
+    // Hay un botón "Cargar ejemplo" en el área de trabajo (además del de la sidebar).
+    const triggers = screen.getAllByRole("button", { name: /Cargar ejemplo/i });
+    expect(triggers.length).toBeGreaterThanOrEqual(1);
+    // Al abrir el del área de trabajo se listan los tres ejemplos.
+    fireEvent.click(triggers[triggers.length - 1]);
+    expect(screen.getAllByRole("menuitem")).toHaveLength(3);
+  });
+
+  it("con un estudio guardado NO auto-restaura: arranca vacío y ofrece restaurarlo", async () => {
+    vi.mocked(studyApi.getStudy).mockResolvedValue({
+      signal: { samples: [{ t: 0, v: 0.1 }, { t: 0.004, v: 0.2 }], fs: 250 },
+      markers: [],
+      filter: null,
+      crop: null,
+    });
+    render(<MainPage />);
+
+    // Aunque haya estudio guardado, sigue en el estado vacío (no dibuja).
+    const restore = await screen.findByRole("button", {
+      name: /Restaurar último estudio/i,
+    });
+    expect(screen.getByText(/o bien elige cargar un ejemplo/i)).toBeInTheDocument();
+    expect(screen.queryByTestId("ecg-chart")).toBeNull();
+
+    // Recién al presionar el botón se restaura y se dibuja.
+    fireEvent.click(restore);
+    await waitFor(() =>
+      expect(screen.getByTestId("ecg-chart")).toBeInTheDocument()
+    );
   });
 
   it("carga un CSV válido y muestra métricas (BPM ~60) sobre la ventana", async () => {
