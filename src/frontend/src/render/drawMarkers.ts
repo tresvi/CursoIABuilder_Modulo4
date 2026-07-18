@@ -24,7 +24,7 @@ export function drawMarkers(
 
   ctx.save();
   ctx.lineWidth = 1.2;
-  ctx.font = "11px system-ui, sans-serif";
+  ctx.font = "16px system-ui, sans-serif";
   for (const m of markers) {
     if (m.time < t0 || m.time > t1) continue;
     const x = scale.xOf(m.time);
@@ -35,7 +35,7 @@ export function drawMarkers(
     ctx.stroke();
     if (m.label) {
       ctx.fillStyle = "rgba(230,81,0,1)";
-      ctx.fillText(displayLabel(m.label), x + 3, y0 + 12);
+      ctx.fillText(displayLabel(m.label), x + 4, y0 + 15);
     }
   }
   ctx.restore();

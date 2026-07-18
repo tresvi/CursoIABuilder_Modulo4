@@ -24,7 +24,7 @@ export function MarkerEditor({ markers, onEdit, onRemove }: Props) {
     <ul className="m-0 list-none space-y-2 p-0" data-testid="marker-list">
       {sorted.map((m) => (
         <li key={m.id} className="flex items-center gap-2">
-          <span className="min-w-16 text-sm tabular-nums text-muted-foreground">
+          <span className="min-w-20 text-sm tabular-nums text-muted-foreground">
             {m.time.toFixed(3)} s
           </span>
           <Input
@@ -32,12 +32,12 @@ export function MarkerEditor({ markers, onEdit, onRemove }: Props) {
             value={m.label}
             placeholder="etiqueta…"
             onChange={(e) => onEdit(m.id, e.target.value)}
-            className="h-8"
+            className="h-9"
           />
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+            className="size-9 shrink-0 text-muted-foreground hover:text-destructive"
             aria-label={`Eliminar marcador en ${m.time.toFixed(3)} s`}
             onClick={() => onRemove(m.id)}
           >

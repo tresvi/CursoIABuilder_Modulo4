@@ -39,7 +39,7 @@ export function drawAxes(ctx: CanvasRenderingContext2D, view: ViewBox): void {
   ctx.strokeStyle = "#9e9e9e";
   ctx.fillStyle = "#333";
   ctx.lineWidth = 1;
-  ctx.font = "11px system-ui, sans-serif";
+  ctx.font = "13px system-ui, sans-serif";
 
   // Líneas de los ejes (borde inferior e izquierdo del área de trazado).
   ctx.beginPath();

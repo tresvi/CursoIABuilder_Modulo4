@@ -60,52 +60,58 @@ export function ECGChart({
   const dragRef = useRef<DragState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Ancho responsivo: el canvas ocupa el ancho del contenedor (tablet/PC).
-  // `widthProp` (900) es el fallback en entornos sin ResizeObserver (jsdom/tests).
-  const [measured, setMeasured] = useState<number | null>(null);
+  // Tamaño responsivo: el canvas ocupa el ancho y el alto del contenedor
+  // (tablet/PC). `widthProp` (900) y `height` (360) son el fallback en entornos
+  // sin ResizeObserver (jsdom/tests).
+  const [measured, setMeasured] = useState<{ w: number; h: number } | null>(
+    null
+  );
   useEffect(() => {
     const el = containerRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver((entries) => {
-      const w = Math.floor(entries[0].contentRect.width);
-      if (w > 0) setMeasured(w);
+      const { width: w, height: h } = entries[0].contentRect;
+      if (w > 0) setMeasured({ w: Math.floor(w), h: Math.floor(h) });
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const width = Math.max(320, measured ?? widthProp);
+  const width = Math.max(320, measured?.w ?? widthProp);
+  // El alto lo manda el contenedor (50 vh desde MainPage); `height` es el piso.
+  const chartHeight = Math.max(height, measured?.h ?? height);
 
   const view: ViewBox | null = useMemo(() => {
     if (!signal || signal.samples.length === 0) return null;
     return {
       width,
-      height,
-      // márgenes asimétricos: lugar a la izquierda (rótulos mV) y abajo (rótulos s)
+      height: chartHeight,
+      // márgenes asimétricos: lugar a la izquierda (rótulos mV) y abajo (rótulos s).
+      // Acompañan al tamaño de fuente de los rótulos (13px en drawAxes).
       padding: 10,
-      padLeft: 46,
-      padBottom: 30,
+      padLeft: 52,
+      padBottom: 34,
       tRange: [window.fromTime, window.toTime],
       vRange: amplitudeRange(signal.samples),
     };
-  }, [signal, window, width, height]);
+  }, [signal, window, width, chartHeight]);
 
   // Capa base: rejilla + señal + ejes con su escala.
   useEffect(() => {
     const ctx = getCtx(baseRef.current);
     if (!ctx) return;
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, chartHeight);
     if (!signal || !view) return;
     if (showGrid) drawGrid(ctx, view, paperSpeed);
     drawSignal(ctx, signal.samples, view);
     drawAxes(ctx, view);
-  }, [signal, view, showGrid, paperSpeed, width, height]);
+  }, [signal, view, showGrid, paperSpeed, width, chartHeight]);
 
   // Capa overlay: marcadores persistentes (+ feedback de arrastre si lo hay).
   const paintOverlay = useCallback(
     (drag: DragState | null) => {
       const ctx = getCtx(overlayRef.current);
       if (!ctx || !view) return;
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, width, chartHeight);
       drawMarkers(ctx, markers, view);
       if (!drag) return;
 
@@ -141,7 +147,7 @@ export function ECGChart({
         ctx.lineTo(drag.x1, drag.y1);
         ctx.stroke();
         ctx.fillStyle = "#6a1b9a";
-        ctx.font = "12px system-ui, sans-serif";
+        ctx.font = "14px system-ui, sans-serif";
         ctx.fillText(
           `Δt=${m.dt.toFixed(3)} s  Δamp=${m.dAmp.toFixed(3)} mV`,
           drag.x1 + 6,
@@ -150,7 +156,7 @@ export function ECGChart({
         ctx.restore();
       }
     },
-    [markers, view, tool, width, height]
+    [markers, view, tool, width, chartHeight]
   );
 
   useEffect(() => {
@@ -213,24 +219,30 @@ export function ECGChart({
     paintOverlay(null);
   }
 
+  // El alto real lo fija el contenedor padre; `height` queda como mínimo.
   return (
     <div
       ref={containerRef}
       className="ecg-chart"
-      style={{ position: "relative", width: "100%", height }}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        minHeight: height,
+      }}
       data-testid="ecg-chart"
     >
       <canvas
         ref={baseRef}
         width={width}
-        height={height}
+        height={chartHeight}
         style={{ position: "absolute", inset: 0, background: "#fff" }}
         aria-label="Gráfico de señal ECG"
       />
       <canvas
         ref={overlayRef}
         width={width}
-        height={height}
+        height={chartHeight}
         style={{ position: "absolute", inset: 0, cursor, touchAction: "none" }}
         data-testid="ecg-overlay"
         onPointerDown={handleDown}

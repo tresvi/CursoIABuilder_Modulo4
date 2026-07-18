@@ -278,7 +278,10 @@ export function MainPage() {
 
       {working ? (
         <div className="flex flex-col gap-6">
-          <div className="flex items-stretch gap-4">
+          {/* El gráfico ocupa 50 vh de alto: la fila suma el p-3 de la Card
+              (1.5rem) y sus bordes (2px) para que al canvas le queden 50 vh
+              netos. Las métricas estiran a la par por `items-stretch`. */}
+          <div className="flex h-[calc(50vh+1.5rem+2px)] min-h-[386px] items-stretch gap-4">
             <Card className="min-w-0 flex-1 p-3">
               <ECGChart
                 signal={working}

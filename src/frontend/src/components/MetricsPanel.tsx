@@ -63,11 +63,11 @@ export function MetricsPanel({ metrics }: Props) {
 
   return (
     <Card
-      className="flex w-32 shrink-0 flex-col gap-2 p-2"
+      className="flex w-44 shrink-0 flex-col gap-2 p-2.5"
       data-testid="metrics-panel"
     >
-      <h2 className="flex items-center gap-1 border-b border-border pb-1.5 text-xs font-semibold">
-        <HeartPulse className="size-3.5 shrink-0 text-primary" aria-hidden />
+      <h2 className="flex items-center gap-1.5 border-b border-border pb-2 text-base font-semibold">
+        <HeartPulse className="size-4 shrink-0 text-primary" aria-hidden />
         Métricas
       </h2>
 
@@ -78,11 +78,11 @@ export function MetricsPanel({ metrics }: Props) {
             className="flex flex-1 flex-col justify-center rounded-lg border border-border px-2 py-1"
           >
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-                <it.icon className="size-3 text-primary" aria-hidden />
+              <span className="flex items-center gap-1.5 text-[15px] font-medium text-muted-foreground">
+                <it.icon className="size-3.5 text-primary" aria-hidden />
                 {it.label}
               </span>
-              <span className="text-[9px] text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground">
                 {it.unit}
               </span>
             </div>
@@ -90,8 +90,8 @@ export function MetricsPanel({ metrics }: Props) {
               <span
                 className={
                   it.big
-                    ? "text-3xl font-bold text-primary"
-                    : "text-2xl font-bold text-primary"
+                    ? "text-4xl font-bold text-primary"
+                    : "text-3xl font-bold text-primary"
                 }
                 data-testid={`metric-${it.key}`}
               >
