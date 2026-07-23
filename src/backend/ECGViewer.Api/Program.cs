@@ -6,21 +6,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 const string CorsPolicy = "ecgviewer-front";
 
-// CORS: habilita el front de desarrollo (5173) y el de preview (4173).
+// CORS: orígenes permitidos configurables en appsettings ("Cors:AllowedOrigins").
+// Fallback a los del front de desarrollo (5173) y preview (4173) si no hay config.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (allowedOrigins is null || allowedOrigins.Length == 0)
+{
+    allowedOrigins = new[]
+    {
+        "http://localhost:5173",
+        "http://localhost:4173",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:4173",
+    };
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
         CorsPolicy,
-        policy =>
-            policy
-                .WithOrigins(
-                    "http://localhost:5173",
-                    "http://localhost:4173",
-                    "http://127.0.0.1:5173",
-                    "http://127.0.0.1:4173"
-                )
-                .AllowAnyHeader()
-                .AllowAnyMethod()
+        policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()
     );
 });
 
