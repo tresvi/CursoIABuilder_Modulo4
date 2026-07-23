@@ -6,6 +6,8 @@ Trabajo futuro identificado para el ECGViewer.
   los complejos del ECG (picos de los complejos y sus duraciones). Es la base
   para la idealización del trazado y para métricas más ricas.
 
+- **Funcion de comparar segmentos de ECG**: desarrollar la funcionalidad para   comparar dos segmentos (o tal vez N segmentos) en simultaneo. La comparacion consistirá en varios charts apilados donde se visualizaria el mismo grafico pero en distintos puntos para realizar la comparacion. De paso al costado cada uno tendrá sus propias metricas de segmento
+
 - **Filtros de `Analisis de Filtros.md`**: implementar lo descrito en
   [`Analisis de Filtros.md`](Analisis%20de%20Filtros.md), en particular el
   backlog: filtrado automático inteligente (basado en una tasa de variabilidad),

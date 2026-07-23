@@ -10,14 +10,19 @@ biomédica. App de **libre acceso** (sin usuarios ni sesiones).
 
 | Capa | Stack | Ubicación | Responsabilidad |
 |------|-------|-----------|-----------------|
-| Frontend | React 19.2 + TypeScript (Vite) | `src/frontend` | Carga CSV, render (Canvas doble capa), métricas HRV sobre la ventana visible, zoom/regla/recorte/marcadores, UI |
+| Frontend | React 19.2 + TypeScript 5.7 (Vite 6) · Tailwind CSS v4 + shadcn/ui | `src/frontend` | Cascarón dashboard (sidebar colapsable, tarjetas de métricas, barra de estado), carga CSV, render (Canvas doble capa), métricas HRV sobre la ventana visible, zoom/regla/recorte/marcadores |
 | Backend | .NET 10 (Minimal API) | `src/backend` | Filtros DSP (FftSharp), import/export XLSX (ClosedXML), persistencia del estudio único (SQLite) |
 
 - API: `http://localhost:5080` · Front dev: `http://localhost:5173` (CORS ya habilitado).
 - El front consume la API vía `VITE_API_BASE` (por defecto `http://localhost:5080`).
+- Responsividad: **tablet + PC** (mobile fuera de alcance). El gráfico ECG es Canvas 2D propio,
+  no una librería de charting.
 
-Diseño detallado en [`specs/001-ecg-viewer/`](specs/001-ecg-viewer/): `spec.md`, `plan.md`,
-`data-model.md`, `contracts/api.md`, `research.md`, `quickstart.md`, `tasks.md`.
+Diseño detallado en `specs/`:
+- [`001-ecg-viewer/`](specs/001-ecg-viewer/) — funcionalidad base: `spec.md`, `plan.md`,
+  `data-model.md`, `contracts/api.md`, `research.md`, `quickstart.md`, `tasks.md`.
+- [`002-ui-shell-redesign/`](specs/002-ui-shell-redesign/) — rediseño del cascarón de UI
+  (dashboard con sidebar, shadcn/ui + Tailwind).
 
 ## Requisitos
 
