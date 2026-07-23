@@ -6,6 +6,8 @@ biomédica. App de **libre acceso** (sin usuarios ni sesiones).
 
 > ECGViewer **no es una herramienta de diagnóstico clínico certificado**.
 
+![ECGViewer — dashboard con trazado ECG, métricas HRV y panel de filtros](docs/screenshot.png)
+
 ## Arquitectura
 
 | Capa | Stack | Ubicación | Responsabilidad |
