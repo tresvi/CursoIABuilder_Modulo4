@@ -14,6 +14,27 @@ Trabajo futuro identificado para el ECGViewer.
   el filtro de "idealización" (detectar complejos y redibujarlos sobre una línea
   ideal, tipo ECG de manual) y la detección automática de complejos.
 
+- **Deteccion de señal ECG**: implementar una funcionalidad para decidir si la señal 
+  realmente es un ECG. A priori podria ser un pipeline de deciciones:
+  Paso 1) Ejecutar un Pan-Tomkins con umbrales adaptativos y verificar si el heart rate está entre 40 y 200 bpm. 
+  Fuera de ese rango no es razonable. Podria entregarse una porcentaje de probabilidad a la siguiente etapa
+  Lo bueno que este metodo ya filtra entre 5 y15 Hz ,si bien no sera el dfinitivo, sirve de criterio de aceptacion
+  Paso 2)Aplica Z-Score a la señal para eliminar el DC y normalizarla, luego tomar el espectro entre 5 y 25Hz (suma al cuadrado de todos los bins que caen en esa banda, dividida por alguna referencia, normalmente la suma de la energia total en la banda es decir E_total =  |X_k|**2 e toda la bnda de 0,5 a 49.5)
+  rQRS​=E[5,25]​​/E_total  En donde rQRS me dice que fraccion de toda la señal esta concentrada en esa banda, que es la banda del QRS. Da entre 0 y 1
+  Este criterio me protege contra:
+  - Una senoidal pura a, digamos, 10 Hz mete casi toda su energía en un bin dentro de la banda → ratio cercano a 1. Demasiado concentrado: delata que no es un ECG.
+  - Ruido blanco reparte energía plana en todo el espectro → la fracción que cae en 5–25 Hz es más o menos proporcional al ancho de esa banda respecto del total, un valor bajo y "sin carácter".
+
+  Paso 3) Se podria sacar este valor por cada frecuencia resultante de mi FFT (digamos de 0.5 a 49.5 Hz), normalizar con Z-Score y aplicar la similitud del coseno entre los vectores de la señal patron y la señal a revisar
+  La similitud del coseno desestima el tamaño y se centra en el angulo. Dará u valor entre -1 y 1. Establecer un umbral
+
+  Pensar que tambien el analisis se podria repetir para varias bandas:
+  - Muy baja, ~0.5–5 Hz: ondas P y T, y algo de la base del QRS. Si acá hay demasiada energía, huele a deriva de línea de base.
+  - Media, ~5–15 Hz: el grueso del QRS.
+  - Alta, ~15–40 Hz: los flancos empinados del QRS y detalle rápido. Si hay muchísima acá, huele a ruido muscular o de red.
+  y Crear un vector y luego usar similityud del coseno nuevamente
+
+  Ver el espectro, tal vez sea mejor recortar entre 2-25Hz
 
 - **Caracterizacion espectral de la señal correcta y la analizada**: implementar 
   la caracterizacion de una señal correcta, y la señal a analizar.
