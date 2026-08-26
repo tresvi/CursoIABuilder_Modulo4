@@ -9,8 +9,10 @@ import { drawSignal, amplitudeRange } from "../render/drawSignal";
 import { drawGrid, type PaperSpeed } from "../render/drawGrid";
 import { drawAxes } from "../render/drawAxes";
 import { drawMarkers } from "../render/drawMarkers";
+import { drawComplexMarks } from "../render/drawComplexMarks";
 import { selectionToRange } from "../render/selectionToRange";
 import { measureRuler, rulerBox } from "../metrics/ruler";
+import type { PqrstComplex } from "../metrics/complexDetection";
 
 interface Props {
   signal: Signal | null;
@@ -20,6 +22,8 @@ interface Props {
   tool: Tool;
   cursor: string;
   markers: EventMarker[];
+  /** Complejos PQRST detectados (feature 003); vacío si la herramienta está apagada. */
+  complexMarks?: PqrstComplex[];
   onZoom: (range: VisibleWindow) => void;
   onPan: (deltaTime: number) => void;
   onCropSelect: (range: CropRange) => void;
@@ -48,6 +52,7 @@ export function ECGChart({
   tool,
   cursor,
   markers,
+  complexMarks = [],
   onZoom,
   onPan,
   onCropSelect,
@@ -113,6 +118,7 @@ export function ECGChart({
       if (!ctx || !view) return;
       ctx.clearRect(0, 0, width, chartHeight);
       drawMarkers(ctx, markers, view);
+      drawComplexMarks(ctx, complexMarks, view);
       if (!drag) return;
 
       if (tool === "zoom" || tool === "crop") {
@@ -156,7 +162,7 @@ export function ECGChart({
         ctx.restore();
       }
     },
-    [markers, view, tool, width, chartHeight]
+    [markers, complexMarks, view, tool, width, chartHeight]
   );
 
   useEffect(() => {

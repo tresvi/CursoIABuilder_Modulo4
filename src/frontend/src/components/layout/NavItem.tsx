@@ -21,6 +21,7 @@ export const NavItem = React.forwardRef<HTMLButtonElement, NavItemProps>(
       ref={ref}
       type="button"
       title={collapsed ? label : props.title}
+      aria-pressed={active}
       className={cn(
         "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
         "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
