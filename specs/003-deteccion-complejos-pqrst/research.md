@@ -88,6 +88,14 @@ lienzo solo se redibuja al cambiar datos/ventana, no en cada pan/zoom en vivo (s
 el comentario de `ECGChart.tsx`), lo que dejaría las marcas desalineadas durante el
 arrastre.
 
+**Actualización (PR #4, feedback directo del usuario tras ver la feature en uso)**: los
+puntos "pequeños" resultaron poco legibles sin pasar el mouse. Se agrandó el radio
+(mínimo 4px; R sigue siendo el más grande) y se agregó la **letra de cada punto,
+siempre visible, en su mismo color** — P/R/T arriba del punto, Q/S abajo, para no
+superponerse con el trazo. Esto reemplaza la idea original de "letra opcional según
+el zoom" (mencionada como posibilidad abierta en `spec.md` → Assumptions): se
+optó por mostrarla siempre, sin condicionarla al nivel de zoom.
+
 ## D5: Recalcular tras aplicar/cambiar/restaurar un filtro
 
 **Decision**: Un efecto en `MainPage.tsx` dispara la detección (vía el Worker de D2)

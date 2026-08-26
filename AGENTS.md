@@ -18,6 +18,22 @@ Orientada a entornos educativos y de investigación en ingeniería biomédica.
 - `select`/`input` son **nativos estilados** (no Radix) para preservar `aria-label` y los tests.
 - Alcance de responsividad: **tablet + PC**; mobile fuera de alcance. Ver `specs/002-ui-shell-redesign/`.
 
+### Detección de complejos PQRST — feature 003
+- La sección de la sidebar antes llamada "Filtros" se llama **"Diagnósticos"**; su primer ítem es
+  **"Detec. Complejos"** (no excluyente con los filtros de señal: puede estar activo junto con un
+  filtro, y se recalcula solo al aplicarlo/cambiarlo/restaurarlo — FR-007).
+- Algoritmo puro en `src/frontend/src/metrics/complexDetection.ts` (`detectComplexes`): ancla en
+  `detectRPeaks` y ubica Q/S/P/T por extremos locales en ventanas relativas al RR. Corre sobre
+  **toda la señal cargada** (excepción deliberada al Principio IV, que solo acota BPM/SDNN/RMSSD/pNN50).
+- **Patrón reutilizable para cómputo pesado sin bloquear el hilo principal**: Web Worker
+  (`src/frontend/src/workers/complexDetection.worker.ts`) con fallback inline síncrono-por-microtask
+  cuando `Worker` no existe (jsdom en tests, o un entorno restringido) — ver
+  `src/frontend/src/hooks/useComplexDetection.ts`. Considerar este mismo patrón para futuro trabajo
+  pesado en el frontend (p. ej. comparación de segmentos, caracterización espectral).
+- Dibujo en `src/frontend/src/render/drawComplexMarks.ts`: puntos P/Q/R/S/T sobre el overlay, cada
+  uno con su letra en su mismo color (P/R/T arriba, Q/S abajo), distintos entre sí y del naranja de
+  los marcadores manuales (FR-011). Nunca se persiste (FR-010). Ver `specs/003-deteccion-complejos-pqrst/`.
+
 ### Dependencias NuGet (back)
 Versiones exactas viven en el `.csproj`; acá solo el "qué y por qué".
 - `FftSharp` (Scott Harden): cálculos de filtros DSP (pasa bajo/alto/banda/notch) — RF-10.
@@ -48,6 +64,17 @@ Frontend — carpeta `src/frontend`:
 Flujo mínimo para levantar la app: en una terminal `cd src/backend && dotnet run --project ECGViewer.Api`,
 en otra `cd src/frontend && npm install && npm run dev`, y abrir `http://localhost:5173`.
 
+## Flujo de Git (Trunk-Based Development, constitution v1.3.0)
+- `main` es la **única rama de larga vida** y DEBE quedar siempre en verde/desplegable.
+- **Todo cambio entra por Pull Request** desde una rama corta `NNN-<slug>` (numeración de
+  Speckit; para un ajuste chico sin spec propia, alcanza un slug descriptivo con el próximo
+  número libre). **El push directo a `main` está prohibido.**
+- Ningún PR se mergea sin los dos checks de CI (`frontend` + `backend`) en verde.
+- Al mergear (merge commit, no squash/rebase, para mantener el estilo ya usado en el repo),
+  borrar la rama; sincronizar `main` local con `git pull` antes de arrancar la próxima rama.
+- Ver `.specify/memory/constitution.md` (sección "Flujo de Desarrollo y Puertas de Calidad"
+  y "Governance") para el detalle completo.
+
 ## CI
 `.github/workflows/ci.yml` corre en cada push a `main`, en cada PR y a mano (`workflow_dispatch`),
 con dos jobs paralelos:
@@ -58,7 +85,13 @@ La solución es **`ECGViewer.slnx`** (formato nuevo); no existe ningún `.sln`.
 No hay gates de formato: `dotnet format --verify-no-changes` y `npm run format:check` hoy fallan
 sobre código ya mergeado, así que quedaron fuera del CI a propósito.
 
+`.github/workflows/deploy.yml` es un workflow de **entrega manual** (`workflow_dispatch` con
+checkboxes): empaquetar backend+frontend como zip y publicarlo en Releases, y/o deployar el
+frontend a GitHub Pages. Nada corre solo; se dispara a mano desde la pestaña Actions.
+
 ## Qué NO hacer
+- NO pushear directo a `main`: todo cambio entra por Pull Request desde una rama corta
+  (Trunk-Based Development, constitution v1.3.0); ningún PR se mergea sin CI en verde.
 - NO persistir cambios automáticamente: marcadores, filtros y recortes solo se guardan cuando el usuario presiona explícitamente "Guardar". Si hay cambios pendientes al cerrar o recargar, alertar y pedir confirmación.
 - NO modificar destructivamente la señal original: los filtros y recortes deben poder revertirse a la señal cargada.
 - NO calcular las métricas (BPM, SDNN, RMSSD, pNN50) sobre todo el archivo: siempre sobre la ventana de tiempo visible.

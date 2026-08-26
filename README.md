@@ -14,7 +14,7 @@ biomédica. App de **libre acceso** (sin usuarios ni sesiones).
 
 | Capa | Stack | Ubicación | Responsabilidad |
 |------|-------|-----------|-----------------|
-| Frontend | React 19.2 + TypeScript 5.7 (Vite 6) · Tailwind CSS v4 + shadcn/ui | `src/frontend` | Cascarón dashboard (sidebar colapsable, tarjetas de métricas, barra de estado), carga CSV, render (Canvas doble capa), métricas HRV sobre la ventana visible, zoom/regla/recorte/marcadores |
+| Frontend | React 19.2 + TypeScript 5.7 (Vite 6) · Tailwind CSS v4 + shadcn/ui | `src/frontend` | Cascarón dashboard (sidebar colapsable, tarjetas de métricas, barra de estado), carga CSV, render (Canvas doble capa), métricas HRV sobre la ventana visible, zoom/regla/recorte/marcadores, detección de complejos PQRST (Web Worker) |
 | Backend | .NET 10 (Minimal API) | `src/backend` | Filtros DSP (FftSharp), import/export XLSX (ClosedXML), persistencia del estudio único (SQLite) |
 
 - API: `http://localhost:5080` · Front dev: `http://localhost:5173` (CORS ya habilitado).
@@ -27,6 +27,8 @@ Diseño detallado en `specs/`:
   `data-model.md`, `contracts/api.md`, `research.md`, `quickstart.md`, `tasks.md`.
 - [`002-ui-shell-redesign/`](specs/002-ui-shell-redesign/) — rediseño del cascarón de UI
   (dashboard con sidebar, shadcn/ui + Tailwind).
+- [`003-deteccion-complejos-pqrst/`](specs/003-deteccion-complejos-pqrst/) — detección y
+  marcado automático de los complejos PQRST sobre toda la señal cargada.
 
 ## Requisitos
 
@@ -76,9 +78,14 @@ cd src/frontend && npm run typecheck && npm run lint && npm run format:check
 - **US6** Marcadores de evento (crear/editar/eliminar).
 - **US7** Import/Export XLSX.
 - **US8** Guardado explícito (un único estudio) + alerta ante cambios sin guardar.
+- **Detección de complejos PQRST** (feature 003) — botón "Detec. Complejos" en la sección
+  "Diagnósticos" de la sidebar: marca los 5 puntos (P, Q, R, S, T) de cada latido sobre toda
+  la señal cargada, convive con los filtros (recalcula solo al aplicarlos) y avisa si no
+  puede detectar con confianza. Nunca se persiste.
 
 ## Principios (constitución)
 
 Señal original inmutable · persistencia solo por "Guardar" · métricas sobre la ventana
-visible · render de alto rendimiento (Canvas doble capa) · TDD. Ver
+visible · render de alto rendimiento (Canvas doble capa) · TDD · integración por Pull Request
+(Trunk-Based Development: `main` siempre en verde, sin push directo). Ver
 [`.specify/memory/constitution.md`](.specify/memory/constitution.md).
