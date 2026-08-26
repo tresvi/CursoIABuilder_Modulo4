@@ -191,10 +191,12 @@ analizar y guardar igual que una señal cargada por archivo.
 
 ## Assumptions
 
-- Esta feature requiere acceso a los puertos serie de la computadora donde corre la
-  app; se asume que el navegador/entorno donde se abre ECGViewer corre en la misma
-  máquina donde está conectado el dispositivo de hardware (no aplica a un despliegue
-  remoto donde el usuario accede desde una computadora distinta a la del hardware).
+- El puerto serie se abre desde el navegador (Web Serial API), no desde el backend:
+  el backend puede correr en un contenedor remoto sin afectar esta feature, porque el
+  acceso al hardware ocurre enteramente en la máquina donde la persona usuaria tiene
+  abierto el navegador (que es, por definición, donde está conectado el dispositivo).
+  Esto exige un navegador compatible (Chrome/Edge/Opera) y contexto seguro (HTTPS o
+  `localhost`); Firefox/Safari no podrán usar esta feature.
 - La app sigue soportando un solo canal por señal (restricción ya existente): la
   captura por hardware entrega un único valor por línea, consistente con esa
   restricción.

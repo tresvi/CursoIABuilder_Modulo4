@@ -27,8 +27,8 @@ import { useUnsavedGuard } from "../hooks/useUnsavedGuard";
 import { useComplexDetection } from "../hooks/useComplexDetection";
 import { metricsForWindow, samplesInWindow } from "../metrics/windowMetrics";
 import { computeSpectrum, type SpectrumPoint } from "../api/spectrumApi";
-import { listPorts } from "../api/serialApi";
 import { useSerialConnection } from "../hooks/useSerialConnection";
+import { getNavigatorSerial } from "../serial/webSerialTypes";
 import {
   applyCrop,
   applyFilter as applyFilterModel,
@@ -180,17 +180,13 @@ export function MainPage() {
     };
   }, [spectrumOn, working, window]);
 
-  // "Conectarse" (feature 005, US1): configuración de puerto/baudios. La
-  // conexión real (US2) se conecta acá cuando esté implementada.
+  // "Conectarse" (feature 005): el puerto se elige con el selector nativo del
+  // navegador (Web Serial API) — el backend no gestiona hardware.
   const [serialConfigDialogOpen, setSerialConfigDialogOpen] = useState(false);
-  const [serialPorts, setSerialPorts] = useState<string[]>([]);
   const [serialConfig, setSerialConfig] =
     useState<SerialConnectionConfig | null>(null);
 
   function handleOpenSerialConfig() {
-    listPorts()
-      .then(setSerialPorts)
-      .catch(() => setSerialPorts([]));
     setSerialConfigDialogOpen(true);
   }
 
@@ -566,7 +562,11 @@ export function MainPage() {
 
       <SerialConfigDialog
         open={serialConfigDialogOpen}
-        ports={serialPorts}
+        requestPort={
+          getNavigatorSerial()
+            ? () => getNavigatorSerial()!.requestPort()
+            : null
+        }
         onConfirm={(config) => {
           setSerialConfig(config);
           setSerialConfigDialogOpen(false);

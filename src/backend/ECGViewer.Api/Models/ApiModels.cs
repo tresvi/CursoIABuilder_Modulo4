@@ -58,22 +58,6 @@ public record SpectrumDto(IReadOnlyList<SpectrumPointDto> Points);
 public record SpectrumRequest(SignalDto Signal);
 public record SpectrumResponse(SpectrumDto Spectrum);
 
-/// <summary>Lista de puertos serie disponibles (feature 005).</summary>
-public record SerialPortsResponse(IReadOnlyList<string> Ports);
-
-/// <summary>Pedido para abrir un puerto serie a una velocidad dada (default 115200).</summary>
-public record SerialConnectRequest(string Port, int BaudRate);
-
-/// <summary>Una muestra ya escalada a mV, con su instante (t = n/250, research.md D5).</summary>
-public record SerialStreamSampleDto(double T, double V);
-
-/// <summary>Un lote del stream de captura en vivo (contracts/api.md, ~cada 100 ms).</summary>
-public record SerialStreamEventDto(
-    IReadOnlyList<SerialStreamSampleDto> Samples,
-    string Status,
-    string? Reason
-);
-
 public record MarkerDto(string Id, double Time, string Label);
 public record CropDto(double FromTime, double ToTime);
 
@@ -100,7 +84,4 @@ public static class ErrorCodes
     public const string InvalidFilterParams = "INVALID_FILTER_PARAMS";
     public const string NotFound = "NOT_FOUND";
     public const string InsufficientSamples = "INSUFFICIENT_SAMPLES";
-    public const string PortNotFound = "PORT_NOT_FOUND";
-    public const string AlreadyConnected = "ALREADY_CONNECTED";
-    public const string PortUnavailable = "PORT_UNAVAILABLE";
 }

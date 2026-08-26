@@ -5,59 +5,63 @@ Contexto revisado: stack existente (`src/backend` .NET 10 Minimal API con
 `useComplexDetection`/`useVisibleWindow`), constitución v1.4.0 (recién enmendada
 para permitir esta feature).
 
-## D1: Dónde vive el acceso al puerto serie — backend, no Web Serial API
+## D1: Dónde vive el acceso al puerto serie — el navegador, vía Web Serial API
 
-**Decision**: El backend (.NET, `System.IO.Ports.SerialPort`, dependencia NuGet
-nueva) abre y lee el puerto; el frontend nunca accede al hardware directamente.
+**Decision**: El puerto serie se abre y se lee enteramente en el frontend, con
+`navigator.serial` (Web Serial API). El backend no tiene ningún código de
+gestión de puertos ni de captura en vivo.
 
-**Rationale**: La alternativa (Web Serial API del navegador) **solo funciona en
-Chromium** (Chrome/Edge) y exige contexto seguro (HTTPS o localhost) — dejaría
-Firefox/Safari sin poder usar la feature. .NET con `System.IO.Ports` funciona
-igual sin importar el navegador, y mantiene el trabajo de bajo nivel/SO en el
-backend, mismo criterio que ya se usa para DSP (`FftSharp`).
+**Rationale**: El backend de ECGViewer corre en un contenedor — no tiene, ni
+puede tener en general, acceso al puerto serie físico de la computadora de
+quien usa la app (el hardware del ECG está conectado por USB a esa máquina, no
+al host donde corre el contenedor). El único proceso que sí corre en esa
+máquina es el navegador, así que el acceso al puerto tiene que vivir ahí. La
+limitación de la Web Serial API (solo Chromium — Chrome/Edge/Opera — y exige
+contexto seguro, HTTPS o `localhost`) es un límite conocido y aceptable frente
+a la alternativa de que la feature no funcione en absoluto con un backend
+containerizado.
 
-**Alternatives considered**: Web Serial API en el frontend — descartada por la
-limitación de navegador.
+**Alternatives considered**: Abrir el puerto desde el backend con
+`System.IO.Ports.SerialPort` — descartada: solo sirve si backend y hardware
+comparten la misma máquina sin contenedores de por medio, algo que no se puede
+asumir como forma de despliegue de ECGViewer.
 
-## D2: Cómo llegan los datos al frontend — Server-Sent Events (SSE)
+## D2: Cómo llegan los datos a la UI — estado de un hook de React, sin red
 
-**Decision**: Un endpoint `GET /api/serial/stream` que mantiene la conexión
-HTTP abierta y empuja lotes de muestras ya escaladas cada ~100 ms (alineado con
-FR-012/Principio V), en vez de WebSocket o polling.
+**Decision**: Un hook (`useSerialConnection`) lee el `ReadableStream` del
+puerto directamente y expone las muestras ya escaladas como estado de React.
+No hay ningún viaje por HTTP: todo ocurre en el mismo proceso (pestaña del
+navegador).
 
-**Rationale**: El flujo de datos es unidireccional (backend → frontend); SSE es
-más simple que WebSocket para este caso (nativo del navegador vía `EventSource`,
-sin librería nueva en el frontend) y evita el desperdicio de polling. Agrupar en
-lotes de ~100 ms coincide exactamente con el tope de actualización visual que ya
-pide la constitución, así que el backend hace el throttling una sola vez en vez
-de que el frontend reciba 250 eventos/s y los descarte.
+**Rationale**: Al no haber backend involucrado, no hace falta streaming por
+red (SSE/WebSocket/polling) — el "transporte" es simplemente la lectura del
+stream del propio `SerialPort` del navegador. Las muestras se acumulan en un
+buffer y se vuelcan al estado en lotes cada ~100 ms (mismo criterio que
+Principio V / FR-012: no se dispara un render por cada línea recibida a 250 Hz).
 
-**Alternatives considered**: WebSocket (más complejo, no hace falta
-bidireccionalidad) — polling (ineficiente a esta cadencia).
+## D3: Comandos de conexión — funciones del hook, no endpoints
 
-## D3: Comandos de conexión — REST simple, separado del stream
+**Decision**: `connect({ port, baudRate })` y `disconnect()` son métodos del
+hook `useSerialConnection`; elegir el dispositivo es
+`navigator.serial.requestPort()` (selector nativo del navegador). No existen
+`/api/serial/*` en el backend.
 
-**Decision**: `GET /api/serial/ports` (lista de puertos disponibles),
-`POST /api/serial/connect { port, baudRate }`, `POST /api/serial/disconnect`.
-El stream de datos (D2) es un recurso aparte.
+**Rationale**: Sin acceso al hardware desde el backend, no hay nada que un
+endpoint REST pudiera intermediar — "abrir/cerrar" y "elegir dispositivo" son
+operaciones que solo tienen sentido del lado del navegador.
 
-**Rationale**: Separar "abrir/cerrar la conexión" (acciones puntuales) de
-"recibir datos" (flujo continuo) es más simple de testear y de razonar que
-mezclar todo en un único endpoint.
+## D4: Escalado de la muestra — en el frontend, junto a la lectura
 
-## D4: Escalado de la muestra — en el backend, junto a la lectura
+**Decision**: El frontend aplica `Valor_Escalado = cuenta × Span + Zero`
+(`Span = 10/4095`, `Zero = 0`) al leer cada línea del puerto
+(`signal/sampleScaling.ts`), antes de acumularla como muestra.
 
-**Decision**: El backend aplica `Valor_Escalado = cuenta × Span + Zero`
-(`Span = 10/4095`, `Zero = 0`) al leer cada línea, antes de enviarla al
-frontend — nunca se envía la cuenta cruda.
-
-**Rationale**: Evita duplicar la fórmula en dos lenguajes (C# y TypeScript);
-mismo criterio que ya se sigue con los filtros DSP y el espectro de potencia
-(el cálculo numérico vive en el backend).
+**Rationale**: Es la única fórmula que hace falta y ya no hay backend en el
+camino de estos datos; ponerla ahí evita un viaje de ida y vuelta sin motivo.
 
 ## D5: Asignación de tiempo — índice de muestra, no reloj de pared
 
-**Decision**: El backend numera cada muestra válida con un contador incremental
+**Decision**: El hook numera cada muestra válida con un contador incremental
 `n` (arrancando en 0 al conectar) y calcula `t = n / 250` segundos — nunca usa
 la hora real de llegada del dato.
 
@@ -67,7 +71,7 @@ ritmo real de llegada por el puerto (que puede tener jitter).
 
 ## D6: Límite de 20 minutos — contar muestras válidas
 
-**Decision**: El backend cierra el puerto solo (mismo resultado que
+**Decision**: El hook cierra el puerto solo (mismo resultado que
 "Desconectarse") al llegar a 300 000 muestras válidas (250 Hz × 20 min), sin
 necesitar un reloj de pared aparte — ya que D5 fija la relación 1 muestra = 1/250 s.
 
@@ -78,8 +82,8 @@ equivalente a contar segundos transcurridos de señal.
 
 **Decision**: Al conectar, el frontend arranca una señal nueva vacía (mismo
 `initDerivation` que ya usa la carga de CSV/XLSX) y la va llenando con cada
-lote que llega por SSE — reemplazando cualquier señal previa, sin diálogo de
-confirmación adicional (FR-011, igual que cargar un archivo hoy).
+lote de muestras del hook — reemplazando cualquier señal previa, sin diálogo
+de confirmación adicional (FR-011, igual que cargar un archivo hoy).
 
 ## D8: Ventana visible sigue el extremo más reciente mientras está conectado
 
@@ -95,7 +99,7 @@ ya cargada.
 **Rationale**: Es el comportamiento más simple y predecible que satisface "ver
 el trazado en vivo como un monitor" (spec, Assumptions) sin inventar una
 máquina de estados de "el usuario interactuó, dejar de autoseguir por N
-segundos". Si en el uso real resulta molesto no poder pausear el
+segundos". Si en el uso real resulta molesto no poder pausar el
 autoseguimiento para mirar un tramo pasado mientras se sigue capturando, es un
 ajuste de seguimiento (follow-up), no bloqueante para esta feature.
 
@@ -103,15 +107,17 @@ ajuste de seguimiento (follow-up), no bloqueante para esta feature.
 manual y se reanuda con un botón "Volver al final" — más completo pero
 significativamente más complejo; se deja fuera del alcance inicial.
 
-## D9: Servicio único de captura (sin multi-sesión)
+## D9: Una sola conexión a la vez (sin multi-sesión)
 
-**Decision**: Un servicio singleton en el backend (`SerialCaptureService`)
-mantiene el estado de la única conexión posible a la vez (idle/conectado/error),
-igual que `StudyRepository` maneja el único estudio persistido — consistente
-con que la app es de libre acceso, sin usuarios ni sesiones concurrentes.
+**Decision**: El hook `useSerialConnection` modela una única conexión activa
+por vez (idle/conectado/detenido/error) — consistente con que la app es de
+libre acceso, sin usuarios ni sesiones concurrentes, y con que solo hay un
+dispositivo de hardware por instancia de la app abierta en el navegador.
 
 ## Resumen de Technical Context
 
 Todas las incógnitas quedaron resueltas; no quedan `NEEDS CLARIFICATION`
-pendientes para `plan.md`. Nueva dependencia de backend: `System.IO.Ports`
-(paquete NuGet estándar de Microsoft, multiplataforma).
+pendientes. El backend no tiene ninguna dependencia ni código nuevos para esta
+feature: toda la lógica (acceso al puerto, escalado, límite de 20 minutos)
+vive en `src/frontend/src/hooks/useSerialConnection.ts` y
+`src/frontend/src/signal/sampleScaling.ts`.

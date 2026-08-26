@@ -1,45 +1,52 @@
 # Data Model: Conexión al hardware del ECG por puerto serie
 
-## SerialPortInfo
+Todas las entidades de esta feature viven en el **frontend** (research.md D1):
+el backend no participa de la conexión al hardware.
 
-Un puerto serie disponible en la computadora (backend, solo lectura).
+## SerialPortLike (`serial/webSerialTypes.ts`)
 
-| Campo | Tipo | Descripción |
-|---|---|---|
-| `name` | `string` | Nombre/identificador del puerto (p. ej. `COM3`, `/dev/ttyUSB0`). |
+Superficie mínima de un puerto de la Web Serial API que usa la app —
+interfaz propia (inyectable en tests) porque `lib.dom.d.ts` no incluye la Web
+Serial API al ser no estándar.
 
-## ConnectionConfig
+| Campo/Método | Descripción |
+|---|---|
+| `open({ baudRate })` | Abre el puerto a la velocidad elegida. |
+| `close()` | Cierra el puerto. |
+| `readable` | `ReadableStream<Uint8Array>` con los bytes entrantes. |
+
+## SerialConnectionConfig
 
 Configuración elegida en el diálogo "Configuración". **No se persiste** con el
 estudio (vive solo para la sesión del navegador, research.md D7).
 
 | Campo | Tipo | Descripción |
 |---|---|---|
-| `port` | `string` | Puerto elegido (de `SerialPortInfo`). |
+| `port` | `SerialPortLike` | Puerto elegido con `navigator.serial.requestPort()` (selector nativo del navegador). |
 | `baudRate` | `number` | Velocidad en baudios. Default **115200** (FR-003). |
 
-## CaptureStatus
+## SerialConnectionStatus
 
-Estado de la única conexión posible a la vez (backend, `SerialCaptureService`
-singleton — research.md D9).
+Estado de la única conexión posible a la vez (`useSerialConnection`,
+research.md D9).
 
 | Estado | Descripción |
 |---|---|
 | `idle` | Sin conexión activa. |
 | `connected` | Puerto abierto, recibiendo (o esperando) datos. |
-| `stopped` | Se detuvo (manual, límite de 20 min, o error) — el resultado ya quedó volcado a una señal normal en el frontend. |
-| `error` | El puerto no se pudo abrir, o se perdió la conexión a mitad de captura. |
+| `stopped` | Se detuvo (manual o límite de 20 min) — el resultado ya quedó volcado a una señal normal. |
+| `error` | Se perdió la conexión a mitad de captura (dispositivo desconectado). |
 
-## Lote de muestras (evento del stream)
+## Lote de muestras (estado del hook)
 
-Lo que el backend empuja por `GET /api/serial/stream` cada ~100 ms
-(research.md D2).
+Lo que `useSerialConnection` vuelca a `samples` cada ~100 ms mientras lee el
+puerto (research.md D2).
 
 | Campo | Tipo | Descripción |
 |---|---|---|
-| `samples` | `Array<{ t: number; v: number }>` | Muestras nuevas desde el último lote; `t` en segundos (`n / 250`, D5), `v` en mV ya escalado (D4). |
-| `status` | `CaptureStatus` | Estado tras procesar este lote. |
-| `reason` | `string \| null` | Motivo si `status` es `stopped`/`error` (p. ej. `"TIME_LIMIT"`, `"DEVICE_DISCONNECTED"`, `"PORT_ERROR"`). |
+| `samples` | `Array<{ t: number; v: number }>` | Todas las muestras válidas acumuladas; `t` en segundos (`n / 250`, D5), `v` en mV ya escalado (D4). |
+| `status` | `SerialConnectionStatus` | Estado actual de la conexión. |
+| `reason` | `string \| null` | Motivo si `status` es `stopped`/`error` (`"TIME_LIMIT"` \| `"DEVICE_DISCONNECTED"` \| `null`). |
 
 **Validación**: una línea recibida que no se pueda interpretar como entero se
 descarta (FR-008) y no cuenta para el índice de muestra `n` ni para el límite
