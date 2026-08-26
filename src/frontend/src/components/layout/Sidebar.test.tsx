@@ -29,6 +29,9 @@ function renderSidebar(overrides: Partial<Parameters<typeof Sidebar>[0]> = {}) {
     complexDetectionActive: false,
     complexDetectionStatus: "idle" as const,
     onToggleComplexDetection: vi.fn(),
+    spectrumActive: false,
+    spectrumStatus: "idle" as const,
+    onToggleSpectrum: vi.fn(),
     ...overrides,
   };
   render(<Sidebar {...props} />);
@@ -118,5 +121,31 @@ describe("Sidebar — Diagnósticos y Detec. Complejos (feature 003)", () => {
     renderSidebar({ complexDetectionActive: true, complexDetectionStatus: "processing" });
     const detec = screen.getByRole("button", { name: /detectando/i });
     expect(detec).toBeDisabled();
+  });
+});
+
+describe("Sidebar — Espectro (feature 004)", () => {
+  it("aparece 'Espectro' en 'Diagnósticos'", () => {
+    renderSidebar();
+    expect(screen.getByRole("button", { name: /^espectro$/i })).toBeInTheDocument();
+  });
+
+  it("'Espectro' está deshabilitado sin señal cargada", () => {
+    renderSidebar({ hasSignal: false });
+    expect(screen.getByRole("button", { name: /^espectro$/i })).toBeDisabled();
+  });
+
+  it("al hacer click invoca onToggleSpectrum", () => {
+    const props = renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: /^espectro$/i }));
+    expect(props.onToggleSpectrum).toHaveBeenCalledTimes(1);
+  });
+
+  it("refleja spectrumActive vía aria-pressed", () => {
+    renderSidebar({ spectrumActive: true });
+    expect(screen.getByRole("button", { name: /^espectro$/i })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
   });
 });

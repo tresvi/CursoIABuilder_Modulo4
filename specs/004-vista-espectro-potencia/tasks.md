@@ -55,20 +55,22 @@ trazado (quickstart.md, Escenario 2).
   una señal válida devuelve 200 con `points` ordenados por frecuencia creciente hasta
   `fs/2`; señal vacía devuelve 400 `INVALID_SIGNAL`; ventana con muy pocas muestras
   devuelve 400 `INSUFFICIENT_SAMPLES` (contracts/api.md).
-- [ ] T402 [P] [US1] Test en `src/frontend/src/api/spectrumApi.test.ts` (mismo estilo
-  que `filterApi` si tiene test, o análogo a como se testea `applyFilter`): `computeSpectrum(signal)` llama a `POST /api/spectrum`
-  y devuelve `SpectrumResult`; propaga el error de la API si la respuesta no es 200.
-- [ ] T403 [P] [US1] Test en `src/frontend/src/render/drawSpectrum.test.ts` (mismo
-  patrón `recordingCtx` que `drawSignal.test.ts`/`drawComplexMarks.test.ts`): dibuja el
-  espectro reutilizando `createScale`/`ecgScale.ts` (research.md D4); no lanza error
-  con `points` vacío.
-- [ ] T404 [P] [US1] Test en `src/frontend/src/components/SpectrumChart.test.tsx`:
-  renderiza el canvas (`data-testid` propio) sin manejadores de puntero ni props de
-  herramientas/marcadores/marcas de complejos (a diferencia de `ECGChart`).
-- [ ] T405 [P] [US1] Test en `src/frontend/src/components/layout/Sidebar.test.tsx`:
+- [X] T402 [P] [US1] **Ajuste de diseño**: ningún archivo `api/*.ts` de este proyecto
+  tiene test dedicado (`filterApi.ts`, `studyApi.ts`, `excelApi.ts` se prueban de forma
+  indirecta, mockeados a nivel de módulo en `MainPage.test.tsx`). Se sigue el mismo
+  criterio: `spectrumApi.ts` no tiene test propio; su cobertura vive en T406
+  (`MainPage.test.tsx`, con `computeSpectrum` mockeado igual que `applyFilter`).
+- [X] T403 [P] [US1] Test en `src/frontend/src/render/drawSpectrum.test.ts` (mismo
+  patrón `recordingCtx` que `drawSignal.test.ts`): dibuja el espectro reutilizando
+  `createScale`/`ecgScale.ts` (research.md D4); no lanza error con `points` vacío;
+  recorta por `view.tRange` igual que el trazado. Además cubre `powerRange`.
+- [X] T404 [P] [US1] Test en `src/frontend/src/components/SpectrumChart.test.tsx`:
+  renderiza un único canvas (`data-testid="spectrum-chart"`) sin lanzar, con y sin
+  puntos.
+- [X] T405 [P] [US1] Test en `src/frontend/src/components/layout/Sidebar.test.tsx`:
   aparece un botón "Espectro" en "Diagnósticos" (junto a "Detec. Complejos"); está
   deshabilitado sin señal cargada; el click invoca `onToggleSpectrum`.
-- [ ] T406 [P] [US1] Tests en `src/frontend/src/pages/MainPage.test.tsx`: activar
+- [X] T406 [P] [US1] Tests en `src/frontend/src/pages/MainPage.test.tsx`: activar
   "Espectro" con una señal cargada muestra `SpectrumChart` en vez de `ECGChart` (por
   `data-testid`) tras pasar por el estado de carga; con "Espectro" activo, aplicar un
   filtro (con `applyFilter` mockeado, mismo patrón que la feature 003) recalcula solo;
@@ -91,19 +93,19 @@ trazado (quickstart.md, Escenario 2).
   `PowerSpectrum`. Depende de T407, T408. Hace pasar T401.
 - [X] T410 [US1] `src/backend/ECGViewer.Api/Program.cs`: registrar
   `app.MapSpectrumEndpoints()`. Depende de T409.
-- [ ] T411 [P] [US1] `src/frontend/src/api/spectrumApi.ts`: `computeSpectrum(signal): Promise<SpectrumResult>`
+- [X] T411 [P] [US1] `src/frontend/src/api/spectrumApi.ts`: `computeSpectrum(signal): Promise<SpectrumResult>`
   (mismo patrón que `filterApi.ts`/`applyFilter`). Hace pasar T402.
-- [ ] T412 [P] [US1] `src/frontend/src/render/drawSpectrum.ts`: dibuja los
+- [X] T412 [P] [US1] `src/frontend/src/render/drawSpectrum.ts`: dibuja los
   `SpectrumPoint[]` reutilizando `createScale`/`plotRect` de `ecgScale.ts` (research.md
   D4, sin sistema de escala paralelo). Hace pasar T403.
-- [ ] T413 [US1] `src/frontend/src/components/SpectrumChart.tsx`: canvas único (sin
+- [X] T413 [US1] `src/frontend/src/components/SpectrumChart.tsx`: canvas único (sin
   capa overlay ni manejadores de puntero, a diferencia de `ECGChart` — research.md D3),
   llama a `drawSpectrum`. Depende de T412. Hace pasar T404.
-- [ ] T414 [US1] `src/frontend/src/components/layout/Sidebar.tsx`: agregar el botón
+- [X] T414 [US1] `src/frontend/src/components/layout/Sidebar.tsx`: agregar el botón
   "Espectro" en la sección "Diagnósticos" (props nuevas `spectrumActive`,
   `spectrumStatus`, `onToggleSpectrum`), sin tocar todavía los botones de filtro ni
   "Restaurar" (eso es US2/Phase 3). Hace pasar T405.
-- [ ] T415 [US1] `src/frontend/src/pages/MainPage.tsx`: estado
+- [X] T415 [US1] `src/frontend/src/pages/MainPage.tsx`: estado
   `spectrumOn`/`spectrum`/`spectrumBusy`/`spectrumError` (ciclo
   `idle → busy → ready/error` de data-model.md, patrón de `filterBusy`/`filterError`
   ya existente — NO el Worker de la feature 003, research.md D5); efecto sobre

@@ -1,6 +1,7 @@
 import { Fragment, useState, type ReactNode } from "react";
 import {
   Activity,
+  ChartSpline,
   ChevronDown,
   Crop,
   Download,
@@ -49,6 +50,11 @@ interface SidebarProps {
   complexDetectionActive: boolean;
   complexDetectionStatus: ComplexDetectionStatus;
   onToggleComplexDetection: () => void;
+  /** "Espectro" (feature 004): alterna el gráfico principal entre trazado y
+   * espectro de potencia; "busy" mientras se calcula (research.md D5). */
+  spectrumActive: boolean;
+  spectrumStatus: "idle" | "busy" | "ready" | "error";
+  onToggleSpectrum: () => void;
 }
 
 const FILTERS: Array<{ id: FilterKind; label: string; icon: typeof Waves }> = [
@@ -139,6 +145,9 @@ export function Sidebar({
   complexDetectionActive,
   complexDetectionStatus,
   onToggleComplexDetection,
+  spectrumActive,
+  spectrumStatus,
+  onToggleSpectrum,
 }: SidebarProps) {
   return (
     <aside
@@ -252,6 +261,14 @@ export function Sidebar({
             active={complexDetectionActive}
             onClick={onToggleComplexDetection}
             disabled={!hasSignal || complexDetectionStatus === "processing"}
+          />
+          <NavItem
+            icon={ChartSpline}
+            label={spectrumStatus === "busy" ? "Calculando…" : "Espectro"}
+            collapsed={collapsed}
+            active={spectrumActive}
+            onClick={onToggleSpectrum}
+            disabled={!hasSignal || spectrumStatus === "busy"}
           />
           {FILTERS.map((f) => (
             <NavItem

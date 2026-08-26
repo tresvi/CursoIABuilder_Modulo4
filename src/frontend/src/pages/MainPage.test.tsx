@@ -3,6 +3,8 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MainPage } from "./MainPage";
 import * as studyApi from "../api/studyApi";
 import * as filterApi from "../api/filterApi";
+import * as spectrumApi from "../api/spectrumApi";
+import { ApiRequestError } from "../api/client";
 
 // Evita llamadas de red en los tests y permite espiar el guardado.
 vi.mock("../api/studyApi", () => ({
@@ -18,6 +20,13 @@ vi.mock("../api/filterApi", () => ({
   ),
 }));
 
+// Evita llamadas de red al calcular el espectro (feature 004).
+vi.mock("../api/spectrumApi", () => ({
+  computeSpectrum: vi.fn(() =>
+    Promise.resolve([{ frequency: 0, power: 0.1 }])
+  ),
+}));
+
 /** Crea un File CSV para simular la carga del usuario. */
 function csvFile(name: string, content: string): File {
   return new File([content], name, { type: "text/csv" });
@@ -26,6 +35,9 @@ function csvFile(name: string, content: string): File {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(studyApi.getStudy).mockResolvedValue(null);
+  vi.mocked(spectrumApi.computeSpectrum).mockResolvedValue([
+    { frequency: 0, power: 0.1 },
+  ]);
 });
 
 describe("MainPage — integración US1 + US2", () => {
@@ -245,5 +257,96 @@ describe("MainPage — integración US1 + US2", () => {
     // recién al presionar "Guardar" se persiste
     fireEvent.click(screen.getByTestId("save-btn"));
     await waitFor(() => expect(studyApi.saveStudy).toHaveBeenCalledTimes(1));
+  });
+});
+
+/** Carga una señal simple de 6 s con picos cada 1 s (60 BPM). */
+async function loadBasicSignal() {
+  const input = screen.getByLabelText(/Cargar archivo CSV/i);
+  const fs = 250;
+  const peaks = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5];
+  const rows: string[] = ["time,value"];
+  for (let i = 0; i < 6 * fs; i++) {
+    const t = i / fs;
+    let v = 0;
+    for (const p of peaks) v += Math.exp(-((t - p) ** 2) / (2 * 0.01 * 0.01));
+    rows.push(`${t.toFixed(4)},${v.toFixed(4)}`);
+  }
+  fireEvent.change(input, { target: { files: [csvFile("ecg.csv", rows.join("\n"))] } });
+  await waitFor(() => expect(screen.getByTestId("ecg-chart")).toBeInTheDocument());
+}
+
+describe("MainPage — Espectro (feature 004)", () => {
+  it("activar 'Espectro' muestra el gráfico de espectro en vez del trazado", async () => {
+    render(<MainPage />);
+    await loadBasicSignal();
+
+    fireEvent.click(screen.getByRole("button", { name: /^espectro$/i }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("spectrum-chart")).toBeInTheDocument()
+    );
+    expect(screen.queryByTestId("ecg-chart")).toBeNull();
+    expect(spectrumApi.computeSpectrum).toHaveBeenCalledTimes(1);
+  });
+
+  it("desactivar 'Espectro' vuelve a mostrar el trazado", async () => {
+    render(<MainPage />);
+    await loadBasicSignal();
+
+    const toggle = () => screen.getByRole("button", { name: /^espectro$/i });
+    fireEvent.click(toggle());
+    await waitFor(() =>
+      expect(screen.getByTestId("spectrum-chart")).toBeInTheDocument()
+    );
+
+    fireEvent.click(toggle());
+    expect(screen.getByTestId("ecg-chart")).toBeInTheDocument();
+    expect(screen.queryByTestId("spectrum-chart")).toBeNull();
+  });
+
+  it("con 'Espectro' activo, aplicar un filtro recalcula el espectro solo (FR-005)", async () => {
+    render(<MainPage />);
+    await loadBasicSignal();
+
+    fireEvent.click(screen.getByRole("button", { name: /^espectro$/i }));
+    await waitFor(() => expect(spectrumApi.computeSpectrum).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole("button", { name: /aplicar filtro/i }));
+
+    await waitFor(() => expect(filterApi.applyFilter).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(spectrumApi.computeSpectrum).toHaveBeenCalledTimes(2));
+    expect(screen.getByTestId("spectrum-chart")).toBeInTheDocument();
+  });
+
+  it("con 'Detec. Complejos' y 'Espectro' activos a la vez, no aparece el trazado ni sus marcas (FR-006)", async () => {
+    render(<MainPage />);
+    await loadBasicSignal();
+
+    fireEvent.click(screen.getByRole("button", { name: /detec\. complejos/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^espectro$/i }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("spectrum-chart")).toBeInTheDocument()
+    );
+    expect(screen.queryByTestId("ecg-chart")).toBeNull();
+  });
+
+  it("ante una ventana insuficiente, muestra un aviso en vez del gráfico de espectro (FR-009)", async () => {
+    vi.mocked(spectrumApi.computeSpectrum).mockRejectedValueOnce(
+      new ApiRequestError({
+        code: "INSUFFICIENT_SAMPLES",
+        message: "Se necesitan al menos 8 muestras.",
+      })
+    );
+    render(<MainPage />);
+    await loadBasicSignal();
+
+    fireEvent.click(screen.getByRole("button", { name: /^espectro$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/8 muestras/i);
+    });
+    expect(screen.queryByTestId("spectrum-chart")).toBeNull();
   });
 });
