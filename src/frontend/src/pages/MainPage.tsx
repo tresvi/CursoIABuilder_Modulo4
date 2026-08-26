@@ -231,7 +231,6 @@ export function MainPage() {
       cancelled = true;
     };
     // Solo al montar.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Restaura el estudio guardado a pedido: reconstruye original, re-aplica el

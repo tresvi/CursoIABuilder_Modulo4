@@ -20,15 +20,16 @@ public class ExcelEndpointTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task Export_devuelve_xlsx_y_reimportar_conserva_los_datos()
     {
+        var ct = TestContext.Current.CancellationToken;
         var signal = Sample();
 
-        var export = await _client.PostAsJsonAsync("/api/export/xlsx", signal, Json);
+        var export = await _client.PostAsJsonAsync("/api/export/xlsx", signal, Json, ct);
         Assert.Equal(HttpStatusCode.OK, export.StatusCode);
         Assert.Equal(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             export.Content.Headers.ContentType!.MediaType
         );
-        var bytes = await export.Content.ReadAsByteArrayAsync();
+        var bytes = await export.Content.ReadAsByteArrayAsync(ct);
         Assert.NotEmpty(bytes);
 
         // reimportar (multipart)
@@ -36,9 +37,9 @@ public class ExcelEndpointTests : IClassFixture<WebApplicationFactory<Program>>
         var fileContent = new ByteArrayContent(bytes);
         form.Add(fileContent, "file", "ecg.xlsx");
 
-        var import = await _client.PostAsync("/api/import/xlsx", form);
+        var import = await _client.PostAsync("/api/import/xlsx", form, ct);
         Assert.Equal(HttpStatusCode.OK, import.StatusCode);
-        var body = await import.Content.ReadFromJsonAsync<ImportResponse>(Json);
+        var body = await import.Content.ReadFromJsonAsync<ImportResponse>(Json, ct);
         Assert.Equal(3, body!.Signal.Samples.Count);
         Assert.Equal(0.15, body.Signal.Samples[1].V, 9);
     }
@@ -46,12 +47,13 @@ public class ExcelEndpointTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task Import_archivo_no_xlsx_devuelve_400()
     {
+        var ct = TestContext.Current.CancellationToken;
         using var form = new MultipartFormDataContent();
         form.Add(new ByteArrayContent("no soy un xlsx"u8.ToArray()), "file", "bad.xlsx");
 
-        var res = await _client.PostAsync("/api/import/xlsx", form);
+        var res = await _client.PostAsync("/api/import/xlsx", form, ct);
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
-        var err = await res.Content.ReadFromJsonAsync<ErrorResponse>(Json);
+        var err = await res.Content.ReadFromJsonAsync<ErrorResponse>(Json, ct);
         Assert.Equal(ErrorCodes.InvalidXlsx, err!.Error.Code);
     }
 
@@ -61,7 +63,8 @@ public class ExcelEndpointTests : IClassFixture<WebApplicationFactory<Program>>
         var res = await _client.PostAsJsonAsync(
             "/api/export/xlsx",
             new SignalDto(new List<SampleDto>(), 250),
-            Json
+            Json,
+            TestContext.Current.CancellationToken
         );
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }

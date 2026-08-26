@@ -2,6 +2,7 @@ import { Activity, CheckCircle2, Clock, FileText } from "lucide-react";
 import type { PaperSpeed } from "@/render/drawGrid";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
+import { formatDuration } from "@/lib/utils";
 
 interface TopBarProps {
   fileName: string | null;
@@ -13,15 +14,6 @@ interface TopBarProps {
   onPaperSpeed: (speed: PaperSpeed) => void;
   /** Duración total del ensayo abierto (segundos), o null si no hay señal. */
   durationSec: number | null;
-}
-
-/** Formatea una duración en segundos como HH:MM:SS. */
-export function formatDuration(totalSec: number): string {
-  const s = Math.max(0, Math.round(totalSec));
-  const hh = Math.floor(s / 3600);
-  const mm = Math.floor((s % 3600) / 60);
-  const ss = s % 60;
-  return [hh, mm, ss].map((n) => String(n).padStart(2, "0")).join(":");
 }
 
 /**

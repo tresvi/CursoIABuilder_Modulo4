@@ -42,23 +42,25 @@ public class StudyEndpointTests : IDisposable
     [Fact]
     public async Task Get_sin_estudio_devuelve_404_not_found()
     {
-        var res = await _client.GetAsync("/api/study");
+        var ct = TestContext.Current.CancellationToken;
+        var res = await _client.GetAsync("/api/study", ct);
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
-        var err = await res.Content.ReadFromJsonAsync<ErrorResponse>(Json);
+        var err = await res.Content.ReadFromJsonAsync<ErrorResponse>(Json, ct);
         Assert.Equal(ErrorCodes.NotFound, err!.Error.Code);
     }
 
     [Fact]
     public async Task Put_guarda_y_Get_restaura_el_estudio()
     {
-        var put = await _client.PutAsJsonAsync("/api/study", SampleStudy(), Json);
+        var ct = TestContext.Current.CancellationToken;
+        var put = await _client.PutAsJsonAsync("/api/study", SampleStudy(), Json, ct);
         Assert.Equal(HttpStatusCode.OK, put.StatusCode);
-        var saved = await put.Content.ReadFromJsonAsync<SaveStudyResponse>(Json);
+        var saved = await put.Content.ReadFromJsonAsync<SaveStudyResponse>(Json, ct);
         Assert.True(saved!.SavedAt <= DateTimeOffset.UtcNow);
 
-        var get = await _client.GetAsync("/api/study");
+        var get = await _client.GetAsync("/api/study", ct);
         Assert.Equal(HttpStatusCode.OK, get.StatusCode);
-        var study = await get.Content.ReadFromJsonAsync<StudyDto>(Json);
+        var study = await get.Content.ReadFromJsonAsync<StudyDto>(Json, ct);
         Assert.Equal("arritmia", study!.Markers[0].Label);
         Assert.Equal(FilterType.BandPass, study.Filter!.Type);
     }
@@ -72,7 +74,12 @@ public class StudyEndpointTests : IDisposable
             null,
             null
         );
-        var res = await _client.PutAsJsonAsync("/api/study", empty, Json);
+        var res = await _client.PutAsJsonAsync(
+            "/api/study",
+            empty,
+            Json,
+            TestContext.Current.CancellationToken
+        );
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
