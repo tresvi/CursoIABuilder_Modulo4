@@ -17,10 +17,6 @@ function renderSidebar(overrides: Partial<Parameters<typeof Sidebar>[0]> = {}) {
     onSave: vi.fn(),
     onExportCsv: vi.fn(),
     onExportXlsx: vi.fn(),
-    activeFilterType: "bandpass" as const,
-    onSelectFilter: vi.fn(),
-    onRevertFilter: vi.fn(),
-    hasFilter: false,
     tool: "none" as const,
     onSelectTool: vi.fn(),
     showGrid: true,
@@ -61,13 +57,13 @@ describe("Sidebar — colapso (US2/US3)", () => {
 
     // Abierta por defecto: sus ítems son visibles y aria-expanded=true.
     expect(header).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("Pasa Banda")).toBeInTheDocument();
+    expect(screen.getByText("Espectro")).toBeInTheDocument();
 
     fireEvent.click(header);
 
     // Colapsada: ítems ocultos y aria-expanded=false.
     expect(header).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText("Pasa Banda")).toBeNull();
+    expect(screen.queryByText("Espectro")).toBeNull();
   });
 
   // SC-005: los controles de colapso son <button> nativos → operables por
@@ -90,9 +86,9 @@ describe("Sidebar — Diagnósticos y Detec. Complejos (feature 003)", () => {
 
     const buttons = screen.getAllByRole("button").map((b) => b.textContent);
     const detecIdx = buttons.findIndex((t) => t?.includes("Detec. Complejos"));
-    const pasaBajoIdx = buttons.findIndex((t) => t?.includes("Pasa Bajo"));
+    const espectroIdx = buttons.findIndex((t) => t?.includes("Espectro"));
     expect(detecIdx).toBeGreaterThan(-1);
-    expect(detecIdx).toBeLessThan(pasaBajoIdx);
+    expect(detecIdx).toBeLessThan(espectroIdx);
   });
 
   it("'Detec. Complejos' está deshabilitado sin señal cargada", () => {
@@ -104,17 +100,6 @@ describe("Sidebar — Diagnósticos y Detec. Complejos (feature 003)", () => {
     const props = renderSidebar();
     fireEvent.click(screen.getByRole("button", { name: /detec\. complejos/i }));
     expect(props.onToggleComplexDetection).toHaveBeenCalledTimes(1);
-  });
-
-  it("puede estar 'active' al mismo tiempo que un filtro de señal (no son excluyentes, FR-007)", () => {
-    renderSidebar({ complexDetectionActive: true, activeFilterType: "bandpass" });
-    const detec = screen.getByRole("button", { name: /detec\. complejos/i });
-    const bandpass = screen.getByRole("button", { name: "Pasa Banda" });
-    // Ambos "presionados" a la vez: complexDetectionActive es un estado propio,
-    // independiente de activeFilterType (que sigue siendo de selección única
-    // entre los filtros de señal entre sí).
-    expect(detec).toHaveAttribute("aria-pressed", "true");
-    expect(bandpass).toHaveAttribute("aria-pressed", "true");
   });
 
   it("muestra un estado de 'procesando' mientras complexDetectionStatus === 'processing'", () => {
@@ -147,5 +132,19 @@ describe("Sidebar — Espectro (feature 004)", () => {
       "aria-pressed",
       "true"
     );
+  });
+});
+
+describe("Sidebar — sin atajos de filtro (feature 004, US2)", () => {
+  it("'Diagnósticos' ya no incluye los botones de filtro ni 'Restaurar'", () => {
+    renderSidebar();
+    expect(screen.queryByRole("button", { name: "Pasa Bajo" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Pasa Alto" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Pasa Banda" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Notch" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Restaurar" })).toBeNull();
+    // Sigue teniendo las dos herramientas de diagnóstico.
+    expect(screen.getByRole("button", { name: /detec\. complejos/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^espectro$/i })).toBeInTheDocument();
   });
 });

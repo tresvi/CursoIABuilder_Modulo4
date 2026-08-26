@@ -130,22 +130,24 @@ filtro sigue funcionando (quickstart.md, Escenario 1).
 
 ### Tests (escribir primero, deben fallar)
 
-- [ ] T416 [P] [US2] Test en `src/frontend/src/components/layout/Sidebar.test.tsx`: la
+- [X] T416 [P] [US2] Test en `src/frontend/src/components/layout/Sidebar.test.tsx`: la
   sección "Diagnósticos" ya no incluye los botones "Pasa Bajo", "Pasa Alto",
   "Pasa Banda", "Notch" ni "Restaurar" (y sigue teniendo "Detec. Complejos" y
-  "Espectro").
+  "Espectro"). **Ajuste**: se actualizaron dos tests existentes que dependían de que
+  hubiera filtros en la sidebar ("Pasa Banda" como sonda de visibilidad → "Espectro";
+  el orden Detec.Complejos-antes-de-Pasa Bajo → antes-de-Espectro), y se retiró el test
+  de FR-007 (feature 003, "no son excluyentes") porque probaba exactamente el botón de
+  filtro que esta feature elimina de la sidebar.
 
 ### Implementación
 
-- [ ] T417 [US2] `src/frontend/src/components/layout/Sidebar.tsx`: quitar el
-  `FILTERS.map(...)` y el `NavItem` "Restaurar" de "Diagnósticos"; quitar de
-  `SidebarProps` los props que quedan sin uso (`activeFilterType`, `onSelectFilter`,
-  `onRevertFilter`, `hasFilter`) y los imports que queden sin uso (`Undo2`, `Filter`,
-  y `Waves`/`Activity` si ya no los usa nada más en el archivo). Depende de T414. Hace
-  pasar T416.
-- [ ] T418 [US2] `src/frontend/src/pages/MainPage.tsx`: dejar de pasar a `<Sidebar>`
-  los props removidos en T417 (`FilterPanel` ya los maneja de forma independiente, sin
-  cambios). Depende de T417.
+- [X] T417 [US2] `src/frontend/src/components/layout/Sidebar.tsx`: quitado el
+  `FILTERS.map(...)` y el `NavItem` "Restaurar" de "Diagnósticos"; quitados de
+  `SidebarProps` los props sin uso (`activeFilterType`, `onSelectFilter`,
+  `onRevertFilter`, `hasFilter`) y los imports sin uso (`Undo2`, `Filter`, `Activity`;
+  `Waves` se conserva por el tipo `typeof Waves` de `TOOLS`).
+- [X] T418 [US2] `src/frontend/src/pages/MainPage.tsx`: dejó de pasar a `<Sidebar>`
+  los props removidos en T417 (`FilterPanel` los sigue manejando sin cambios).
 
 **Checkpoint**: US1 + US2 funcionan juntas de forma independiente (quickstart
 Escenario 1); aplicar/revertir un filtro desde el panel de filtro sigue funcionando

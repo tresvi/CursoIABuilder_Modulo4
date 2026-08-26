@@ -1,11 +1,9 @@
 import { Fragment, useState, type ReactNode } from "react";
 import {
-  Activity,
   ChartSpline,
   ChevronDown,
   Crop,
   Download,
-  Filter,
   Grid3x3,
   HeartPulse,
   MapPin,
@@ -15,12 +13,10 @@ import {
   Ruler,
   Save,
   ScanSearch,
-  Undo2,
   Upload,
   Waves,
   ZoomIn,
 } from "lucide-react";
-import type { FilterKind } from "@/api/filterApi";
 import type { Tool } from "@/hooks/useTool";
 import type { ComplexDetectionStatus } from "@/hooks/useComplexDetection";
 import { NavItem } from "./NavItem";
@@ -36,10 +32,6 @@ interface SidebarProps {
   onSave: () => void;
   onExportCsv: () => void;
   onExportXlsx: () => void;
-  activeFilterType: FilterKind;
-  onSelectFilter: (kind: FilterKind) => void;
-  onRevertFilter: () => void;
-  hasFilter: boolean;
   tool: Tool;
   onSelectTool: (tool: Tool) => void;
   showGrid: boolean;
@@ -56,13 +48,6 @@ interface SidebarProps {
   spectrumStatus: "idle" | "busy" | "ready" | "error";
   onToggleSpectrum: () => void;
 }
-
-const FILTERS: Array<{ id: FilterKind; label: string; icon: typeof Waves }> = [
-  { id: "lowpass", label: "Pasa Bajo", icon: Waves },
-  { id: "highpass", label: "Pasa Alto", icon: Waves },
-  { id: "bandpass", label: "Pasa Banda", icon: Activity },
-  { id: "notch", label: "Notch", icon: Filter },
-];
 
 const TOOLS: Array<{ id: Tool; label: string; icon: typeof Waves }> = [
   { id: "zoom", label: "Zoom", icon: ZoomIn },
@@ -133,10 +118,6 @@ export function Sidebar({
   onSave,
   onExportCsv,
   onExportXlsx,
-  activeFilterType,
-  onSelectFilter,
-  onRevertFilter,
-  hasFilter,
   tool,
   onSelectTool,
   showGrid,
@@ -269,24 +250,6 @@ export function Sidebar({
             active={spectrumActive}
             onClick={onToggleSpectrum}
             disabled={!hasSignal || spectrumStatus === "busy"}
-          />
-          {FILTERS.map((f) => (
-            <NavItem
-              key={f.id}
-              icon={f.icon}
-              label={f.label}
-              collapsed={collapsed}
-              active={activeFilterType === f.id}
-              onClick={() => onSelectFilter(f.id)}
-              disabled={!hasSignal}
-            />
-          ))}
-          <NavItem
-            icon={Undo2}
-            label="Restaurar"
-            collapsed={collapsed}
-            onClick={onRevertFilter}
-            disabled={!hasFilter}
           />
         </SidebarGroup>
       </nav>

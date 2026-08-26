@@ -330,10 +330,6 @@ export function MainPage() {
           onSave={handleSave}
           onExportCsv={handleExportCsv}
           onExportXlsx={handleExportXlsx}
-          activeFilterType={filterType}
-          onSelectFilter={setFilterType}
-          onRevertFilter={handleRevertFilter}
-          hasFilter={derivation?.filteredSamples != null}
           tool={tool}
           onSelectTool={setTool}
           showGrid={state.showGrid}
