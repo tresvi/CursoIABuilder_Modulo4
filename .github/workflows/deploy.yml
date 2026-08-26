@@ -19,7 +19,7 @@ on:
         type: string
         default: ""
       api_base:
-        description: "VITE_API_BASE para el build de Pages (URL de una API externa). Vacío = sin backend."
+        description: "VITE_API_BASE para el build de Pages. Vacío = default del front (http://localhost:5080, tu API local)."
         type: string
         default: ""
 
@@ -115,11 +115,15 @@ jobs:
       - name: Build frontend para Pages
         working-directory: src/frontend
         # base = /<repo>/ porque Pages de proyecto sirve desde esa subruta.
-        # VITE_API_BASE sale del input (una API externa); vacío = demo sin backend.
-        env:
-          VITE_API_BASE: ${{ inputs.api_base }}
+        # api_base vacío => no seteamos VITE_API_BASE y el front cae en su
+        # propio default (http://localhost:5080, src/api/config.ts). Si se
+        # setea acá aunque sea con string vacío, pisa ese default porque
+        # el fallback del front usa `??` (solo actúa sobre null/undefined).
         run: |
           npm ci
+          if [ -n "${{ inputs.api_base }}" ]; then
+            export VITE_API_BASE="${{ inputs.api_base }}"
+          fi
           npm run build -- --base=/${{ github.event.repository.name }}/
 
       - name: Preparar artefacto (SPA fallback + .nojekyll)
