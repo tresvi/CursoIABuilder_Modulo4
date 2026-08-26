@@ -48,6 +48,16 @@ Frontend — carpeta `src/frontend`:
 Flujo mínimo para levantar la app: en una terminal `cd src/backend && dotnet run --project ECGViewer.Api`,
 en otra `cd src/frontend && npm install && npm run dev`, y abrir `http://localhost:5173`.
 
+## CI
+`.github/workflows/ci.yml` corre en cada push a `main`, en cada PR y a mano (`workflow_dispatch`),
+con dos jobs paralelos:
+- **frontend** (`src/frontend`, Node 22): `npm ci` → `npm run lint` → `npm test` → `npm run build`.
+- **backend** (`src/backend`, .NET 10): `dotnet restore|build|test ECGViewer.slnx`.
+
+La solución es **`ECGViewer.slnx`** (formato nuevo); no existe ningún `.sln`.
+No hay gates de formato: `dotnet format --verify-no-changes` y `npm run format:check` hoy fallan
+sobre código ya mergeado, así que quedaron fuera del CI a propósito.
+
 ## Qué NO hacer
 - NO persistir cambios automáticamente: marcadores, filtros y recortes solo se guardan cuando el usuario presiona explícitamente "Guardar". Si hay cambios pendientes al cerrar o recargar, alertar y pedir confirmación.
 - NO modificar destructivamente la señal original: los filtros y recortes deben poder revertirse a la señal cargada.

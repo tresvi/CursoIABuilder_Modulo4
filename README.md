@@ -1,5 +1,7 @@
 # ECGViewer
 
+[![CI](https://github.com/tresvi/CursoIABuilder_Modulo4/actions/workflows/ci.yml/badge.svg)](https://github.com/tresvi/CursoIABuilder_Modulo4/actions/workflows/ci.yml)
+
 Aplicación web para **visualizar, filtrar y analizar** señales de electrocardiograma (ECG)
 desde archivos CSV/XLSX. Orientada a entornos educativos y de investigación en ingeniería
 biomédica. App de **libre acceso** (sin usuarios ni sesiones).

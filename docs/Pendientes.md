@@ -47,7 +47,5 @@ Trabajo futuro identificado para el ECGViewer.
   todo para las **métricas de ventana** (BPM, SDNN, RMSSD, pNN50) y para la
   **detección de picos**.
 
-- **Pipeline de CI**: crear un pipeline de integración continua (build y tests
-  de back y front) que corra en cada push/PR.
-
 - **Workflow de CD**: crear un workflow de entrega/despliegue continuo.
+  El CI ya vive en [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
