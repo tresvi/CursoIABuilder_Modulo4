@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SpectrumPoint } from "../api/spectrumApi";
 import type { ViewBox } from "../render/ecgScale";
-import { drawSpectrum, powerRange } from "../render/drawSpectrum";
+import {
+  drawSpectrum,
+  drawSpectrumAxes,
+  powerRange,
+  SPECTRUM_MAX_FREQ_HZ,
+} from "../render/drawSpectrum";
 
 interface Props {
   points: SpectrumPoint[];
@@ -40,15 +45,18 @@ export function SpectrumChart({
   const width = Math.max(320, measured?.w ?? widthProp);
   const chartHeight = Math.max(height, measured?.h ?? height);
   const view: ViewBox = useMemo(() => {
-    const maxFreq = points.length > 0 ? points[points.length - 1].frequency : 1;
+    // El rango de potencia (Y) solo debe reflejar lo que entra en el dominio
+    // fijo de frecuencia (X, 0–100 Hz) — un pico fuera de rango no debe
+    // aplastar la escala de lo que sí se ve.
+    const visible = points.filter((p) => p.frequency <= SPECTRUM_MAX_FREQ_HZ);
     return {
       width,
       height: chartHeight,
       padding: 10,
       padLeft: 52,
       padBottom: 34,
-      tRange: [0, maxFreq || 1],
-      vRange: powerRange(points),
+      tRange: [0, SPECTRUM_MAX_FREQ_HZ],
+      vRange: powerRange(visible),
     };
   }, [points, width, chartHeight]);
 
@@ -57,6 +65,7 @@ export function SpectrumChart({
     if (!ctx) return;
     ctx.clearRect(0, 0, width, chartHeight);
     drawSpectrum(ctx, points, view);
+    drawSpectrumAxes(ctx, view);
   }, [points, view, width, chartHeight]);
 
   return (
