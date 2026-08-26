@@ -115,5 +115,5 @@ frontend a GitHub Pages. Nada corre solo; se dispara a mano desde la pestaña Ac
 - NO agregar inicio de sesión ni datos por usuario: la app es de libre acceso (autenticación está Fuera de Alcance).
 - NO hardcodear la API key de Claude: va en `.env` como ANTHROPIC_API_KEY.
 - NO llamar a la API de Claude desde los tests: usar mocks/fakes.
-- NO agregar features fuera del alcance definido: captura en tiempo real por hardware, multi-usuario/roles/nube, HL7/DICOM, export a firmware, multi-tenant.
+- NO agregar features fuera del alcance definido: multi-usuario/roles/nube, HL7/DICOM, export a firmware, multi-tenant. La conexión a hardware por puerto serie SÍ está en alcance desde la constitución v1.4.0 (ver `specs/005-conexion-hardware-ecg/`), pero acotada a ese caso — no habilita cualquier otra integración de hardware sin su propia spec.
 - NO presentar ECGViewer como herramienta de diagnóstico clínico certificado.

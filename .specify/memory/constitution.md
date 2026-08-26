@@ -1,7 +1,20 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.2.0 → 1.3.0
+Version change: 1.3.0 → 1.4.0
+Bump rationale (1.4.0): Enmienda MINOR, a pedido explícito del usuario para
+desbloquear la feature `specs/005-conexion-hardware-ecg`. Se quita "captura en
+tiempo real por hardware" de "Fuera de Alcance" en "Restricciones de Alcance y
+Seguridad", y se agrega una bala "Conexión a hardware" que acota el nuevo alcance
+a un dispositivo de ECG por puerto serie (no abre la puerta a cualquier
+integración de hardware). Se amplía el Principio V (Rendimiento de Visualización)
+con el criterio de actualización para captura en vivo (≤100 ms, distinto del
+render estático de <0.1 s/1 min). No se elimina ni redefine ningún principio
+existente. Templates: sin cambios (genéricos). Documentación operativa
+actualizada en consecuencia: `AGENTS.md`.
+
+--- Historial ---
+Version change (1.3.0): 1.2.0 → 1.3.0
 Bump rationale (1.3.0): Enmienda MINOR. Se adopta Trunk-Based Development (TBD)
 como estrategia de integración: `main` es la única rama de larga vida, siempre en
 verde/desplegable; todo cambio entra por Pull Request desde una rama corta
@@ -10,8 +23,6 @@ la sección "Flujo de Desarrollo y Puertas de Calidad" con la bala de integraci�
 se refuerza "Governance" (revisión y merge ocurren en el PR, con CI en verde). No
 se agregan ni redefinen principios. Templates: sin cambios. Enforcement técnico
 fuera del repo: reglas de Branch Protection de GitHub sobre `main`.
-
---- Historial ---
 Version change (1.2.0): 1.1.0 → 1.2.0
 Bump rationale (1.2.0): Enmienda MINOR (aclaración de alcance del Principio I,
 derivada del análisis /speckit.analyze de la feature 002). Se agrega la subsección
@@ -124,6 +135,12 @@ criterio de aceptación, no una optimización posterior.
 Rationale: la exploración interactiva de la señal pierde valor si el render es lento o
 inestable.
 
+**Captura en vivo (aclaración v1.4.0)**: para una sesión de captura desde hardware
+(conexión por puerto serie), el trazado y las métricas DEBEN actualizarse con una
+demora perceptible de como máximo 100 ms desde que llega cada dato — un criterio
+distinto y adicional al render estático de <0.1 s/1 minuto, porque acá se mide la
+cadencia de actualización en vivo, no el costo de un redibujo puntual.
+
 ## Restricciones de Alcance y Seguridad
 
 - **Un solo canal**: la app soporta señal monocanal. Ante un CSV/XLSX multicanal DEBE
@@ -134,9 +151,13 @@ inestable.
   `ANTHROPIC_API_KEY`.
 - **No es herramienta de diagnóstico**: ECGViewer no se presenta como herramienta de
   diagnóstico clínico certificado.
-- **Fuera de alcance**: captura en tiempo real por hardware, multi-usuario/roles/nube,
-  HL7/DICOM, export a firmware y multi-tenant. No se agregan features fuera del alcance
-  definido en el PRD.
+- **Conexión a hardware (desde v1.4.0)**: se admite conectar un dispositivo de ECG por
+  puerto serie (COM) y recibir muestras en vivo — ver `specs/005-conexion-hardware-ecg/`.
+  Esto acota el alcance a ese caso concreto; NO habilita agregar cualquier otra
+  integración de hardware sin pasar antes por una especificación propia.
+- **Fuera de alcance**: multi-usuario/roles/nube, HL7/DICOM, export a firmware y
+  multi-tenant. No se agregan features fuera del alcance definido en el PRD (salvo la
+  excepción de conexión a hardware señalada arriba).
 
 ## Flujo de Desarrollo y Puertas de Calidad
 
@@ -181,4 +202,4 @@ tests previos a la implementación (Principio I) es motivo de rechazo. La comple
 adicional debe justificarse. Para la guía operativa de desarrollo, consultar `AGENTS.md` /
 `CLAUDE.md`.
 
-**Version**: 1.3.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-08-26
+**Version**: 1.4.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-08-26
