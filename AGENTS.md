@@ -19,20 +19,15 @@ Orientada a entornos educativos y de investigación en ingeniería biomédica.
 - Alcance de responsividad: **tablet + PC**; mobile fuera de alcance. Ver `specs/002-ui-shell-redesign/`.
 
 ### Detección de complejos PQRST — feature 003
-- La sección de la sidebar antes llamada "Filtros" se llama **"Diagnósticos"**; su primer ítem es
-  **"Detec. Complejos"** (no excluyente con los filtros de señal: puede estar activo junto con un
-  filtro, y se recalcula solo al aplicarlo/cambiarlo/restaurarlo — FR-007).
-- Algoritmo puro en `src/frontend/src/metrics/complexDetection.ts` (`detectComplexes`): ancla en
-  `detectRPeaks` y ubica Q/S/P/T por extremos locales en ventanas relativas al RR. Corre sobre
-  **toda la señal cargada** (excepción deliberada al Principio IV, que solo acota BPM/SDNN/RMSSD/pNN50).
-- **Patrón reutilizable para cómputo pesado sin bloquear el hilo principal**: Web Worker
-  (`src/frontend/src/workers/complexDetection.worker.ts`) con fallback inline síncrono-por-microtask
-  cuando `Worker` no existe (jsdom en tests, o un entorno restringido) — ver
-  `src/frontend/src/hooks/useComplexDetection.ts`. Considerar este mismo patrón para futuro trabajo
-  pesado en el frontend (p. ej. comparación de segmentos, caracterización espectral).
-- Dibujo en `src/frontend/src/render/drawComplexMarks.ts`: puntos P/Q/R/S/T sobre el overlay, cada
-  uno con su letra en su mismo color (P/R/T arriba, Q/S abajo), distintos entre sí y del naranja de
-  los marcadores manuales (FR-011). Nunca se persiste (FR-010). Ver `specs/003-deteccion-complejos-pqrst/`.
+- La sección de la sidebar antes llamada "Filtros" es ahora **"Diagnósticos"** (mismo
+  `Sidebar.tsx`); se agregó "Detec. Complejos" como primer ítem, sin sacar nada.
+- Motor en `src/frontend/src/metrics/complexDetection.ts`; dibujo del overlay en
+  `src/frontend/src/render/drawComplexMarks.ts`.
+- **Patrón reutilizable**: el cómputo pesado corre en un Web Worker
+  (`src/frontend/src/workers/complexDetection.worker.ts`) con fallback inline síncrono cuando
+  `Worker` no existe (jsdom, entornos restringidos) — ver `src/frontend/src/hooks/useComplexDetection.ts`.
+  Repetir este patrón ante futuro trabajo pesado en el frontend.
+- Requisitos y comportamiento detallado: `specs/003-deteccion-complejos-pqrst/`.
 
 ### Dependencias NuGet (back)
 Versiones exactas viven en el `.csproj`; acá solo el "qué y por qué".
