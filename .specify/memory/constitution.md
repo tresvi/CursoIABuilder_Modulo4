@@ -1,7 +1,18 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.1.0 → 1.2.0
+Version change: 1.2.0 → 1.3.0
+Bump rationale (1.3.0): Enmienda MINOR. Se adopta Trunk-Based Development (TBD)
+como estrategia de integración: `main` es la única rama de larga vida, siempre en
+verde/desplegable; todo cambio entra por Pull Request desde una rama corta
+(feature branch de Speckit) y queda prohibido el push directo a `main`. Se amplía
+la sección "Flujo de Desarrollo y Puertas de Calidad" con la bala de integración y
+se refuerza "Governance" (revisión y merge ocurren en el PR, con CI en verde). No
+se agregan ni redefinen principios. Templates: sin cambios. Enforcement técnico
+fuera del repo: reglas de Branch Protection de GitHub sobre `main`.
+
+--- Historial ---
+Version change (1.2.0): 1.1.0 → 1.2.0
 Bump rationale (1.2.0): Enmienda MINOR (aclaración de alcance del Principio I,
 derivada del análisis /speckit.analyze de la feature 002). Se agrega la subsección
 "Alcance" al Principio I: TDD rige el comportamiento/lógica de dominio; para trabajo
@@ -10,7 +21,6 @@ tests + escribir tests de interacción para el comportamiento nuevo de UI. Ampl�
 materialmente la guía sin redefinir el principio ni habilitar saltear TDD en lógica.
 Templates: sin cambios.
 
---- Historial ---
 Version change (1.1.0): 1.0.0 → 1.1.0
 Bump rationale (1.1.0): Enmienda MINOR asociada a la feature 002 (rediseño del
 cascarón de UI). Se amplía la guía de stack en "Flujo de Desarrollo": se fija
@@ -137,6 +147,14 @@ inestable.
   visualización del ECG es **Canvas 2D propio** y **NO se reemplaza por una librería de charting**
   (Chart.js, Recharts, Plotly, etc.): hacerlo violaría el Principio V. Las decisiones de UI/UX se
   registran en el `research.md` de su feature, no en esta constitución.
+- **Integración vía Trunk-Based Development (TBD)**: `main` es la **única rama de larga
+  vida** y DEBE quedar siempre en verde y desplegable. Todo cambio entra por **Pull
+  Request** desde una **rama corta** (feature branch de Speckit, `NNN-<slug>`), de vida
+  breve (horas a pocos días) y con incrementos pequeños y frecuentes. **El push directo a
+  `main` está prohibido.** Ningún PR se mergea sin CI en verde. Las features grandes se
+  cortan en varios PRs pequeños en lugar de un único mega-PR final. El cumplimiento técnico
+  se aplica con las reglas de **Branch Protection de GitHub** sobre `main` (require PR,
+  require status checks `frontend` + `backend`, branches up to date), fuera de este repo.
 - **Puertas de calidad**: `dotnet test` (xUnit) y `npm test` (Vitest) DEBEN pasar antes de
   integrar un cambio. Todo cambio de comportamiento llega acompañado de sus tests
   (Principio I).
@@ -156,9 +174,11 @@ Versionado (semver de la constitución):
 - **MINOR**: se agrega un principio/sección o se amplía materialmente una guía.
 - **PATCH**: aclaraciones y correcciones que no cambian el significado.
 
-Cumplimiento: todo PR/revisión DEBE verificar el cumplimiento de estos principios; en
-particular, la ausencia de tests previos a la implementación (Principio I) es motivo de
-rechazo. La complejidad adicional debe justificarse. Para la guía operativa de desarrollo,
-consultar `AGENTS.md` / `CLAUDE.md`.
+Cumplimiento: todo cambio se integra a `main` mediante **Pull Request** (nunca por push
+directo). La **revisión y el merge ocurren en el PR**, que DEBE verificar el cumplimiento de
+estos principios y tener **CI en verde** antes de integrarse; en particular, la ausencia de
+tests previos a la implementación (Principio I) es motivo de rechazo. La complejidad
+adicional debe justificarse. Para la guía operativa de desarrollo, consultar `AGENTS.md` /
+`CLAUDE.md`.
 
-**Version**: 1.2.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-07-16
+**Version**: 1.3.0 | **Ratified**: 2026-07-11 | **Last Amended**: 2026-08-26
