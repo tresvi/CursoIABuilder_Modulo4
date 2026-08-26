@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using ECGViewer.Api.Endpoints;
 using ECGViewer.Api.Persistence;
+using ECGViewer.Api.Serial;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,12 @@ builder.Services.ConfigureHttpJsonOptions(o =>
 var dbPath = builder.Configuration["StudyDbPath"] ?? "ecgviewer.db";
 builder.Services.AddSingleton(new StudyRepository(dbPath));
 
+// Conexión al hardware del ECG por puerto serie (feature 005): una única fuente
+// singleton, reemplazable por una simulada en tests (nunca se abre hardware real
+// en un test automatizado).
+builder.Services.AddSingleton<ISerialLineSource, SystemSerialLineSource>();
+builder.Services.AddSingleton<SerialCaptureService>();
+
 var app = builder.Build();
 
 app.UseCors(CorsPolicy);
@@ -48,6 +55,7 @@ app.MapFilterEndpoints();
 app.MapStudyEndpoints();
 app.MapExcelEndpoints();
 app.MapSpectrumEndpoints();
+app.MapSerialEndpoints();
 
 app.Run();
 
