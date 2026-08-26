@@ -73,6 +73,12 @@ coherente con los valores enviados.
 5. **Given** una conexión en curso, **When** el dispositivo se desconecta o el puerto
    deja de responder, **Then** el sistema lo informa claramente en vez de quedar
    esperando datos indefinidamente sin avisar.
+6. **Given** una conexión activa, **When** llegan nuevas muestras, **Then** el trazado
+   y las métricas se actualizan en vivo, sin que el usuario tenga que hacer nada
+   (actualización visual como máximo cada 100 ms).
+7. **Given** una conexión activa, **When** pasan 20 minutos desde que se conectó,
+   **Then** la conexión se detiene sola y lo capturado queda disponible, igual que si
+   el usuario hubiera presionado "Detener".
 
 ---
 
@@ -107,7 +113,9 @@ analizar y guardar igual que una señal cargada por archivo.
 - El puerto elegido ya está siendo usado por otro programa, o no responde: informar el
   error en vez de fallar en silencio.
 - El usuario ya tiene una señal cargada (por archivo o por una captura anterior) y
-  presiona "Conectarse": ver FR-011/Clarification sobre qué pasa con esa señal previa.
+  presiona "Conectarse": se reemplaza por la nueva sesión de captura (FR-011).
+- Una sesión de captura llega a los 20 minutos: se detiene sola, igual que si el
+  usuario hubiera presionado "Detener" (FR-013).
 - El navegador o entorno no tiene forma de acceder a puertos serie (limitación técnica
   del entorno de ejecución, no de esta especificación): debe informarse igual que
   cualquier otro caso de puerto no disponible (US1, Acceptance Scenario 4).
@@ -141,15 +149,18 @@ analizar y guardar igual que una señal cargada por archivo.
   hacerlo, el puerto se cierra y la señal capturada hasta ese momento queda disponible
   para el resto de la app (métricas, filtros, espectro, marcadores, guardar) igual que
   una señal cargada desde archivo.
-- **FR-011**: [NEEDS CLARIFICATION: si ya hay una señal cargada (por archivo o por una
-  captura anterior) y el usuario presiona "Conectarse", ¿la reemplaza (como cargar un
-  nuevo CSV), o se bloquea "Conectarse" hasta que el usuario la descarte primero?]
-- **FR-012**: [NEEDS CLARIFICATION: mientras la conexión está activa, ¿el trazado y las
-  métricas se actualizan en vivo a medida que llegan muestras (como un monitor en
-  tiempo real), o la app solo muestra el resultado una vez detenida la conexión?]
-- **FR-013**: [NEEDS CLARIFICATION: ¿hay algún límite de duración o de cantidad de
-  muestras para una captura en vivo, o continúa indefinidamente hasta que el usuario
-  presione detener?]
+- **FR-011**: Al presionar "Conectarse", el sistema DEBE reemplazar cualquier señal
+  actualmente cargada (por archivo o por una captura anterior) con la nueva sesión de
+  captura, con el mismo comportamiento que ya tiene cargar un archivo nuevo (sin un
+  paso de confirmación adicional).
+- **FR-012**: Mientras la conexión está activa, el trazado y las métricas DEBEN
+  actualizarse en vivo (comportamiento de monitor en tiempo real), con una frecuencia
+  de actualización visual de como máximo una vez cada 100 ms — no hace falta redibujar
+  por cada muestra individual (a 250 Hz eso sería cada 4 ms).
+- **FR-013**: Una sesión de captura DEBE detenerse automáticamente al llegar a
+  **20 minutos** de duración (equivalentes a 250 Hz × 20 min = 300 000 muestras),
+  con el mismo resultado que si el usuario hubiera presionado "Detener": el puerto se
+  cierra y lo capturado hasta ese momento queda disponible para el resto de la app.
 
 ### Key Entities
 
@@ -173,6 +184,10 @@ analizar y guardar igual que una señal cargada por archivo.
 - **SC-004**: Una señal capturada por hardware se puede analizar (métricas, filtros,
   espectro, marcadores) y guardar exactamente igual que una cargada desde archivo, sin
   ninguna limitación adicional.
+- **SC-005**: Durante una conexión activa, el usuario ve el trazado actualizarse en
+  vivo con una demora perceptible de como máximo ~100 ms desde que llega cada dato.
+- **SC-006**: El 100% de las sesiones de captura que llegan a los 20 minutos se
+  detienen solas, sin perder los datos ya capturados.
 
 ## Assumptions
 
@@ -183,6 +198,14 @@ analizar y guardar igual que una señal cargada por archivo.
 - La app sigue soportando un solo canal por señal (restricción ya existente): la
   captura por hardware entrega un único valor por línea, consistente con esa
   restricción.
+- Mientras la conexión está activa, la ventana de tiempo visible sigue el extremo más
+  reciente de la señal (comportamiento de monitor: se ve siempre lo último que llegó),
+  salvo que el usuario navegue manualmente hacia atrás; esto es un supuesto de UX
+  razonable dado el pedido de actualización en vivo (FR-012), a confirmar en el detalle
+  de planificación.
+- El límite de 20 minutos (FR-013) resulta en sesiones de hasta 300 000 muestras
+  (250 Hz × 20 min), un orden de magnitud ya manejado hoy por la app con archivos
+  cargados de varios minutos.
 - Esta feature **excede el alcance actual documentado en la constitución del proyecto**
   ("Fuera de Alcance": captura en tiempo real por hardware) y requiere una enmienda a
   `.specify/memory/constitution.md` antes de poder implementarse — se deja registrado

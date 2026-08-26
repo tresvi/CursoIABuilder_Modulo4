@@ -13,8 +13,8 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
-- [x] Requirements are testable and unambiguous (salvo los 3 marcados)
+- [x] No [NEEDS CLARIFICATION] markers remain
+- [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
 - [x] All acceptance scenarios are defined
@@ -31,10 +31,10 @@
 
 ## Notes
 
-- Quedan 3 marcadores `[NEEDS CLARIFICATION]` (FR-011, FR-012, FR-013): qué pasa con
-  una señal previa al conectar, si el trazado se actualiza en vivo o recién al
-  detener, y si hay límite de duración/muestras. Se presentan al usuario antes de
-  seguir a `/speckit-plan`.
+- Los 3 marcadores `[NEEDS CLARIFICATION]` se resolvieron con el usuario: FR-011
+  (conectar reemplaza cualquier señal cargada, igual que un archivo nuevo), FR-012
+  (monitor en tiempo real, actualización visual cada ≤100 ms) y FR-013 (límite fijo de
+  20 minutos, auto-detención). Listo para `/speckit-plan`.
 - **Fuera del checklist, pero crítico**: esta feature contradice explícitamente
-  "Fuera de Alcance" de `.specify/memory/constitution.md" (captura en tiempo real por
+  "Fuera de Alcance" de `.specify/memory/constitution.md` (captura en tiempo real por
   hardware); requiere una enmienda de la constitución antes de `/speckit-plan`.
