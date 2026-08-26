@@ -9,40 +9,42 @@
 ## Summary
 
 Nueva sección "Conectarse" en la sidebar (botones "Configuración" y
-"Conectarse"/"Desconectarse"). El backend abre el puerto serie elegido
-(`System.IO.Ports`, dependencia nueva), lee enteros línea por línea, los
-escala a mV (`cuenta × 10/4095`) y los numera a 250 Hz (`t = n/250`),
-empujándolos al frontend por Server-Sent Events en lotes de ~100 ms. Conectar
-reemplaza cualquier señal cargada (como abrir un archivo nuevo); mientras dura
-la conexión, la ventana visible sigue el extremo más reciente (monitor en
-vivo); la sesión se corta sola a los 20 minutos (300 000 muestras). Al
-detener, lo capturado queda disponible para el resto de la app (filtros,
-espectro, complejos, guardar) igual que una señal de archivo.
+"Conectarse"/"Desconectarse"). El **frontend** abre el puerto serie elegido
+con la Web Serial API del navegador (`navigator.serial`) — el backend no
+participa: corre en un contenedor, sin acceso al hardware físico de quien usa
+la app. El hook `useSerialConnection` lee enteros línea por línea, los escala
+a mV (`cuenta × 10/4095`) y los numera a 250 Hz (`t = n/250`), volcándolos al
+estado en lotes de ~100 ms. Conectar reemplaza cualquier señal cargada (como
+abrir un archivo nuevo); mientras dura la conexión, la ventana visible sigue
+el extremo más reciente (monitor en vivo); la sesión se corta sola a los 20
+minutos (300 000 muestras). Al detener, lo capturado queda disponible para el
+resto de la app (filtros, espectro, complejos, guardar) igual que una señal
+de archivo.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (React 19.2, Vite 6) + .NET 10 (Minimal
-API) — toca ambos lados, como la feature 004.
+**Language/Version**: TypeScript 5.x (React 19.2, Vite 6). Esta feature vive
+**enteramente en el frontend**; el backend (.NET 10) no se toca.
 
-**Primary Dependencies**: `System.IO.Ports` (NuGet, **nueva** dependencia de
-backend) para el acceso al puerto serie. Sin dependencias nuevas en el
-frontend (`EventSource` es nativo del navegador).
+**Primary Dependencies**: Ninguna nueva. `navigator.serial` (Web Serial API)
+es nativo del navegador (research.md D1) — sin librería adicional.
 
 **Storage**: N/A para la configuración de conexión (research.md/data-model.md:
-`ConnectionConfig` no se persiste). La señal ya capturada, una vez detenida la
-conexión, se guarda igual que cualquier otra (`StudyRepository` existente, sin
-cambios).
+`SerialConnectionConfig` no se persiste). La señal ya capturada, una vez
+detenida la conexión, se guarda igual que cualquier otra (`StudyRepository`
+existente, sin cambios).
 
-**Testing**: xUnit (backend: `SerialCaptureService` con una fuente de líneas
-inyectable/simulada, nunca un puerto real) + Vitest/RTL (frontend: hook +
-diálogo + sidebar, con `EventSource` simulado).
+**Testing**: Vitest/RTL (frontend: hook + diálogo + sidebar + `MainPage`, con
+un `SerialPortLike`/`NavigatorSerialLike` simulados — nunca hardware real ni
+`navigator.serial` real, que no existe en jsdom).
 
-**Target Platform**: Igual que el resto de la app, con la salvedad de que esta
-feature exige que el navegador y el hardware estén en la misma máquina que el
-backend (research.md/spec.md Assumptions) — no aplica a un despliegue remoto
-(p. ej. el sitio de GitHub Pages que ya expone el repo).
+**Target Platform**: Requiere un navegador con Web Serial API (Chrome/Edge/
+Opera) y contexto seguro (HTTPS o `localhost`); Firefox/Safari no soportan la
+conexión (research.md D1) — el resto de la app funciona igual en cualquier
+navegador. No depende de que backend y hardware compartan máquina: el backend
+puede correr en un contenedor remoto sin afectar esta feature.
 
-**Project Type**: Web application existente; toca `src/backend` y `src/frontend`.
+**Project Type**: Web application existente; esta feature toca solo `src/frontend`.
 
 **Performance Goals**: FR-012/Constitución v1.4.0 — actualización visual con
 demora ≤100 ms durante la captura en vivo.
@@ -62,7 +64,7 @@ orden de magnitud que archivos ya soportados.
 
 | Principio | Evaluación |
 |---|---|
-| I. Test-First (NO-NEGOCIABLE) | **Aplica de lleno**: nuevo servicio de backend, nuevos endpoints, nuevo hook/diálogo/sección de sidebar son todos cambio de comportamiento → TDD obligatorio en ambos lados, con el puerto serie siempre simulado en tests (nunca hardware real). **PASS**. |
+| I. Test-First (NO-NEGOCIABLE) | **Aplica de lleno**: nuevo hook/diálogo/sección de sidebar son cambio de comportamiento → TDD obligatorio, con el puerto serie siempre simulado en tests (`SerialPortLike`/`NavigatorSerialLike` falsos — nunca hardware real ni `navigator.serial` real). **PASS**. |
 | II. Integridad de la Señal Original | Una vez que una muestra entra a la señal en curso, no se modifica salvo por los mecanismos ya existentes (filtro/recorte, no destructivos). **PASS**. |
 | III. Persistencia Explícita | La config de conexión y la señal en curso NUNCA se persisten solas; "Guardar" sigue siendo el único gatillo, igual que hoy. **PASS**. |
 | IV. Métricas sobre la Ventana Visible | Sin cambios: las métricas siguen calculándose sobre la ventana visible, que durante la conexión es la que sigue el extremo más reciente (research.md D8) — sigue siendo "la ventana visible", no toda la señal. **PASS**. |
@@ -82,7 +84,7 @@ specs/005-conexion-hardware-ecg/
 ├── research.md          # Phase 0
 ├── data-model.md        # Phase 1
 ├── contracts/
-│   └── api.md           # Phase 1: /api/serial/ports|connect|disconnect|stream
+│   └── api.md           # Phase 1: no hay endpoints — interfaz del hook (frontend-only)
 ├── quickstart.md        # Phase 1
 ├── checklists/
 │   └── requirements.md
@@ -91,49 +93,37 @@ specs/005-conexion-hardware-ecg/
 
 ### Source Code (repository root)
 
-Estructura **Web application** existente; esta feature toca ambos lados.
+Esta feature toca **solo `src/frontend`** — el backend no tiene ningún
+archivo nuevo ni modificado (research.md D1).
 
 ```text
-src/backend/ECGViewer.Api/
-├── Models/ApiModels.cs              # MODIFICADO: DTOs de puertos/conexión/lote
-├── Serial/
-│   ├── ISerialLineSource.cs         # NUEVO: abstracción inyectable sobre el puerto (testeable sin hardware)
-│   ├── SystemSerialLineSource.cs    # NUEVO: implementación real vía System.IO.Ports
-│   ├── SampleScaling.cs             # NUEVO: cuenta → mV (Span/Zero), pura y testeable
-│   └── SerialCaptureService.cs      # NUEVO: singleton, estado de la única conexión, contador de muestras, límite de 20 min
-├── Endpoints/
-│   └── SerialEndpoints.cs           # NUEVO: GET ports, POST connect/disconnect, GET stream (SSE)
-└── Program.cs                       # MODIFICADO: registrar el servicio + endpoints
-
-src/backend/ECGViewer.Tests/
-├── SampleScalingTests.cs            # NUEVO
-├── SerialCaptureServiceTests.cs     # NUEVO (fuente de líneas simulada)
-└── SerialEndpointTests.cs           # NUEVO
-
 src/frontend/src/
-├── api/
-│   └── serialApi.ts                 # NUEVO: listPorts/connect/disconnect + apertura del EventSource
+├── signal/
+│   ├── sampleScaling.ts             # NUEVO: cuenta → mV (Span/Zero), pura y testeable
+│   └── sampleScaling.test.ts        # NUEVO
+├── serial/
+│   └── webSerialTypes.ts            # NUEVO: SerialPortLike/NavigatorSerialLike (interfaz propia, inyectable)
 ├── hooks/
-│   └── useSerialConnection.ts       # NUEVO: estado de configuración/conexión, acumula muestras entrantes
-│   └── useSerialConnection.test.ts  # NUEVO
+│   ├── useSerialConnection.ts       # NUEVO: abre el puerto, lee el stream, acumula muestras en lotes
+│   ├── useSerialConnection.test.ts  # NUEVO
+│   └── useVisibleWindow.ts          # MODIFICADO: modo autoseguimiento durante la conexión (research.md D8)
 ├── components/
-│   ├── SerialConfigDialog.tsx       # NUEVO: elegir puerto + baudios (default 115200)
+│   ├── SerialConfigDialog.tsx       # NUEVO: requestPort() + baudios (default 115200)
 │   ├── SerialConfigDialog.test.tsx  # NUEVO
 │   └── layout/
-│       ├── Sidebar.tsx              # MODIFICADO: sección "Conectarse" (Configuración/Conectarse)
+│       ├── Sidebar.tsx              # MODIFICADO: sección "Conectarse" (Configuración/Conectarse/Desconectarse)
 │       └── Sidebar.test.tsx         # MODIFICADO
-├── hooks/
-│   └── useVisibleWindow.ts          # MODIFICADO: modo autoseguimiento durante la conexión (research.md D8)
 └── pages/
     ├── MainPage.tsx                  # MODIFICADO: reemplaza la señal al conectar, wiring del hook
     └── MainPage.test.tsx             # MODIFICADO
 ```
 
-**Structure Decision**: Se agrega una carpeta nueva `Serial/` en el backend
-(mismo nivel que `Dsp/`/`Persistence/`), siguiendo la convención ya
-establecida de agrupar por dominio técnico. En el frontend, mismo patrón que
-`spectrumApi.ts`/`useComplexDetection.ts`/`SpectrumChart.tsx` de features
-anteriores: un cliente de API, un hook de estado, un componente de UI nuevo.
+**Structure Decision**: Mismo patrón que otras features del frontend (un
+hook de estado + un componente de UI nuevo), pero sin cliente de API porque
+no hay backend involucrado. `serial/webSerialTypes.ts` sigue el mismo criterio
+que el Worker inyectable de la feature 003 y el `EventSource` inyectable que
+tuvo esta misma feature en su primera versión: una interfaz propia mínima,
+reemplazable por una falsa en tests.
 
 ## Complexity Tracking
 

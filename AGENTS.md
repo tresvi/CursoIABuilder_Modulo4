@@ -49,16 +49,17 @@ Orientada a entornos educativos y de investigación en ingeniería biomédica.
 
 ### Conexión al hardware del ECG por puerto serie — feature 005
 - Nueva sección en la sidebar, **"Conectarse"** (junto a "Herramientas"/"Diagnósticos"):
-  "Configuración" (elegir puerto y baudios) y "Conectarse"/"Desconectarse".
-- Backend: `src/backend/ECGViewer.Api/Serial/` — `ISerialLineSource` (abstracción
-  inyectable sobre `System.IO.Ports.SerialPort`, nunca real en tests),
-  `SerialCaptureService` (singleton con el estado de la única conexión posible, escala
-  a mV y numera muestras a 250 Hz), `SampleScaling`. Endpoints en
-  `Endpoints/SerialEndpoints.cs`.
-- El trazado en vivo viaja del backend al frontend por **Server-Sent Events**
-  (`GET /api/serial/stream`, `text/event-stream`, lotes cada ~100 ms); el frontend lo
-  consume con `EventSource` nativo en `src/frontend/src/hooks/useSerialConnection.ts`
-  (patrón inyectable para tests, análogo al Worker inyectable de la feature 003).
+  "Configuración" (elegir dispositivo y baudios) y "Conectarse"/"Desconectarse".
+- **Todo vive en el frontend, el backend no participa**: corre en un contenedor, sin
+  acceso al puerto físico de quien usa la app. El puerto se abre con la **Web Serial
+  API** del navegador (`navigator.serial`, solo Chrome/Edge/Opera, requiere HTTPS o
+  `localhost`) — no existe ningún `/api/serial/*` ni código de `System.IO.Ports`.
+- `src/frontend/src/serial/webSerialTypes.ts`: interfaz propia (`SerialPortLike`/
+  `NavigatorSerialLike`) inyectable en tests, igual que el Worker inyectable de la
+  feature 003 (`navigator.serial` no existe en jsdom).
+- `src/frontend/src/hooks/useSerialConnection.ts`: abre el puerto, lee su
+  `ReadableStream`, escala cada línea a mV (`signal/sampleScaling.ts`) y numera las
+  muestras a 250 Hz, volcándolas al estado en lotes de ~100 ms.
 - Mientras hay una conexión activa, `useVisibleWindow` entra en modo autoseguimiento
   (`autoFollow`): la ventana visible sigue el extremo más reciente de la señal.
 - Requisitos y comportamiento detallado: `specs/005-conexion-hardware-ecg/`.
@@ -68,8 +69,6 @@ Versiones exactas viven en el `.csproj`; acá solo el "qué y por qué".
 - `FftSharp` (Scott Harden): cálculos de filtros DSP (pasa bajo/alto/banda/notch) — RF-10;
   también el espectro de potencia (`Dsp/PowerSpectrum.cs`, feature 004).
 - `ClosedXML` y `DocumentFormat.OpenXml`: manipulación y creación de archivos Excel `.xlsx` (import/export) — RF-12, RF-13.
-- `System.IO.Ports`: acceso real al puerto serie (`Serial/SystemSerialLineSource.cs`) —
-  conexión al hardware del ECG, feature 005.
 
 ## Cómo correr
 Estructura: en la raíz hay una carpeta `src` con `src/frontend` (frontend) y `src/backend` (backend).

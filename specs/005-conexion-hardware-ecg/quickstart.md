@@ -6,21 +6,23 @@ levantado (ver `AGENTS.md` → "Cómo correr").
 ## Prerrequisitos
 
 ```bash
-cd src/backend && dotnet run --project ECGViewer.Api
 cd src/frontend && npm install && npm run dev
 ```
 
-Para probar sin un dispositivo real, usar un simulador de puerto serie (p. ej.
-un puerto virtual `socat`/`com0com` que escriba una línea con un entero cada
-4 ms) o mockear `System.IO.Ports.SerialPort` en los tests automatizados
-(ver Verificación automatizada).
+El backend **no** hace falta para esta feature (no tiene código de puerto
+serie, research.md D1); alcanza con el frontend abierto en **Chrome, Edge u
+Opera** sobre **HTTPS o `localhost`** (Web Serial API). Para probar sin un
+dispositivo real, usar un puerto virtual `socat`/`com0com` que escriba una
+línea con un entero cada 4 ms.
 
 ## Escenario 1 — Configurar el puerto y la velocidad (US1)
 
-1. Abrir la sidebar → sección "Conectarse" → "Configuración".
-2. **Esperado**: se ve la lista de puertos disponibles y **115200 baudios**
-   preseleccionado (FR-002/003).
-3. Elegir un puerto y confirmar.
+1. Abrir la sidebar → sección "Conectarse" → "Configuración" → "Elegir
+   dispositivo".
+2. **Esperado**: se abre el selector nativo del navegador con los puertos
+   disponibles; al elegir uno, **115200 baudios** queda preseleccionado
+   (FR-002/003).
+3. Confirmar.
 
 ## Escenario 2 — Conectarse y ver el trazado en vivo (US2)
 
@@ -55,10 +57,10 @@ un puerto virtual `socat`/`com0com` que escriba una línea con un entero cada
 ## Verificación automatizada
 
 ```bash
-cd src/backend && dotnet test    # incluye los tests nuevos de /api/serial/*
-cd src/frontend && npm test      # incluye los tests nuevos de sidebar/diálogo/hook
+cd src/frontend && npm test      # incluye los tests nuevos de sidebar/diálogo/hook/escalado
 ```
 
-Los tests de backend NUNCA abren un puerto serie real: usan una abstracción
-inyectable sobre `SerialPort` (fuente de líneas simulada) — mismo criterio que
-"los tests nunca llaman a la API real de Claude" ya vigente en el proyecto.
+Los tests NUNCA abren un puerto serie real ni dependen de `navigator.serial`
+(no existe en jsdom): usan un `SerialPortLike`/`NavigatorSerialLike` falsos —
+mismo criterio que "los tests nunca llaman a la API real de Claude" ya vigente
+en el proyecto.
