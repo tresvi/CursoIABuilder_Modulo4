@@ -4,7 +4,7 @@ import type { Signal } from "../signal/signalModel";
 import { cn } from "@/lib/utils";
 
 /** Ejemplos servidos como assets estáticos desde `public/` (ver AGENTS.md). */
-export const EXAMPLES: Array<{ file: string; label: string }> = [
+const EXAMPLES: Array<{ file: string; label: string }> = [
   { file: "ECG_20_Seg_FILTRADO.csv", label: "ECG filtrado (20 s)" },
   { file: "ECG_20_Seg_NO_FILTRADO.csv", label: "ECG sin filtrar (20 s)" },
   { file: "ECG_20_Seg_ESPANTOSO.csv", label: "ECG con mucho ruido (20 s)" },

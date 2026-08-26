@@ -10,7 +10,7 @@ visual en un navegador real (mismo tipo de limitación que T077/T078 de la featu
 |-------|-----------|
 | Backend `dotnet test` (xUnit) | **30 passed** — sin cambios (feature 100% frontend) |
 | Frontend `npm test` (Vitest) | **125 passed** (18 nuevos: `complexDetection`, `useComplexDetection`, `complexDetection.worker`, `drawComplexMarks`, `Sidebar`, `MainPage`) |
-| Frontend `tsc --noEmit` / ESLint | limpios (mismos 4 warnings preexistentes, ninguno nuevo) |
+| Frontend `tsc --noEmit` / ESLint | limpios, 0 warnings (los 4 preexistentes al momento de esta feature se limpiaron después, PR de chore) |
 | Frontend `vite build` | OK — `complexDetection.worker` se bundlea como chunk separado |
 
 ## Cobertura por escenario de `quickstart.md`
