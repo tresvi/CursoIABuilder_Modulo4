@@ -47,6 +47,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapFilterEndpoints();
 app.MapStudyEndpoints();
 app.MapExcelEndpoints();
+app.MapSpectrumEndpoints();
 
 app.Run();
 

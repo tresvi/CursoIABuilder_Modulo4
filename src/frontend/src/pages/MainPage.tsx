@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FileLoader } from "../components/FileLoader";
 import { ECGChart } from "../components/ECGChart";
+import { SpectrumChart } from "../components/SpectrumChart";
 import { MetricsPanel } from "../components/MetricsPanel";
 import { MarkerEditor } from "../components/MarkerEditor";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -20,7 +21,8 @@ import { useTool } from "../hooks/useTool";
 import { useMarkers } from "../hooks/useMarkers";
 import { useUnsavedGuard } from "../hooks/useUnsavedGuard";
 import { useComplexDetection } from "../hooks/useComplexDetection";
-import { metricsForWindow } from "../metrics/windowMetrics";
+import { metricsForWindow, samplesInWindow } from "../metrics/windowMetrics";
+import { computeSpectrum, type SpectrumPoint } from "../api/spectrumApi";
 import {
   applyCrop,
   applyFilter as applyFilterModel,
@@ -109,6 +111,58 @@ export function MainPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [complexDetectionOn, working]);
+
+  // "Espectro" (feature 004): reemplaza el trazado por el espectro de potencia
+  // de la ventana visible (research.md D2), calculado en el backend. Nunca se
+  // persiste (FR-010); nunca convive con el trazado (D3, "nunca ambos a la vez").
+  const [spectrumOn, setSpectrumOn] = useState(false);
+  const [spectrum, setSpectrum] = useState<SpectrumPoint[] | null>(null);
+  const [spectrumBusy, setSpectrumBusy] = useState(false);
+  const [spectrumError, setSpectrumError] = useState<string | null>(null);
+
+  function handleToggleSpectrum() {
+    setSpectrumOn((on) => {
+      if (on) {
+        setSpectrum(null);
+        setSpectrumError(null);
+      }
+      return !on;
+    });
+  }
+
+  // Recalcula sobre la ventana visible (no toda la señal) cada vez que cambia
+  // la señal mostrada o la ventana, mientras "Espectro" esté activo (FR-005).
+  useEffect(() => {
+    if (!spectrumOn || !working) return;
+    let cancelled = false;
+    setSpectrumBusy(true);
+    setSpectrumError(null);
+    const windowed = {
+      samples: samplesInWindow(working, window.fromTime, window.toTime),
+      fs: working.fs,
+      durationSec: window.toTime - window.fromTime,
+    };
+    computeSpectrum(windowed)
+      .then((points) => {
+        if (cancelled) return;
+        setSpectrum(points);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setSpectrum(null);
+        setSpectrumError(
+          e instanceof ApiRequestError
+            ? e.apiError.message
+            : "No se pudo calcular el espectro (¿backend en http://localhost:5080?)."
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setSpectrumBusy(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [spectrumOn, working, window]);
 
   const metrics: CardiacMetrics | null = useMemo(() => {
     if (!working) return null;
@@ -276,10 +330,6 @@ export function MainPage() {
           onSave={handleSave}
           onExportCsv={handleExportCsv}
           onExportXlsx={handleExportXlsx}
-          activeFilterType={filterType}
-          onSelectFilter={setFilterType}
-          onRevertFilter={handleRevertFilter}
-          hasFilter={derivation?.filteredSamples != null}
           tool={tool}
           onSelectTool={setTool}
           showGrid={state.showGrid}
@@ -288,6 +338,11 @@ export function MainPage() {
           complexDetectionActive={complexDetectionOn}
           complexDetectionStatus={complexStatus}
           onToggleComplexDetection={handleToggleComplexDetection}
+          spectrumActive={spectrumOn}
+          spectrumStatus={
+            spectrumBusy ? "busy" : spectrumError ? "error" : spectrumOn ? "ready" : "idle"
+          }
+          onToggleSpectrum={handleToggleSpectrum}
         />
       }
       topBar={
@@ -314,20 +369,30 @@ export function MainPage() {
               netos. Las métricas estiran a la par por `items-stretch`. */}
           <div className="flex h-[calc(50vh+1.5rem+2px)] min-h-[386px] items-stretch gap-4">
             <Card className="min-w-0 flex-1 p-3">
-              <ECGChart
-                signal={working}
-                window={window}
-                showGrid={state.showGrid}
-                paperSpeed={state.paperSpeed}
-                tool={tool}
-                cursor={cursor}
-                markers={markers.markers}
-                complexMarks={complexResult?.complexes ?? []}
-                onZoom={(r) => zoomTo(r.fromTime, r.toTime)}
-                onPan={(dt) => panBy(dt)}
-                onCropSelect={(r) => setPendingCrop(r)}
-                onAddMarker={(time) => setPendingMarkerTime(time)}
-              />
+              {spectrumOn ? (
+                spectrumError ? (
+                  <p role="alert" className="text-sm text-destructive">
+                    {spectrumError}
+                  </p>
+                ) : (
+                  <SpectrumChart points={spectrum ?? []} />
+                )
+              ) : (
+                <ECGChart
+                  signal={working}
+                  window={window}
+                  showGrid={state.showGrid}
+                  paperSpeed={state.paperSpeed}
+                  tool={tool}
+                  cursor={cursor}
+                  markers={markers.markers}
+                  complexMarks={complexResult?.complexes ?? []}
+                  onZoom={(r) => zoomTo(r.fromTime, r.toTime)}
+                  onPan={(dt) => panBy(dt)}
+                  onCropSelect={(r) => setPendingCrop(r)}
+                  onAddMarker={(time) => setPendingMarkerTime(time)}
+                />
+              )}
             </Card>
             <MetricsPanel metrics={metrics} />
           </div>
