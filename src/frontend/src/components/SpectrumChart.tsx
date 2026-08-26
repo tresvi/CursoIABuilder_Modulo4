@@ -4,6 +4,7 @@ import type { ViewBox } from "../render/ecgScale";
 import {
   drawSpectrum,
   drawSpectrumAxes,
+  drawSpectrumGrid,
   powerRange,
   SPECTRUM_MAX_FREQ_HZ,
 } from "../render/drawSpectrum";
@@ -64,6 +65,7 @@ export function SpectrumChart({
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
     ctx.clearRect(0, 0, width, chartHeight);
+    drawSpectrumGrid(ctx, view);
     drawSpectrum(ctx, points, view);
     drawSpectrumAxes(ctx, view);
   }, [points, view, width, chartHeight]);

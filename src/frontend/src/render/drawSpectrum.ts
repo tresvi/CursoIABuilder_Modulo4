@@ -132,6 +132,48 @@ export function drawSpectrumAxes(ctx: CanvasRenderingContext2D, view: ViewBox): 
   ctx.restore();
 }
 
+/**
+ * Dibuja la grilla del espectro: una vertical de borde a borde del área de
+ * trazado por cada Hz etiquetado (mismo paso que `drawSpectrumAxes`) y una
+ * horizontal por cada tick "redondo" del eje Y — para que se lean más
+ * claramente los valores, igual que `drawGrid.ts` hace para el trazado ECG.
+ * Se dibuja ANTES de la curva (ver `SpectrumChart.tsx`) para no taparla.
+ */
+export function drawSpectrumGrid(ctx: CanvasRenderingContext2D, view: ViewBox): void {
+  const scale = createScale(view);
+  const { x0, y0, x1, y1 } = plotRect(view);
+  const [f0, f1] = view.tRange;
+  const [p0, p1] = view.vRange;
+
+  ctx.save();
+  ctx.strokeStyle = "#e0e0e0";
+  ctx.lineWidth = 1;
+
+  const pxPerHz = Math.abs(scale.xOf(f0 + 1) - scale.xOf(f0));
+  const step = frequencyLabelStep(pxPerHz);
+  const firstTick = Math.ceil(f0 / SPECTRUM_TICK_STEP_HZ) * SPECTRUM_TICK_STEP_HZ;
+  for (let hz = firstTick; hz <= f1 + 1e-9; hz += SPECTRUM_TICK_STEP_HZ) {
+    if (Math.round(hz / SPECTRUM_TICK_STEP_HZ) % step !== 0) continue;
+    const x = scale.xOf(hz);
+    if (x < x0 - 0.5 || x > x1 + 0.5) continue;
+    ctx.beginPath();
+    ctx.moveTo(x, y0);
+    ctx.lineTo(x, y1);
+    ctx.stroke();
+  }
+
+  for (const p of niceTicks(p0, p1)) {
+    const y = scale.yOf(p);
+    if (y < y0 - 0.5 || y > y1 + 0.5) continue;
+    ctx.beginPath();
+    ctx.moveTo(x0, y);
+    ctx.lineTo(x1, y);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 /** Rango de potencia [0, max] con margen, para el eje Y (la potencia no es negativa). */
 export function powerRange(points: readonly SpectrumPoint[]): [number, number] {
   if (points.length === 0) return [0, 1];
