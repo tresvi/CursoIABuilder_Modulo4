@@ -36,12 +36,15 @@ jobs:
     permissions:
       contents: write # necesario para crear el Release y adjuntar el asset
     steps:
-      - name: Validar tag
+      - name: Resolver tag
+        id: resolve_tag
         run: |
-          if [ -z "${{ inputs.tag }}" ]; then
-            echo "::error::'do_release' está tildado pero 'tag' está vacío. Indicá una versión (ej. v1.0.0)."
-            exit 1
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="v$(date -u +'%Y.%m.%d')"
+            echo "Tag no especificado; usando fecha: $TAG"
           fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v5
 
@@ -72,15 +75,15 @@ jobs:
       - name: Comprimir paquete
         run: |
           cd release
-          zip -r "../ECGViewer-${{ inputs.tag }}.zip" api web
+          zip -r "../ECGViewer-${{ steps.resolve_tag.outputs.tag }}.zip" api web
 
       - name: Crear Release y adjuntar zip
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ inputs.tag }}" \
-            "ECGViewer-${{ inputs.tag }}.zip" \
-            --title "ECGViewer ${{ inputs.tag }}" \
+          gh release create "${{ steps.resolve_tag.outputs.tag }}" \
+            "ECGViewer-${{ steps.resolve_tag.outputs.tag }}.zip" \
+            --title "ECGViewer ${{ steps.resolve_tag.outputs.tag }}" \
             --notes "Build manual generado por workflow_dispatch. Contiene backend (.NET publish) en /api y frontend (Vite dist) en /web." \
             --target "${{ github.sha }}"
 
