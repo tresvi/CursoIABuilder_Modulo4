@@ -43,13 +43,13 @@ trazado (quickstart.md, Escenario 2).
 
 ### Tests (escribir primero, deben fallar)
 
-- [ ] T400 [P] [US1] Test en `src/backend/ECGViewer.Tests/PowerSpectrumTests.cs`
+- [X] T400 [P] [US1] Test en `src/backend/ECGViewer.Tests/PowerSpectrumTests.cs`
   (cálculo DSP puro, sin `WebApplicationFactory`, mismo estilo que
   `DspFilterTests.cs`): una señal senoidal pura concentra su potencia cerca de su
   frecuencia conocida; una señal vacía no lanza excepción; una ventana con muy pocas
   muestras se identifica como insuficiente (contrato de `PowerSpectrum`, a definir en
   la implementación).
-- [ ] T401 [P] [US1] Test en `src/backend/ECGViewer.Tests/SpectrumEndpointTests.cs`
+- [X] T401 [P] [US1] Test en `src/backend/ECGViewer.Tests/SpectrumEndpointTests.cs`
   (mismo estilo que `FilterEndpointTests.cs`, con
   `TestContext.Current.CancellationToken` desde el inicio): `POST /api/spectrum` con
   una señal válida devuelve 200 con `points` ordenados por frecuencia creciente hasta
@@ -78,18 +78,18 @@ trazado (quickstart.md, Escenario 2).
 
 ### Implementación
 
-- [ ] T407 [US1] `src/backend/ECGViewer.Api/Models/ApiModels.cs`: agregar
+- [X] T407 [US1] `src/backend/ECGViewer.Api/Models/ApiModels.cs`: agregar
   `SpectrumPointDto(double Frequency, double Power)`, `SpectrumDto(IReadOnlyList<SpectrumPointDto> Points)`,
   `SpectrumRequest(SignalDto Signal)`, `SpectrumResponse(SpectrumDto Spectrum)`, y
   `ErrorCodes.InsufficientSamples`.
-- [ ] T408 [US1] `src/backend/ECGViewer.Api/Dsp/PowerSpectrum.cs`: cálculo del espectro
+- [X] T408 [US1] `src/backend/ECGViewer.Api/Dsp/PowerSpectrum.cs`: cálculo del espectro
   de potencia vía `FftSharp` (reutiliza `SignalMath.ResolveFs`). Depende de T407 (usa
   los DTOs). Hace pasar T400.
-- [ ] T409 [US1] `src/backend/ECGViewer.Api/Endpoints/SpectrumEndpoints.cs`:
+- [X] T409 [US1] `src/backend/ECGViewer.Api/Endpoints/SpectrumEndpoints.cs`:
   `POST /api/spectrum` — valida señal vacía (`InvalidSignal`) y ventana insuficiente
   (`InsufficientSamples`, mismo estilo que `SignalFilter.Validate`), llama a
   `PowerSpectrum`. Depende de T407, T408. Hace pasar T401.
-- [ ] T410 [US1] `src/backend/ECGViewer.Api/Program.cs`: registrar
+- [X] T410 [US1] `src/backend/ECGViewer.Api/Program.cs`: registrar
   `app.MapSpectrumEndpoints()`. Depende de T409.
 - [ ] T411 [P] [US1] `src/frontend/src/api/spectrumApi.ts`: `computeSpectrum(signal): Promise<SpectrumResult>`
   (mismo patrón que `filterApi.ts`/`applyFilter`). Hace pasar T402.

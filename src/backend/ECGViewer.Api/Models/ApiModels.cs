@@ -49,6 +49,15 @@ public record FilterConfigDto(
 public record FilterRequest(SignalDto Signal, FilterConfigDto Filter);
 public record FilterResponse(SignalDto Signal);
 
+/// <summary>Un punto del espectro de potencia: frecuencia (Hz) y su potencia.</summary>
+public record SpectrumPointDto(double Frequency, double Power);
+
+/// <summary>Espectro de potencia completo, ordenado por frecuencia creciente hasta Nyquist (fs/2).</summary>
+public record SpectrumDto(IReadOnlyList<SpectrumPointDto> Points);
+
+public record SpectrumRequest(SignalDto Signal);
+public record SpectrumResponse(SpectrumDto Spectrum);
+
 public record MarkerDto(string Id, double Time, string Label);
 public record CropDto(double FromTime, double ToTime);
 
@@ -74,4 +83,5 @@ public static class ErrorCodes
     public const string InvalidXlsx = "INVALID_XLSX";
     public const string InvalidFilterParams = "INVALID_FILTER_PARAMS";
     public const string NotFound = "NOT_FOUND";
+    public const string InsufficientSamples = "INSUFFICIENT_SAMPLES";
 }
