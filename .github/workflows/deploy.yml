@@ -1,0 +1,135 @@
+name: Deploy (Release / Pages)
+
+# Disparo 100% manual: nada corre solo. Desde la pestaña Actions -> "Deploy
+# (Release / Pages)" -> "Run workflow" se eligen con checkboxes qué pasos ejecutar.
+# Cada paso (Release y Pages) es independiente y se aprueba tildándolo en cada corrida.
+on:
+  workflow_dispatch:
+    inputs:
+      do_release:
+        description: "Generar zip (backend + frontend) y publicarlo en Releases"
+        type: boolean
+        default: false
+      do_pages:
+        description: "Deployar el frontend a GitHub Pages"
+        type: boolean
+        default: false
+      tag:
+        description: "Tag/versión del Release (ej. v1.0.0). Requerido si 'do_release' está tildado."
+        type: string
+        default: ""
+      api_base:
+        description: "VITE_API_BASE para el build de Pages (URL de una API externa). Vacío = sin backend."
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Paso 1: empaquetar ensamblados (backend) + frontend y publicar en Releases ──
+  release:
+    name: Release (zip backend + frontend)
+    if: ${{ inputs.do_release }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # necesario para crear el Release y adjuntar el asset
+    steps:
+      - name: Validar tag
+        run: |
+          if [ -z "${{ inputs.tag }}" ]; then
+            echo "::error::'do_release' está tildado pero 'tag' está vacío. Indicá una versión (ej. v1.0.0)."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Publicar backend (.NET, framework-dependent)
+        run: dotnet publish src/backend/ECGViewer.Api -c Release -o release/api
+
+      - name: Build frontend (base relativa para el zip portable)
+        working-directory: src/frontend
+        run: |
+          npm ci
+          npm run build -- --base=./
+
+      - name: Copiar dist del frontend al paquete
+        run: |
+          mkdir -p release/web
+          cp -r src/frontend/dist/. release/web/
+
+      - name: Comprimir paquete
+        run: |
+          cd release
+          zip -r "../ECGViewer-${{ inputs.tag }}.zip" api web
+
+      - name: Crear Release y adjuntar zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.tag }}" \
+            "ECGViewer-${{ inputs.tag }}.zip" \
+            --title "ECGViewer ${{ inputs.tag }}" \
+            --notes "Build manual generado por workflow_dispatch. Contiene backend (.NET publish) en /api y frontend (Vite dist) en /web." \
+            --target "${{ github.sha }}"
+
+  # ── Paso 2: deployar el frontend estático a GitHub Pages ──
+  pages:
+    name: Deploy a GitHub Pages
+    if: ${{ inputs.do_pages }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write # deploy a Pages
+      id-token: write # OIDC que exige deploy-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # Un solo deploy de Pages a la vez.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Build frontend para Pages
+        working-directory: src/frontend
+        # base = /<repo>/ porque Pages de proyecto sirve desde esa subruta.
+        # VITE_API_BASE sale del input (una API externa); vacío = demo sin backend.
+        env:
+          VITE_API_BASE: ${{ inputs.api_base }}
+        run: |
+          npm ci
+          npm run build -- --base=/${{ github.event.repository.name }}/
+
+      - name: Preparar artefacto (SPA fallback + .nojekyll)
+        run: |
+          cp src/frontend/dist/index.html src/frontend/dist/404.html
+          touch src/frontend/dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: src/frontend/dist
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
