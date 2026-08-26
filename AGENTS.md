@@ -47,11 +47,29 @@ Orientada a entornos educativos y de investigación en ingeniería biomédica.
   a mano (`i * fs / n`) en vez de usarlo.
 - Requisitos y comportamiento detallado: `specs/003-deteccion-complejos-pqrst/`.
 
+### Conexión al hardware del ECG por puerto serie — feature 005
+- Nueva sección en la sidebar, **"Conectarse"** (junto a "Herramientas"/"Diagnósticos"):
+  "Configuración" (elegir puerto y baudios) y "Conectarse"/"Desconectarse".
+- Backend: `src/backend/ECGViewer.Api/Serial/` — `ISerialLineSource` (abstracción
+  inyectable sobre `System.IO.Ports.SerialPort`, nunca real en tests),
+  `SerialCaptureService` (singleton con el estado de la única conexión posible, escala
+  a mV y numera muestras a 250 Hz), `SampleScaling`. Endpoints en
+  `Endpoints/SerialEndpoints.cs`.
+- El trazado en vivo viaja del backend al frontend por **Server-Sent Events**
+  (`GET /api/serial/stream`, `text/event-stream`, lotes cada ~100 ms); el frontend lo
+  consume con `EventSource` nativo en `src/frontend/src/hooks/useSerialConnection.ts`
+  (patrón inyectable para tests, análogo al Worker inyectable de la feature 003).
+- Mientras hay una conexión activa, `useVisibleWindow` entra en modo autoseguimiento
+  (`autoFollow`): la ventana visible sigue el extremo más reciente de la señal.
+- Requisitos y comportamiento detallado: `specs/005-conexion-hardware-ecg/`.
+
 ### Dependencias NuGet (back)
 Versiones exactas viven en el `.csproj`; acá solo el "qué y por qué".
 - `FftSharp` (Scott Harden): cálculos de filtros DSP (pasa bajo/alto/banda/notch) — RF-10;
   también el espectro de potencia (`Dsp/PowerSpectrum.cs`, feature 004).
 - `ClosedXML` y `DocumentFormat.OpenXml`: manipulación y creación de archivos Excel `.xlsx` (import/export) — RF-12, RF-13.
+- `System.IO.Ports`: acceso real al puerto serie (`Serial/SystemSerialLineSource.cs`) —
+  conexión al hardware del ECG, feature 005.
 
 ## Cómo correr
 Estructura: en la raíz hay una carpeta `src` con `src/frontend` (frontend) y `src/backend` (backend).
@@ -115,5 +133,5 @@ frontend a GitHub Pages. Nada corre solo; se dispara a mano desde la pestaña Ac
 - NO agregar inicio de sesión ni datos por usuario: la app es de libre acceso (autenticación está Fuera de Alcance).
 - NO hardcodear la API key de Claude: va en `.env` como ANTHROPIC_API_KEY.
 - NO llamar a la API de Claude desde los tests: usar mocks/fakes.
-- NO agregar features fuera del alcance definido: captura en tiempo real por hardware, multi-usuario/roles/nube, HL7/DICOM, export a firmware, multi-tenant.
+- NO agregar features fuera del alcance definido: multi-usuario/roles/nube, HL7/DICOM, export a firmware, multi-tenant. La conexión a hardware por puerto serie SÍ está en alcance desde la constitución v1.4.0 (ver `specs/005-conexion-hardware-ecg/`), pero acotada a ese caso — no habilita cualquier otra integración de hardware sin su propia spec.
 - NO presentar ECGViewer como herramienta de diagnóstico clínico certificado.

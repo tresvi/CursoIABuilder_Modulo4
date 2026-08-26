@@ -104,3 +104,44 @@ describe("useVisibleWindow — reinicio de la ventana", () => {
     expect(result.current.window).toEqual(fullWindow(sig));
   });
 });
+
+describe("useVisibleWindow — autoseguimiento en vivo (feature 005, research.md D8)", () => {
+  it("con autoFollow, un lote nuevo sigue el extremo conservando el ancho (no expande a todo el rango)", () => {
+    const key = {};
+    const sig = signalOf(2500); // 0 … 9.996 s, ventana inicial completa (ancho ≈10 s)
+    const { result, rerender } = renderHook(
+      ({ s, k }) => useVisibleWindow(s, k, true),
+      { initialProps: { s: sig, k: key } }
+    );
+    const initialWidth =
+      result.current.window.toTime - result.current.window.fromTime;
+    expect(initialWidth).toBeCloseTo(9.996, 2);
+
+    // Llega un lote nuevo (mismo loadKey, la señal creció mucho): con
+    // autoFollow la ventana NO debe crecer a todo el rango (eso sería el
+    // comportamiento de "recorte"), debe seguir el extremo con el mismo ancho.
+    const grown = signalOf(6000); // 0 … 23.996 s
+    rerender({ s: grown, k: key });
+    const width = result.current.window.toTime - result.current.window.fromTime;
+    expect(result.current.window.toTime).toBeCloseTo(fullWindow(grown).toTime, 6);
+    expect(width).toBeCloseTo(initialWidth, 2);
+    expect(width).toBeLessThan(fullWindow(grown).toTime - fullWindow(grown).fromTime);
+  });
+
+  it("con autoFollow, ignora un pan manual en el siguiente lote (siempre sigue el extremo)", () => {
+    const key = {};
+    const sig = signalOf(6000); // 0 … 23.996 s → ventana inicial acotada a 20 s
+    const { result, rerender } = renderHook(
+      ({ s, k }) => useVisibleWindow(s, k, true),
+      { initialProps: { s: sig, k: key } }
+    );
+    act(() => result.current.panBy(-10));
+    expect(result.current.window.fromTime).toBeLessThan(0.001);
+
+    const grown = signalOf(7000); // 0 … 27.996 s
+    rerender({ s: grown, k: key });
+    expect(result.current.window.toTime).toBeCloseTo(fullWindow(grown).toTime, 6);
+    const width = result.current.window.toTime - result.current.window.fromTime;
+    expect(width).toBeCloseTo(20, 1);
+  });
+});

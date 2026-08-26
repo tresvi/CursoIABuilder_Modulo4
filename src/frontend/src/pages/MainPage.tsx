@@ -6,6 +6,10 @@ import { MetricsPanel } from "../components/MetricsPanel";
 import { MarkerEditor } from "../components/MarkerEditor";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { MarkerPromptDialog } from "../components/MarkerPromptDialog";
+import {
+  SerialConfigDialog,
+  type SerialConnectionConfig,
+} from "../components/SerialConfigDialog";
 import { FilterPanel } from "../components/FilterPanel";
 import { ExampleMenu } from "../components/ExampleMenu";
 import { Button } from "../components/ui/button";
@@ -23,6 +27,8 @@ import { useUnsavedGuard } from "../hooks/useUnsavedGuard";
 import { useComplexDetection } from "../hooks/useComplexDetection";
 import { metricsForWindow, samplesInWindow } from "../metrics/windowMetrics";
 import { computeSpectrum, type SpectrumPoint } from "../api/spectrumApi";
+import { listPorts } from "../api/serialApi";
+import { useSerialConnection } from "../hooks/useSerialConnection";
 import {
   applyCrop,
   applyFilter as applyFilterModel,
@@ -75,11 +81,21 @@ export function MainPage() {
     [derivation]
   );
 
+  // "Conectarse" (feature 005, US2): mientras la señal mostrada viene de una
+  // conexión serie activa, la ventana se autosigue (research.md D8) y usa una
+  // clave de carga propia (`serialSessionKey`) que solo cambia al iniciar una
+  // conexión nueva — así no se resetea a los primeros 20 s en cada lote.
+  const [usingSerialSignal, setUsingSerialSignal] = useState(false);
+  const [serialSessionKey, setSerialSessionKey] = useState(0);
+  const serialConnection = useSerialConnection();
+  const serialConnected = serialConnection.status === "connected";
+
   // `derivation.original` cambia solo al cargar otra señal (initDerivation); al
   // filtrar/recortar se conserva, por eso sirve de clave de "carga nueva".
   const { window, zoomTo, panBy, reset } = useVisibleWindow(
     working,
-    derivation?.original
+    usingSerialSignal ? `serial-${serialSessionKey}` : derivation?.original,
+    usingSerialSignal && serialConnected
   );
   const markers = useMarkers(markDirty);
   useUnsavedGuard(state.dirty);
@@ -164,18 +180,59 @@ export function MainPage() {
     };
   }, [spectrumOn, working, window]);
 
+  // "Conectarse" (feature 005, US1): configuración de puerto/baudios. La
+  // conexión real (US2) se conecta acá cuando esté implementada.
+  const [serialConfigDialogOpen, setSerialConfigDialogOpen] = useState(false);
+  const [serialPorts, setSerialPorts] = useState<string[]>([]);
+  const [serialConfig, setSerialConfig] =
+    useState<SerialConnectionConfig | null>(null);
+
+  function handleOpenSerialConfig() {
+    listPorts()
+      .then(setSerialPorts)
+      .catch(() => setSerialPorts([]));
+    setSerialConfigDialogOpen(true);
+  }
+
   const metrics: CardiacMetrics | null = useMemo(() => {
     if (!working) return null;
     return metricsForWindow(working, window);
   }, [working, window]);
 
   function handleLoad(signal: Signal) {
+    if (serialConnected) void serialConnection.disconnect();
+    setUsingSerialSignal(false);
     setDerivation(initDerivation(signal));
     setPendingCrop(null);
     setFilterError(null);
     setActiveFilter(null);
     setSaveStatus(null);
     markers.reset([]);
+  }
+
+  // "Conectarse" (feature 005, US2): cada muestra nueva del hook reemplaza la
+  // derivación actual con la señal acumulada hasta el momento (mismo
+  // `initDerivation` que cargar un archivo, FR-011).
+  useEffect(() => {
+    if (!usingSerialSignal || serialConnection.samples.length === 0) return;
+    setDerivation(initDerivation(createSignal([...serialConnection.samples])));
+  }, [usingSerialSignal, serialConnection.samples]);
+
+  function handleConnectSerial() {
+    if (!serialConfig) return;
+    setSerialSessionKey((k) => k + 1);
+    setUsingSerialSignal(true);
+    setPendingCrop(null);
+    setFilterError(null);
+    setActiveFilter(null);
+    setSaveStatus(null);
+    markers.reset([]);
+    void serialConnection.connect(serialConfig);
+  }
+
+  function handleDisconnectSerial() {
+    void serialConnection.disconnect();
+    setUsingSerialSignal(false);
   }
 
   function confirmCrop() {
@@ -343,6 +400,11 @@ export function MainPage() {
             spectrumBusy ? "busy" : spectrumError ? "error" : spectrumOn ? "ready" : "idle"
           }
           onToggleSpectrum={handleToggleSpectrum}
+          onOpenSerialConfig={handleOpenSerialConfig}
+          serialConfigured={!!serialConfig}
+          serialConnected={serialConnected}
+          onToggleSerialConnection={handleConnectSerial}
+          onDisconnectSerial={handleDisconnectSerial}
         />
       }
       topBar={
@@ -500,6 +562,16 @@ export function MainPage() {
           setPendingMarkerTime(null);
         }}
         onCancel={() => setPendingMarkerTime(null)}
+      />
+
+      <SerialConfigDialog
+        open={serialConfigDialogOpen}
+        ports={serialPorts}
+        onConfirm={(config) => {
+          setSerialConfig(config);
+          setSerialConfigDialogOpen(false);
+        }}
+        onCancel={() => setSerialConfigDialogOpen(false)}
       />
     </AppLayout>
   );

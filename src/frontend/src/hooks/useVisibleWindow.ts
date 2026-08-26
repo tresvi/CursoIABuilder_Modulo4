@@ -61,8 +61,18 @@ export function panWindow(
  *
  * `loadKey` debe cambiar solo al cargar una señal nueva (p. ej. la identidad de
  * la señal original), y mantenerse estable al filtrar o recortar.
+ *
+ * `autoFollow` (feature 005, research.md D8): mientras hay una conexión serie
+ * activa, cada lote nuevo recalcula la ventana a `[último−ancho, último]`
+ * (conservando el ancho actual), en vez de expandirla a todo el rango como
+ * hace un recorte normal — esto siempre pisa cualquier pan/zoom manual hecho
+ * mientras tanto (diseño más simple elegido en research.md).
  */
-export function useVisibleWindow(signal: Signal | null, loadKey?: unknown) {
+export function useVisibleWindow(
+  signal: Signal | null,
+  loadKey?: unknown,
+  autoFollow = false
+) {
   const full = useMemo(() => fullWindow(signal), [signal]);
   const [window, setWindow] = useState<VisibleWindow>(() => initialWindow(full));
 
@@ -78,9 +88,16 @@ export function useVisibleWindow(signal: Signal | null, loadKey?: unknown) {
     lastFull.fromTime !== full.fromTime ||
     lastFull.toTime !== full.toTime
   ) {
-    // Cambió el rango sin recargar (recorte): mostrar el rango completo.
     setLastFull(full);
-    setWindow(full);
+    if (autoFollow) {
+      const width = window.toTime - window.fromTime;
+      const toTime = full.toTime;
+      const fromTime = Math.max(full.fromTime, toTime - width);
+      setWindow({ fromTime, toTime });
+    } else {
+      // Cambió el rango sin recargar (recorte): mostrar el rango completo.
+      setWindow(full);
+    }
   }
 
   const zoomTo = useCallback((fromTime: number, toTime: number) => {
