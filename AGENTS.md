@@ -47,11 +47,29 @@ Orientada a entornos educativos y de investigación en ingeniería biomédica.
   a mano (`i * fs / n`) en vez de usarlo.
 - Requisitos y comportamiento detallado: `specs/003-deteccion-complejos-pqrst/`.
 
+### Conexión al hardware del ECG por puerto serie — feature 005
+- Nueva sección en la sidebar, **"Conectarse"** (junto a "Herramientas"/"Diagnósticos"):
+  "Configuración" (elegir puerto y baudios) y "Conectarse"/"Desconectarse".
+- Backend: `src/backend/ECGViewer.Api/Serial/` — `ISerialLineSource` (abstracción
+  inyectable sobre `System.IO.Ports.SerialPort`, nunca real en tests),
+  `SerialCaptureService` (singleton con el estado de la única conexión posible, escala
+  a mV y numera muestras a 250 Hz), `SampleScaling`. Endpoints en
+  `Endpoints/SerialEndpoints.cs`.
+- El trazado en vivo viaja del backend al frontend por **Server-Sent Events**
+  (`GET /api/serial/stream`, `text/event-stream`, lotes cada ~100 ms); el frontend lo
+  consume con `EventSource` nativo en `src/frontend/src/hooks/useSerialConnection.ts`
+  (patrón inyectable para tests, análogo al Worker inyectable de la feature 003).
+- Mientras hay una conexión activa, `useVisibleWindow` entra en modo autoseguimiento
+  (`autoFollow`): la ventana visible sigue el extremo más reciente de la señal.
+- Requisitos y comportamiento detallado: `specs/005-conexion-hardware-ecg/`.
+
 ### Dependencias NuGet (back)
 Versiones exactas viven en el `.csproj`; acá solo el "qué y por qué".
 - `FftSharp` (Scott Harden): cálculos de filtros DSP (pasa bajo/alto/banda/notch) — RF-10;
   también el espectro de potencia (`Dsp/PowerSpectrum.cs`, feature 004).
 - `ClosedXML` y `DocumentFormat.OpenXml`: manipulación y creación de archivos Excel `.xlsx` (import/export) — RF-12, RF-13.
+- `System.IO.Ports`: acceso real al puerto serie (`Serial/SystemSerialLineSource.cs`) —
+  conexión al hardware del ECG, feature 005.
 
 ## Cómo correr
 Estructura: en la raíz hay una carpeta `src` con `src/frontend` (frontend) y `src/backend` (backend).

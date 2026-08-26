@@ -71,26 +71,26 @@ default de baudios (quickstart.md, Escenario 1).
 
 ### Tests (escribir primero, deben fallar)
 
-- [ ] T505 [P] [US1] Test en `src/backend/ECGViewer.Tests/SerialEndpointTests.cs`:
+- [X] T505 [P] [US1] Test en `src/backend/ECGViewer.Tests/SerialEndpointTests.cs`:
   `GET /api/serial/ports` devuelve la lista que reporta `ISerialLineSource` (fake
   inyectado); `[]` si no hay ninguno (FR-002, contracts/api.md).
-- [ ] T506 [P] [US1] Test en
+- [X] T506 [P] [US1] Test en
   `src/frontend/src/components/SerialConfigDialog.test.tsx`: lista los puertos
   recibidos; el campo de baudios muestra **115200** preseleccionado (FR-003); al
   confirmar, expone la elección al padre.
-- [ ] T507 [P] [US1] Test en `src/frontend/src/components/layout/Sidebar.test.tsx`:
+- [X] T507 [P] [US1] Test en `src/frontend/src/components/layout/Sidebar.test.tsx`:
   aparece una sección "Conectarse" (al mismo nivel que "Herramientas"/"Diagnósticos")
   con un botón "Configuración" (FR-001/002).
 
 ### Implementación
 
-- [ ] T508 [US1] `src/backend/ECGViewer.Api/Endpoints/SerialEndpoints.cs` (solo
+- [X] T508 [US1] `src/backend/ECGViewer.Api/Endpoints/SerialEndpoints.cs` (solo
   `GET /api/serial/ports` por ahora) + registrar `app.MapSerialEndpoints()` en
   `Program.cs`. Depende de T502, T504. Hace pasar T505.
-- [ ] T509 [P] [US1] `src/frontend/src/api/serialApi.ts`: `listPorts()`.
-- [ ] T510 [US1] `src/frontend/src/components/SerialConfigDialog.tsx`: selector de
+- [X] T509 [P] [US1] `src/frontend/src/api/serialApi.ts`: `listPorts()`.
+- [X] T510 [US1] `src/frontend/src/components/SerialConfigDialog.tsx`: selector de
   puerto + baudios (default 115200). Depende de T509. Hace pasar T506.
-- [ ] T511 [US1] `src/frontend/src/components/layout/Sidebar.tsx`: sección
+- [X] T511 [US1] `src/frontend/src/components/layout/Sidebar.tsx`: sección
   "Conectarse" con "Configuración" (abre el diálogo) y un botón "Conectarse"
   deshabilitado hasta tener una configuración válida (se habilita de verdad en US2).
   Hace pasar T507.
@@ -112,50 +112,51 @@ Escenarios 2 y 4).
 
 ### Tests (escribir primero, deben fallar)
 
-- [ ] T512 [P] [US2] Test en
+- [X] T512 [P] [US2] Test en
   `src/backend/ECGViewer.Tests/SerialCaptureServiceTests.cs` (fuente simulada vía
   `ISerialLineSource` fake, nunca hardware real): la línea `"2048"` produce una
   muestra ≈5 mV en `t=0`, la siguiente en `t=1/250` (FR-006/007); una línea no
   numérica se descarta sin cortar la conexión (FR-008); al acumular 300 000 muestras
   válidas la conexión se detiene sola con `status="stopped"`/`reason="TIME_LIMIT"`
   (FR-013); si la fuente simulada reporta desconexión, `status="error"` (FR-009).
-- [ ] T513 [P] [US2] Test en `SerialEndpointTests.cs`: `POST /api/serial/connect`
+- [X] T513 [P] [US2] Test en `SerialEndpointTests.cs`: `POST /api/serial/connect`
   con un puerto válido devuelve 200; una segunda llamada mientras hay una conexión
   activa devuelve 409 `ALREADY_CONNECTED` (research.md D9); un puerto que no está en
   la lista devuelve 400 `PORT_NOT_FOUND`; `POST /api/serial/disconnect` es
   idempotente.
-- [ ] T514 [P] [US2] Test en
+- [X] T514 [P] [US2] Test en
   `src/frontend/src/hooks/useSerialConnection.test.ts` (con una fuente de eventos
   SSE simulada/inyectable, análogo al Worker inyectable de la feature 003):
   `connect()` llama a `POST /connect` y luego consume el stream; cada evento recibido
   se acumula en el arreglo de muestras; un evento con `status:"stopped"` cierra el
   consumo y expone el motivo (`reason`).
-- [ ] T515 [P] [US2] Test en `src/frontend/src/pages/MainPage.test.tsx`: presionar
+- [X] T515 [P] [US2] Test en `src/frontend/src/pages/MainPage.test.tsx`: presionar
   "Conectarse" (con el hook mockeado) reemplaza cualquier señal cargada (FR-011); las
   muestras que llega el hook se reflejan en el trazado; mientras está "conectado", la
   ventana visible sigue el extremo más reciente de la señal (research.md D8).
 
 ### Implementación
 
-- [ ] T516 [US2] `src/backend/ECGViewer.Api/Serial/SystemSerialLineSource.cs`:
+- [X] T516 [US2] `src/backend/ECGViewer.Api/Serial/SystemSerialLineSource.cs`:
   implementación real de `ISerialLineSource` vía `System.IO.Ports.SerialPort`.
-  Depende de T500, T504.
-- [ ] T517 [US2] `src/backend/ECGViewer.Api/Serial/SerialCaptureService.cs`:
+  Depende de T500, T504. (Implementada antes de lo previsto, junto con T508, porque
+  el endpoint real de US1 necesitaba una `ISerialLineSource` concreta en DI.)
+- [X] T517 [US2] `src/backend/ECGViewer.Api/Serial/SerialCaptureService.cs`:
   singleton con el estado de la única conexión posible (idle/connected/stopped/error,
   data-model.md), numera muestras `t=n/250` (D5), aplica `SampleScaling` (D4), corta
   sola a las 300 000 muestras válidas (D6), agrupa en lotes cada ~100 ms para quien
   esté suscripto (D2). Depende de T503, T504. Hace pasar T512.
-- [ ] T518 [US2] `src/backend/ECGViewer.Api/Endpoints/SerialEndpoints.cs`: agregar
+- [X] T518 [US2] `src/backend/ECGViewer.Api/Endpoints/SerialEndpoints.cs`: agregar
   `POST /connect`, `POST /disconnect`, `GET /stream` (Server-Sent Events, D2/D3).
   Depende de T517. Hace pasar T513.
-- [ ] T519 [P] [US2] `src/frontend/src/hooks/useSerialConnection.ts`:
+- [X] T519 [P] [US2] `src/frontend/src/hooks/useSerialConnection.ts`:
   `connect()`/`disconnect()`, consume `EventSource` sobre `/api/serial/stream`,
   acumula las muestras entrantes. Hace pasar T514.
-- [ ] T520 [US2] `src/frontend/src/hooks/useVisibleWindow.ts`: modo autoseguimiento
+- [X] T520 [US2] `src/frontend/src/hooks/useVisibleWindow.ts`: modo autoseguimiento
   — mientras hay una conexión activa, la ventana se recalcula a
   `[último−ancho, último]` en cada lote nuevo (research.md D8), sin bloquear el
   pan/zoom manual una vez desconectado.
-- [ ] T521 [US2] `src/frontend/src/pages/MainPage.tsx`: habilita de verdad
+- [X] T521 [US2] `src/frontend/src/pages/MainPage.tsx`: habilita de verdad
   "Conectarse" (T511); al presionar, reemplaza la señal actual (FR-011, mismo
   `initDerivation` que cargar un archivo) y conecta el hook + el autoseguimiento de
   ventana. Depende de T519, T520. Hace pasar T515.
@@ -175,7 +176,7 @@ filtrar/ver el espectro/detectar complejos/guardar funcionan igual que siempre
 
 ### Tests (escribir primero, deben fallar)
 
-- [ ] T522 [P] [US3] Test en `MainPage.test.tsx`: "Desconectarse" llama a
+- [X] T522 [P] [US3] Test en `MainPage.test.tsx`: "Desconectarse" llama a
   `disconnect()` del hook y apaga el autoseguimiento de la ventana (el usuario
   recupera pan/zoom manual); la señal capturada sigue disponible después. **No** se
   duplican los tests ya existentes de filtros/espectro/complejos/guardar — sirven tal
@@ -184,7 +185,7 @@ filtrar/ver el espectro/detectar complejos/guardar funcionan igual que siempre
 
 ### Implementación
 
-- [ ] T523 [US3] `src/frontend/src/components/layout/Sidebar.tsx` +
+- [X] T523 [US3] `src/frontend/src/components/layout/Sidebar.tsx` +
   `src/frontend/src/pages/MainPage.tsx`: botón "Desconectarse" en el lugar de
   "Conectarse" mientras hay una conexión activa; llama a `disconnect()` y desactiva
   el autoseguimiento (T520). Depende de T521. Hace pasar T522.
@@ -195,15 +196,15 @@ filtrar/ver el espectro/detectar complejos/guardar funcionan igual que siempre
 
 ## Phase 6: Polish & Verificación
 
-- [ ] T524 [P] `dotnet build` / `dotnet test` en `src/backend` — 0 warnings nuevos.
-- [ ] T525 [P] `npm run typecheck` y `npm run lint` en `src/frontend` — 0 warnings.
-- [ ] T526 `npm test` (frontend) y `dotnet test` (backend) — toda la suite (existente
+- [X] T524 [P] `dotnet build` / `dotnet test` en `src/backend` — 0 warnings nuevos.
+- [X] T525 [P] `npm run typecheck` y `npm run lint` en `src/frontend` — 0 warnings.
+- [X] T526 `npm test` (frontend) y `dotnet test` (backend) — toda la suite (existente
   + la nueva de esta feature) en verde.
-- [ ] T527 [P] Ejecutar manualmente los 4 escenarios de `quickstart.md` con un
+- [X] T527 [P] Ejecutar manualmente los 4 escenarios de `quickstart.md` con un
   dispositivo real o un puerto serie simulado, y documentar el resultado en
   `specs/005-conexion-hardware-ecg/quickstart-results.md` (requiere hardware/entorno
   real — misma categoría que T077/T078 de la feature 001).
-- [ ] T528 Actualizar `AGENTS.md`: nueva dependencia NuGet `System.IO.Ports`, puntero
+- [X] T528 Actualizar `AGENTS.md`: nueva dependencia NuGet `System.IO.Ports`, puntero
   operativo a `Serial/SerialCaptureService.cs` y al patrón SSE usado para el stream
   en vivo.
 
