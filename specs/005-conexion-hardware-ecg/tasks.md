@@ -25,7 +25,7 @@ features 001–004.
 
 ## Phase 1: Setup
 
-- [ ] T500 Backend: agregar el paquete NuGet `System.IO.Ports` a
+- [X] T500 Backend: agregar el paquete NuGet `System.IO.Ports` a
   `src/backend/ECGViewer.Api/ECGViewer.Api.csproj` (research.md D1).
 
 ---
@@ -37,21 +37,21 @@ comparten US1 y US2. Ninguna historia puede empezar sin esto.
 
 ### Tests (escribir primero, deben fallar)
 
-- [ ] T501 [P] Test en `src/backend/ECGViewer.Tests/SampleScalingTests.cs`: cuenta `0`
+- [X] T501 [P] Test en `src/backend/ECGViewer.Tests/SampleScalingTests.cs`: cuenta `0`
   → 0 mV; cuenta `2048` → ≈5 mV; cuenta `4095` → ≈10 mV; fórmula exacta
   `cuenta × (10/4095) + 0` (FR-006).
 
 ### Implementación
 
-- [ ] T502 [P] `src/backend/ECGViewer.Api/Models/ApiModels.cs`: agregar
+- [X] T502 [P] `src/backend/ECGViewer.Api/Models/ApiModels.cs`: agregar
   `SerialPortsResponse(IReadOnlyList<string> Ports)`,
   `SerialConnectRequest(string Port, int BaudRate)`,
   `SerialStreamSampleDto(double T, double V)`,
   `SerialStreamEventDto(IReadOnlyList<SerialStreamSampleDto> Samples, string Status, string? Reason)`,
   y en `ErrorCodes`: `PortNotFound`, `AlreadyConnected`, `PortUnavailable`.
-- [ ] T503 [P] `src/backend/ECGViewer.Api/Serial/SampleScaling.cs`: función pura
+- [X] T503 [P] `src/backend/ECGViewer.Api/Serial/SampleScaling.cs`: función pura
   `ToMillivolts(int count)` (FR-006). Hace pasar T501.
-- [ ] T504 [P] `src/backend/ECGViewer.Api/Serial/ISerialLineSource.cs`: interfaz
+- [X] T504 [P] `src/backend/ECGViewer.Api/Serial/ISerialLineSource.cs`: interfaz
   inyectable (listar puertos, abrir/cerrar, emitir líneas entrantes y el evento de
   desconexión inesperada) que abstrae `System.IO.Ports.SerialPort` — permite simular
   el hardware en todos los tests de esta feature (quickstart.md).
