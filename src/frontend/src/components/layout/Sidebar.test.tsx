@@ -28,6 +28,11 @@ function renderSidebar(overrides: Partial<Parameters<typeof Sidebar>[0]> = {}) {
     spectrumActive: false,
     spectrumStatus: "idle" as const,
     onToggleSpectrum: vi.fn(),
+    onOpenSerialConfig: vi.fn(),
+    serialConfigured: false,
+    serialConnected: false,
+    onToggleSerialConnection: vi.fn(),
+    onDisconnectSerial: vi.fn(),
     ...overrides,
   };
   render(<Sidebar {...props} />);
@@ -146,5 +151,65 @@ describe("Sidebar — sin atajos de filtro (feature 004, US2)", () => {
     // Sigue teniendo las dos herramientas de diagnóstico.
     expect(screen.getByRole("button", { name: /detec\. complejos/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^espectro$/i })).toBeInTheDocument();
+  });
+});
+
+describe("Sidebar — Conectarse (feature 005, US1)", () => {
+  it("aparece una sección 'Conectarse' con un botón 'Configuración'", () => {
+    renderSidebar();
+    // El encabezado de la sección es un botón colapsable (aria-expanded);
+    // se distingue del NavItem "Conectarse" (mismo texto) por ese atributo.
+    const sectionHeader = screen
+      .getAllByRole("button", { name: "Conectarse" })
+      .find((b) => b.hasAttribute("aria-expanded"));
+    expect(sectionHeader).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: "Configuración" })
+    ).toBeInTheDocument();
+  });
+
+  it("al hacer click en 'Configuración' invoca onOpenSerialConfig", () => {
+    const props = renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: "Configuración" }));
+    expect(props.onOpenSerialConfig).toHaveBeenCalledTimes(1);
+  });
+
+  function getConnectButton() {
+    // El NavItem "Conectarse" es el único de los dos botones con ese texto que
+    // no tiene aria-expanded (eso lo tiene el encabezado de la sección).
+    return screen
+      .getAllByRole("button", { name: "Conectarse" })
+      .find((b) => !b.hasAttribute("aria-expanded"))!;
+  }
+
+  it("'Conectarse' está deshabilitado sin una configuración válida", () => {
+    renderSidebar({ serialConfigured: false });
+    expect(getConnectButton()).toBeDisabled();
+  });
+
+  it("'Conectarse' se habilita con una configuración válida", () => {
+    renderSidebar({ serialConfigured: true });
+    expect(getConnectButton()).toBeEnabled();
+  });
+});
+
+describe("Sidebar — Desconectarse (feature 005, US3)", () => {
+  it("mientras hay una conexión activa, 'Conectarse' se reemplaza por 'Desconectarse'", () => {
+    renderSidebar({ serialConfigured: true, serialConnected: true });
+    // El único botón "Conectarse" restante es el encabezado de la sección
+    // (con aria-expanded); el NavItem fue reemplazado por "Desconectarse".
+    const remaining = screen
+      .getAllByRole("button", { name: "Conectarse" })
+      .every((b) => b.hasAttribute("aria-expanded"));
+    expect(remaining).toBe(true);
+    expect(
+      screen.getByRole("button", { name: "Desconectarse" })
+    ).toBeInTheDocument();
+  });
+
+  it("al hacer click en 'Desconectarse' invoca onDisconnectSerial", () => {
+    const props = renderSidebar({ serialConfigured: true, serialConnected: true });
+    fireEvent.click(screen.getByRole("button", { name: "Desconectarse" }));
+    expect(props.onDisconnectSerial).toHaveBeenCalledTimes(1);
   });
 });

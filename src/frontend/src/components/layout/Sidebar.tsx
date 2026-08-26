@@ -9,9 +9,12 @@ import {
   MapPin,
   Menu,
   Move,
+  Plug,
+  PlugZap,
   RotateCcw,
   Ruler,
   Save,
+  Settings,
   ScanSearch,
   Upload,
   Waves,
@@ -47,6 +50,15 @@ interface SidebarProps {
   spectrumActive: boolean;
   spectrumStatus: "idle" | "busy" | "ready" | "error";
   onToggleSpectrum: () => void;
+  /** "Conectarse" (feature 005): conexión al hardware del ECG por puerto serie. */
+  onOpenSerialConfig: () => void;
+  /** Habilita "Conectarse" una vez que se eligió puerto y baudios (US1). */
+  serialConfigured: boolean;
+  serialConnected: boolean;
+  onToggleSerialConnection: () => void;
+  /** "Desconectarse" (feature 005, US3): reemplaza a "Conectarse" mientras hay
+   * una conexión activa. */
+  onDisconnectSerial: () => void;
 }
 
 const TOOLS: Array<{ id: Tool; label: string; icon: typeof Waves }> = [
@@ -129,6 +141,11 @@ export function Sidebar({
   spectrumActive,
   spectrumStatus,
   onToggleSpectrum,
+  onOpenSerialConfig,
+  serialConfigured,
+  serialConnected,
+  onToggleSerialConnection,
+  onDisconnectSerial,
 }: SidebarProps) {
   return (
     <aside
@@ -251,6 +268,32 @@ export function Sidebar({
             onClick={onToggleSpectrum}
             disabled={!hasSignal || spectrumStatus === "busy"}
           />
+        </SidebarGroup>
+
+        <SidebarGroup title="Conectarse" collapsed={collapsed}>
+          <NavItem
+            icon={Settings}
+            label="Configuración"
+            collapsed={collapsed}
+            onClick={onOpenSerialConfig}
+          />
+          {serialConnected ? (
+            <NavItem
+              icon={PlugZap}
+              label="Desconectarse"
+              collapsed={collapsed}
+              active
+              onClick={onDisconnectSerial}
+            />
+          ) : (
+            <NavItem
+              icon={Plug}
+              label="Conectarse"
+              collapsed={collapsed}
+              onClick={onToggleSerialConnection}
+              disabled={!serialConfigured}
+            />
+          )}
         </SidebarGroup>
       </nav>
     </aside>

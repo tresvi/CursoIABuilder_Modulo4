@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { MainPage } from "./MainPage";
 import * as studyApi from "../api/studyApi";
 import * as filterApi from "../api/filterApi";
 import * as spectrumApi from "../api/spectrumApi";
+import * as serialApiModule from "../api/serialApi";
 import { ApiRequestError } from "../api/client";
 
 // Evita llamadas de red en los tests y permite espiar el guardado.
@@ -27,6 +28,35 @@ vi.mock("../api/spectrumApi", () => ({
   ),
 }));
 
+// Evita llamadas de red de "Conectarse" (feature 005): el stream SSE se
+// simula reemplazando `window.EventSource` (ver `FakeEventSource` abajo).
+vi.mock("../api/serialApi", () => ({
+  listPorts: vi.fn(() => Promise.resolve(["COM3"])),
+  connectSerial: vi.fn(() => Promise.resolve()),
+  disconnectSerial: vi.fn(() => Promise.resolve()),
+  serialStreamUrl: vi.fn(() => "http://test/api/serial/stream"),
+}));
+
+/** EventSource simulado: la última instancia creada queda en `lastInstance`. */
+class FakeEventSource {
+  static lastInstance: FakeEventSource | null = null;
+  onmessage: ((event: { data: string }) => void) | null = null;
+  onerror: (() => void) | null = null;
+  closed = false;
+
+  constructor() {
+    FakeEventSource.lastInstance = this;
+  }
+
+  emit(data: unknown) {
+    this.onmessage?.({ data: JSON.stringify(data) });
+  }
+
+  close() {
+    this.closed = true;
+  }
+}
+
 /** Crea un File CSV para simular la carga del usuario. */
 function csvFile(name: string, content: string): File {
   return new File([content], name, { type: "text/csv" });
@@ -38,6 +68,8 @@ beforeEach(() => {
   vi.mocked(spectrumApi.computeSpectrum).mockResolvedValue([
     { frequency: 0, power: 0.1 },
   ]);
+  FakeEventSource.lastInstance = null;
+  vi.stubGlobal("EventSource", FakeEventSource);
 });
 
 describe("MainPage — integración US1 + US2", () => {
@@ -348,5 +380,104 @@ describe("MainPage — Espectro (feature 004)", () => {
       expect(screen.getByRole("alert")).toHaveTextContent(/8 muestras/i);
     });
     expect(screen.queryByTestId("spectrum-chart")).toBeNull();
+  });
+});
+
+/** Configura el puerto (única opción "COM3") y confirma el diálogo. */
+async function configureSerialPort() {
+  fireEvent.click(screen.getByRole("button", { name: "Configuración" }));
+  await waitFor(() =>
+    expect(screen.getByLabelText("Puerto")).toHaveTextContent("COM3")
+  );
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Aceptar" })).toBeEnabled()
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
+}
+
+function connectButton() {
+  return screen
+    .getAllByRole("button", { name: "Conectarse" })
+    .find((b) => !b.hasAttribute("aria-expanded"))!;
+}
+
+describe("MainPage — Conectarse (feature 005, US2)", () => {
+  it("presionar 'Conectarse' reemplaza cualquier señal cargada (FR-011)", async () => {
+    render(<MainPage />);
+    await loadBasicSignal();
+    expect(screen.getByTestId("status-bar")).toHaveTextContent("1500");
+
+    await configureSerialPort();
+    fireEvent.click(connectButton());
+    await waitFor(() => expect(FakeEventSource.lastInstance).not.toBeNull());
+
+    act(() => {
+      FakeEventSource.lastInstance!.emit({
+        samples: [{ t: 0, v: 5 }],
+        status: "connected",
+        reason: null,
+      });
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("status-bar")).toHaveTextContent("Muestras 1")
+    );
+  });
+
+  it("las muestras que llegan por el hook se acumulan en el trazado", async () => {
+    render(<MainPage />);
+    await configureSerialPort();
+    fireEvent.click(connectButton());
+    await waitFor(() => expect(FakeEventSource.lastInstance).not.toBeNull());
+
+    act(() => {
+      FakeEventSource.lastInstance!.emit({
+        samples: [{ t: 0, v: 5 }],
+        status: "connected",
+        reason: null,
+      });
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("status-bar")).toHaveTextContent("Muestras 1")
+    );
+
+    act(() => {
+      FakeEventSource.lastInstance!.emit({
+        samples: [{ t: 1 / 250, v: 0 }],
+        status: "connected",
+        reason: null,
+      });
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("status-bar")).toHaveTextContent("Muestras 2")
+    );
+    expect(screen.getByTestId("ecg-chart")).toBeInTheDocument();
+  });
+});
+
+describe("MainPage — Desconectarse (feature 005, US3)", () => {
+  it("'Desconectarse' llama a disconnect() y la señal capturada sigue disponible", async () => {
+    render(<MainPage />);
+    await configureSerialPort();
+    fireEvent.click(connectButton());
+    await waitFor(() => expect(FakeEventSource.lastInstance).not.toBeNull());
+
+    act(() => {
+      FakeEventSource.lastInstance!.emit({
+        samples: [{ t: 0, v: 5 }],
+        status: "connected",
+        reason: null,
+      });
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("status-bar")).toHaveTextContent("Muestras 1")
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Desconectarse" }));
+    expect(serialApiModule.disconnectSerial).toHaveBeenCalledTimes(1);
+
+    // La señal capturada sigue disponible: el trazado no desaparece.
+    expect(screen.getByTestId("ecg-chart")).toBeInTheDocument();
+    expect(screen.getByTestId("status-bar")).toHaveTextContent("Muestras 1");
   });
 });
