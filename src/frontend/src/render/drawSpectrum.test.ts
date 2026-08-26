@@ -3,32 +3,47 @@ import {
   drawSpectrum,
   powerRange,
   drawSpectrumAxes,
+  drawSpectrumGrid,
   frequencyLabelStep,
   formatFrequencyTick,
   SPECTRUM_MAX_FREQ_HZ,
 } from "./drawSpectrum";
-import type { ViewBox } from "./ecgScale";
+import { plotRect, type ViewBox } from "./ecgScale";
 import type { SpectrumPoint } from "../api/spectrumApi";
 
-/** Contexto 2D que además registra los textos dibujados (para verificar los ejes). */
+/** Un segmento de línea dibujado con moveTo(x0,y0) + lineTo(x1,y1) + stroke(). */
+interface Segment {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/** Contexto 2D que además registra los textos y los segmentos de línea dibujados. */
 function recordingCtxWithText(): {
   ctx: CanvasRenderingContext2D;
   calls: string[];
   texts: string[];
+  segments: Segment[];
 } {
   const calls: string[] = [];
   const texts: string[] = [];
+  const segments: Segment[] = [];
+  let pending: { x0: number; y0: number } | null = null;
   const ctx = {
     save() {},
     restore() {},
     beginPath() {
       calls.push("beginPath");
+      pending = null;
     },
-    moveTo() {
+    moveTo(x: number, y: number) {
       calls.push("moveTo");
+      pending = { x0: x, y0: y };
     },
-    lineTo() {
+    lineTo(x: number, y: number) {
       calls.push("lineTo");
+      if (pending) segments.push({ ...pending, x1: x, y1: y });
     },
     stroke() {
       calls.push("stroke");
@@ -46,7 +61,7 @@ function recordingCtxWithText(): {
     textAlign: "",
     textBaseline: "",
   };
-  return { ctx: ctx as unknown as CanvasRenderingContext2D, calls, texts };
+  return { ctx: ctx as unknown as CanvasRenderingContext2D, calls, texts, segments };
 }
 
 /** Contexto 2D que registra los métodos invocados (mismo patrón que drawSignal.test.ts). */
@@ -142,6 +157,47 @@ describe("drawSpectrumAxes (a pedido del usuario: X=Frecuencia 0-100 Hz cada 1 H
       expect(Number(label)).toBeGreaterThanOrEqual(0);
       expect(Number(label)).toBeLessThanOrEqual(100);
     }
+  });
+});
+
+describe("drawSpectrumGrid (líneas completas en los ticks, no solo marcas cortas)", () => {
+  const gridView: ViewBox = {
+    width: 800,
+    height: 400,
+    padding: 10,
+    padLeft: 52,
+    padBottom: 34,
+    tRange: [0, SPECTRUM_MAX_FREQ_HZ],
+    vRange: [0, 1],
+  };
+  const { x0, y0, x1, y1 } = plotRect(gridView);
+
+  it("dibuja al menos una vertical de borde a borde del área de trazado (y0→y1)", () => {
+    const { ctx, segments } = recordingCtxWithText();
+    drawSpectrumGrid(ctx, gridView);
+    const verticals = segments.filter((s) => s.x0 === s.x1);
+    expect(verticals.length).toBeGreaterThan(0);
+    for (const v of verticals) {
+      expect(v.y0).toBeCloseTo(y0, 0);
+      expect(v.y1).toBeCloseTo(y1, 0);
+    }
+  });
+
+  it("dibuja al menos una horizontal de borde a borde del área de trazado (x0→x1)", () => {
+    const { ctx, segments } = recordingCtxWithText();
+    drawSpectrumGrid(ctx, gridView);
+    const horizontals = segments.filter((s) => s.y0 === s.y1);
+    expect(horizontals.length).toBeGreaterThan(0);
+    for (const h of horizontals) {
+      expect(h.x0).toBeCloseTo(x0, 0);
+      expect(h.x1).toBeCloseTo(x1, 0);
+    }
+  });
+
+  it("no lanza con un rango degenerado", () => {
+    const degenerate: ViewBox = { ...gridView, vRange: [0, 0] };
+    const { ctx } = recordingCtxWithText();
+    expect(() => drawSpectrumGrid(ctx, degenerate)).not.toThrow();
   });
 });
 
