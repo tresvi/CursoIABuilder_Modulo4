@@ -20,18 +20,37 @@ Orientada a entornos educativos y de investigación en ingeniería biomédica.
 
 ### Detección de complejos PQRST — feature 003
 - La sección de la sidebar antes llamada "Filtros" es ahora **"Diagnósticos"** (mismo
-  `Sidebar.tsx`); se agregó "Detec. Complejos" como primer ítem, sin sacar nada.
+  `Sidebar.tsx`); "Detec. Complejos" es su primer ítem.
 - Motor en `src/frontend/src/metrics/complexDetection.ts`; dibujo del overlay en
   `src/frontend/src/render/drawComplexMarks.ts`.
 - **Patrón reutilizable**: el cómputo pesado corre en un Web Worker
   (`src/frontend/src/workers/complexDetection.worker.ts`) con fallback inline síncrono cuando
   `Worker` no existe (jsdom, entornos restringidos) — ver `src/frontend/src/hooks/useComplexDetection.ts`.
   Repetir este patrón ante futuro trabajo pesado en el frontend.
+
+### Espectro de potencia y sidebar sin atajos de filtro — feature 004
+- "Diagnósticos" quedó con **"Detec. Complejos" y "Espectro"** únicamente: los atajos de
+  filtro (Pasa Bajo/Alto/Banda/Notch) y "Restaurar" se sacaron de la sidebar. Filtrar
+  sigue funcionando igual desde `FilterPanel` (debajo del gráfico), que ya tenía su
+  propio selector de tipo y sus propios botones.
+- "Espectro" alterna el gráfico principal entre `ECGChart` (trazado) y
+  `src/frontend/src/components/SpectrumChart.tsx` (espectro de potencia) — son
+  componentes separados, no un "modo" de `ECGChart` (así ninguna herramienta de
+  interacción ni marca de complejos aplica mientras se ve el espectro, gratis).
+- El cálculo corre en el backend: nuevo endpoint `POST /api/spectrum`
+  (`src/backend/ECGViewer.Api/Endpoints/SpectrumEndpoints.cs` +
+  `Dsp/PowerSpectrum.cs`, reutiliza `FftSharp`), sobre la ventana visible (no toda la
+  señal). Ver `specs/004-vista-espectro-potencia/` para el detalle.
+- **Cuidado con `FftSharp.FFT.FrequencyScale(n, fs, onesided: true)`**: devuelve un
+  arreglo de longitud `n` (no `n/2+1`) con la escala comprimida — desalineado con
+  `FFT.Magnitude(..., true)`. `PowerSpectrum.Compute` calcula la frecuencia de cada bin
+  a mano (`i * fs / n`) en vez de usarlo.
 - Requisitos y comportamiento detallado: `specs/003-deteccion-complejos-pqrst/`.
 
 ### Dependencias NuGet (back)
 Versiones exactas viven en el `.csproj`; acá solo el "qué y por qué".
-- `FftSharp` (Scott Harden): cálculos de filtros DSP (pasa bajo/alto/banda/notch) — RF-10.
+- `FftSharp` (Scott Harden): cálculos de filtros DSP (pasa bajo/alto/banda/notch) — RF-10;
+  también el espectro de potencia (`Dsp/PowerSpectrum.cs`, feature 004).
 - `ClosedXML` y `DocumentFormat.OpenXml`: manipulación y creación de archivos Excel `.xlsx` (import/export) — RF-12, RF-13.
 
 ## Cómo correr

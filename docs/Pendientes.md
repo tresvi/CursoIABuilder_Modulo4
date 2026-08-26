@@ -39,11 +39,18 @@ Trabajo futuro identificado para el ECGViewer.
 
   Ver el espectro, tal vez sea mejor recortar entre 2-25Hz
 
+  Ya existe una base reutilizable para esto: [`specs/004-vista-espectro-potencia`](../specs/004-vista-espectro-potencia/spec.md)
+  agregó el botón "Espectro" (ve el espectro de potencia de la ventana visible) y el
+  endpoint `POST /api/spectrum` (backend, vía FftSharp). No implementa el algoritmo de
+  decisión (rQRS, similitud del coseno) — solo la visualización sobre la que se podría
+  construir.
+
 - **Caracterizacion espectral de la señal correcta y la analizada**: implementar 
   la caracterizacion de una señal correcta, y la señal a analizar.
   También crear un algoritmo/procedimiento para compararla y otro para sugerir cambios
   (auto-filter tal vez?). 
   Con esto bloquear señales que morfologicamente no coincidan con un ECG.
+  (Mismo punto de partida reutilizable que el ítem anterior: `specs/004-vista-espectro-potencia`.)
 
 
 - **Archivos con casos de prueba**: generar archivos con casos de prueba, sobre

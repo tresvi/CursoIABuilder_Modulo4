@@ -158,19 +158,19 @@ sin necesidad de duplicarlos — SC-004).
 
 ## Phase 4: Polish & Verificación
 
-- [ ] T419 [P] `dotnet build` / `dotnet test` en `src/backend` — 0 warnings nuevos
+- [X] T419 [P] `dotnet build` / `dotnet test` en `src/backend` — 0 warnings nuevos
   (mismo estándar que la limpieza reciente de xUnit1051).
-- [ ] T420 [P] `npm run typecheck` y `npm run lint` en `src/frontend` — 0 warnings.
-- [ ] T421 `npm test` (frontend) y `dotnet test` (backend) — toda la suite (existente +
+- [X] T420 [P] `npm run typecheck` y `npm run lint` en `src/frontend` — 0 warnings.
+- [X] T421 `npm test` (frontend) y `dotnet test` (backend) — toda la suite (existente +
   la nueva de esta feature) en verde.
-- [ ] T422 [P] Ejecutar manualmente los 5 escenarios de `quickstart.md` y documentar el
+- [X] T422 [P] Ejecutar manualmente los 5 escenarios de `quickstart.md` y documentar el
   resultado en `specs/004-vista-espectro-potencia/quickstart-results.md`.
-- [ ] T423 [P] Actualizar `docs/Pendientes.md`: agregar una nota bajo "Deteccion de
+- [X] T423 [P] Actualizar `docs/Pendientes.md`: agregar una nota bajo "Deteccion de
   señal ECG" y "Caracterizacion espectral..." señalando que ya existe una vista de
   espectro de potencia reutilizable (esta feature) como bloque de partida — sin
   marcarlos como resueltos, porque esos ítems piden además el algoritmo de decisión
   (rQRS, similitud del coseno), que esta feature no implementa.
-- [ ] T424 Actualizar `AGENTS.md` con un puntero breve a esta feature (nuevo endpoint
+- [X] T424 Actualizar `AGENTS.md` con un puntero breve a esta feature (nuevo endpoint
   `/api/spectrum`, `SpectrumChart` como componente separado de `ECGChart`), mismo
   criterio operativo y de extensión usado para la feature 003.
 
