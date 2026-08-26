@@ -78,10 +78,8 @@ cd src/frontend && npm run typecheck && npm run lint && npm run format:check
 - **US6** Marcadores de evento (crear/editar/eliminar).
 - **US7** Import/Export XLSX.
 - **US8** Guardado explícito (un único estudio) + alerta ante cambios sin guardar.
-- **Detección de complejos PQRST** (feature 003) — botón "Detec. Complejos" en la sección
-  "Diagnósticos" de la sidebar: marca los 5 puntos (P, Q, R, S, T) de cada latido sobre toda
-  la señal cargada, convive con los filtros (recalcula solo al aplicarlos) y avisa si no
-  puede detectar con confianza. Nunca se persiste.
+- **Detección de complejos** (feature 003) — marca los puntos P, Q, R, S, T de cada latido
+  sobre toda la señal cargada; convive con los filtros y avisa si no detecta con confianza.
 
 ## Principios (constitución)
 
