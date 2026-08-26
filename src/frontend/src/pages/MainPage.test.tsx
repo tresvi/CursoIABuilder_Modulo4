@@ -2,11 +2,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MainPage } from "./MainPage";
 import * as studyApi from "../api/studyApi";
+import * as filterApi from "../api/filterApi";
 
 // Evita llamadas de red en los tests y permite espiar el guardado.
 vi.mock("../api/studyApi", () => ({
   getStudy: vi.fn(() => Promise.resolve(null)),
   saveStudy: vi.fn(() => Promise.resolve(new Date().toISOString())),
+}));
+
+// Evita llamadas de red al aplicar un filtro: devuelve la señal sin cambios
+// (alcanza para probar que se dispara la recalculación de complejos, FR-007).
+vi.mock("../api/filterApi", () => ({
+  applyFilter: vi.fn((signal: { samples: unknown }) =>
+    Promise.resolve(signal.samples)
+  ),
 }));
 
 /** Crea un File CSV para simular la carga del usuario. */
@@ -102,6 +111,121 @@ describe("MainPage — integración US1 + US2", () => {
     });
     // sigue mostrando el prompt: no se cargó señal
     expect(screen.getByText(/Cargá un archivo CSV/i)).toBeInTheDocument();
+  });
+
+  it("activar 'Detec. Complejos' pasa por 'procesando' y termina activo (feature 003, US1)", async () => {
+    render(<MainPage />);
+    const input = screen.getByLabelText(/Cargar archivo CSV/i);
+
+    const fs = 250;
+    const peaks = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5];
+    const rows: string[] = ["time,value"];
+    for (let i = 0; i < 6 * fs; i++) {
+      const t = i / fs;
+      let v = 0;
+      for (const p of peaks) v += Math.exp(-((t - p) ** 2) / (2 * 0.01 * 0.01));
+      rows.push(`${t.toFixed(4)},${v.toFixed(4)}`);
+    }
+    fireEvent.change(input, { target: { files: [csvFile("ecg.csv", rows.join("\n"))] } });
+    await waitFor(() => expect(screen.getByTestId("ecg-chart")).toBeInTheDocument());
+
+    const toggle = screen.getByRole("button", { name: /detec\. complejos/i });
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(toggle);
+
+    // Se activa de inmediato (independiente de cuánto tarde el cálculo).
+    expect(
+      screen.getByRole("button", { name: /detec\. complejos|detectando/i })
+    ).toHaveAttribute("aria-pressed", "true");
+
+    // Y termina "ready" (deja de estar deshabilitado/"procesando").
+    await waitFor(() => {
+      const btn = screen.getByRole("button", { name: /detec\. complejos/i });
+      expect(btn).toBeEnabled();
+    });
+  });
+
+  it("desactivar 'Detec. Complejos' vuelve a 'idle' sin alterar la señal ni las métricas (US2)", async () => {
+    render(<MainPage />);
+    const input = screen.getByLabelText(/Cargar archivo CSV/i);
+    const fs = 250;
+    const peaks = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5];
+    const rows: string[] = ["time,value"];
+    for (let i = 0; i < 6 * fs; i++) {
+      const t = i / fs;
+      let v = 0;
+      for (const p of peaks) v += Math.exp(-((t - p) ** 2) / (2 * 0.01 * 0.01));
+      rows.push(`${t.toFixed(4)},${v.toFixed(4)}`);
+    }
+    fireEvent.change(input, { target: { files: [csvFile("ecg.csv", rows.join("\n"))] } });
+    await waitFor(() => expect(screen.getByTestId("metric-bpm")).toHaveTextContent("60"));
+
+    const toggle = () => screen.getByRole("button", { name: /detec\. complejos/i });
+    fireEvent.click(toggle());
+    await waitFor(() => expect(toggle()).toBeEnabled());
+    expect(toggle()).toHaveAttribute("aria-pressed", "true");
+
+    const bpmBefore = screen.getByTestId("metric-bpm").textContent;
+
+    fireEvent.click(toggle());
+    expect(toggle()).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByTestId("metric-bpm").textContent).toBe(bpmBefore);
+  });
+
+  it("con 'Detec. Complejos' activo, aplicar un filtro dispara una nueva detección sola (US2, FR-007)", async () => {
+    render(<MainPage />);
+    const input = screen.getByLabelText(/Cargar archivo CSV/i);
+    const fs = 250;
+    const peaks = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5];
+    const rows: string[] = ["time,value"];
+    for (let i = 0; i < 6 * fs; i++) {
+      const t = i / fs;
+      let v = 0;
+      for (const p of peaks) v += Math.exp(-((t - p) ** 2) / (2 * 0.01 * 0.01));
+      rows.push(`${t.toFixed(4)},${v.toFixed(4)}`);
+    }
+    fireEvent.change(input, { target: { files: [csvFile("ecg.csv", rows.join("\n"))] } });
+    await waitFor(() => expect(screen.getByTestId("ecg-chart")).toBeInTheDocument());
+
+    const toggle = () => screen.getByRole("button", { name: /detec\. complejos/i });
+    fireEvent.click(toggle());
+    await waitFor(() => expect(toggle()).toBeEnabled());
+    expect(toggle()).toHaveAttribute("aria-pressed", "true");
+
+    // Aplicar un filtro (Pasa Banda, la aplicación al backend está mockeada):
+    // no hace falta reactivar la herramienta, se recalcula sola.
+    fireEvent.click(screen.getByRole("button", { name: /aplicar filtro/i }));
+
+    await waitFor(() => expect(filterApi.applyFilter).toHaveBeenCalledTimes(1));
+    // Vuelve a pasar por processing→ready sin intervención manual.
+    await waitFor(() => expect(toggle()).toBeEnabled());
+    expect(toggle()).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("avisa cuando un tramo de la señal no permite detección confiable (US3, FR-008)", async () => {
+    render(<MainPage />);
+    const input = screen.getByLabelText(/Cargar archivo CSV/i);
+
+    const fs = 250;
+    const rows: string[] = ["time,value"];
+    // Dos latidos limpios, un hueco de silencio de 3 s, dos latidos limpios más.
+    const beat = (rt: number, t: number) =>
+      Math.exp(-((t - rt) ** 2) / (2 * 0.01 * 0.01));
+    for (let i = 0; i < 9 * fs; i++) {
+      const t = i / fs;
+      let v = 0;
+      for (const rt of [0.5, 1.5, 7.0, 8.0]) v += beat(rt, t);
+      rows.push(`${t.toFixed(4)},${v.toFixed(4)}`);
+    }
+    fireEvent.change(input, { target: { files: [csvFile("ecg.csv", rows.join("\n"))] } });
+    await waitFor(() => expect(screen.getByTestId("ecg-chart")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /detec\. complejos/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(/no se pudo detectar/i);
+    });
   });
 
   it("persistencia explícita: solo 'Guardar' invoca saveStudy (US8, FR-016/017, T054a)", async () => {

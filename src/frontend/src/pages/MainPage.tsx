@@ -19,6 +19,7 @@ import { useVisibleWindow } from "../hooks/useVisibleWindow";
 import { useTool } from "../hooks/useTool";
 import { useMarkers } from "../hooks/useMarkers";
 import { useUnsavedGuard } from "../hooks/useUnsavedGuard";
+import { useComplexDetection } from "../hooks/useComplexDetection";
 import { metricsForWindow } from "../metrics/windowMetrics";
 import {
   applyCrop,
@@ -80,6 +81,34 @@ export function MainPage() {
   );
   const markers = useMarkers(markDirty);
   useUnsavedGuard(state.dirty);
+
+  // "Detec. Complejos" (feature 003): `complexDetectionOn` es la intención del
+  // usuario (botón activo/inactivo); el estado idle/processing/ready de la
+  // corrida en curso lo maneja el hook. Nunca se persiste (FR-010).
+  const [complexDetectionOn, setComplexDetectionOn] = useState(false);
+  const {
+    status: complexStatus,
+    result: complexResult,
+    run: runComplexDetection,
+    reset: resetComplexDetection,
+  } = useComplexDetection();
+
+  function handleToggleComplexDetection() {
+    setComplexDetectionOn((on) => {
+      if (on) resetComplexDetection();
+      return !on;
+    });
+  }
+
+  // Recalcula automáticamente sobre la señal actualmente mostrada (original o
+  // filtrada) cada vez que cambia, mientras la herramienta esté activa
+  // (FR-007): el filtrado puede desplazar los complejos.
+  useEffect(() => {
+    if (complexDetectionOn && working) {
+      runComplexDetection(working);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [complexDetectionOn, working]);
 
   const metrics: CardiacMetrics | null = useMemo(() => {
     if (!working) return null;
@@ -257,6 +286,9 @@ export function MainPage() {
           showGrid={state.showGrid}
           onToggleGrid={toggleGrid}
           onResetZoom={reset}
+          complexDetectionActive={complexDetectionOn}
+          complexDetectionStatus={complexStatus}
+          onToggleComplexDetection={handleToggleComplexDetection}
         />
       }
       topBar={
@@ -291,6 +323,7 @@ export function MainPage() {
                 tool={tool}
                 cursor={cursor}
                 markers={markers.markers}
+                complexMarks={complexResult?.complexes ?? []}
                 onZoom={(r) => zoomTo(r.fromTime, r.toTime)}
                 onPan={(dt) => panBy(dt)}
                 onCropSelect={(r) => setPendingCrop(r)}
@@ -299,6 +332,19 @@ export function MainPage() {
             </Card>
             <MetricsPanel metrics={metrics} />
           </div>
+
+          {complexDetectionOn &&
+            complexStatus === "ready" &&
+            complexResult &&
+            complexResult.lowConfidenceRanges.length > 0 && (
+              <p role="alert" className="text-sm text-destructive">
+                No se pudo detectar complejos con confianza en{" "}
+                {complexResult.lowConfidenceRanges.length === 1
+                  ? "un tramo de la señal"
+                  : `${complexResult.lowConfidenceRanges.length} tramos de la señal`}
+                ; esas zonas no muestran marcas.
+              </p>
+            )}
 
           <div className="flex flex-wrap items-start gap-6">
             <FilterPanel

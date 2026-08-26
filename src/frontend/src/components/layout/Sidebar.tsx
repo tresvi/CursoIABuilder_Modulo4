@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Ruler,
   Save,
+  ScanSearch,
   Undo2,
   Upload,
   Waves,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import type { FilterKind } from "@/api/filterApi";
 import type { Tool } from "@/hooks/useTool";
+import type { ComplexDetectionStatus } from "@/hooks/useComplexDetection";
 import { NavItem } from "./NavItem";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +44,11 @@ interface SidebarProps {
   showGrid: boolean;
   onToggleGrid: () => void;
   onResetZoom: () => void;
+  /** "Detec. Complejos" (feature 003): independiente de activeFilterType,
+   * puede estar activo al mismo tiempo que un filtro de señal (FR-007). */
+  complexDetectionActive: boolean;
+  complexDetectionStatus: ComplexDetectionStatus;
+  onToggleComplexDetection: () => void;
 }
 
 const FILTERS: Array<{ id: FilterKind; label: string; icon: typeof Waves }> = [
@@ -129,6 +136,9 @@ export function Sidebar({
   showGrid,
   onToggleGrid,
   onResetZoom,
+  complexDetectionActive,
+  complexDetectionStatus,
+  onToggleComplexDetection,
 }: SidebarProps) {
   return (
     <aside
@@ -230,7 +240,19 @@ export function Sidebar({
           ))}
         </SidebarGroup>
 
-        <SidebarGroup title="Filtros" collapsed={collapsed}>
+        <SidebarGroup title="Diagnósticos" collapsed={collapsed}>
+          <NavItem
+            icon={ScanSearch}
+            label={
+              complexDetectionStatus === "processing"
+                ? "Detectando…"
+                : "Detec. Complejos"
+            }
+            collapsed={collapsed}
+            active={complexDetectionActive}
+            onClick={onToggleComplexDetection}
+            disabled={!hasSignal || complexDetectionStatus === "processing"}
+          />
           {FILTERS.map((f) => (
             <NavItem
               key={f.id}

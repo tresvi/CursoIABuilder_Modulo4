@@ -2,17 +2,20 @@
 
 Trabajo futuro identificado para el ECGViewer.
 
-- **Detección automática de complejos**: desarrollar la detección automática de
-  los complejos del ECG (picos de los complejos y sus duraciones). Es la base
-  para la idealización del trazado y para métricas más ricas.
+- ~~**Detección automática de complejos**~~ — resuelto por
+  [`specs/003-deteccion-complejos-pqrst`](../specs/003-deteccion-complejos-pqrst/spec.md):
+  "Detec. Complejos" en la sidebar marca los 5 puntos (P, Q, R, S, T) de cada latido sobre toda
+  la señal cargada. Sigue pendiente, como trabajo aparte: exponer la **duración** de cada complejo
+  como métrica (se puede derivar de los puntos ya detectados) y la idealización del trazado.
 
 - **Funcion de comparar segmentos de ECG**: desarrollar la funcionalidad para   comparar dos segmentos (o tal vez N segmentos) en simultaneo. La comparacion consistirá en varios charts apilados donde se visualizaria el mismo grafico pero en distintos puntos para realizar la comparacion. De paso al costado cada uno tendrá sus propias metricas de segmento
 
 - **Filtros de `Analisis de Filtros.md`**: implementar lo descrito en
   [`Analisis de Filtros.md`](Analisis%20de%20Filtros.md), en particular el
-  backlog: filtrado automático inteligente (basado en una tasa de variabilidad),
-  el filtro de "idealización" (detectar complejos y redibujarlos sobre una línea
-  ideal, tipo ECG de manual) y la detección automática de complejos.
+  backlog: filtrado automático inteligente (basado en una tasa de variabilidad)
+  y el filtro de "idealización" (redibujar los complejos ya detectados sobre una
+  línea ideal, tipo ECG de manual — la detección automática en sí ya está resuelta,
+  ver ítem de arriba).
 
 - **Deteccion de señal ECG**: implementar una funcionalidad para decidir si la señal 
   realmente es un ECG. A priori podria ser un pipeline de deciciones:
